@@ -420,6 +420,50 @@ body {
 .summary-title {
     font-size: 18px;
     font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.analysis-filter-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.filter-text {
+    font-size: 11px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.clear-filter-btn {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.clear-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
 }
 
 .summary-period {
@@ -979,6 +1023,52 @@ body {
     justify-content: center;
     flex-shrink: 0;
     font-size: 24px;
+    position: relative;
+}
+
+.file-icon.updated {
+    background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+    border: 2px solid var(--accent);
+    animation: fileUpdatePulse 2s ease-in-out 3;
+}
+
+.file-update-indicator {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    animation: updateIndicatorPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+@keyframes fileUpdatePulse {
+    0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    50% { 
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    }
+}
+
+@keyframes updateIndicatorPop {
+    0% { 
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
 }
 
 .file-details {
@@ -1043,7 +1133,13 @@ body {
 }
 
 .reports-content {
-    padding: 0;
+    padding: 20px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.9);
+    min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     position: relative;
 }
 
@@ -1536,6 +1632,219 @@ body {
     transition: width 0.3s;
 }
 
+/* Manual Entry Modal Styles */
+.manual-entry-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 2500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.manual-entry-overlay.show {
+    display: flex;
+}
+
+.manual-entry-modal {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--slate-200);
+}
+
+.modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.modal-icon {
+    font-size: 20px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--slate-400);
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: var(--slate-100);
+    color: var(--slate-600);
+}
+
+.modal-body {
+    padding: 0 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.manual-entry-form {
+    padding: 20px 0;
+}
+
+.form-section {
+    margin-bottom: 32px;
+}
+
+.form-section:last-child {
+    margin-bottom: 0;
+}
+
+.form-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-section-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-field.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate-700);
+}
+
+.form-input {
+    padding: 12px 16px;
+    border: 2px solid var(--slate-200);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: white;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input[readonly] {
+    background: var(--slate-50);
+    color: var(--slate-600);
+}
+
+.form-help {
+    font-size: 12px;
+    color: var(--slate-500);
+    font-style: italic;
+}
+
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--slate-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 768px) {
+    .manual-entry-modal {
+        margin: 10px;
+        max-height: calc(100vh - 20px);
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 /* Enhanced Toast with all production features */
 .toast {
     position: fixed;
@@ -1619,79 +1928,595 @@ body {
     }
 }
 
-/* Enhanced Print Styles */
+/* OPTIMIZED PRINT STYLES - A4 SINGLE PAGE */
 @media print {
     @page {
         size: A4;
         margin: 10mm;
     }
-    
+
+    /* Global print resets */
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
-    
+
+    /* Base typography for print */
     body {
         margin: 0 !important;
         padding: 0 !important;
         background: white !important;
         font-size: 10pt !important;
+        line-height: 1.4 !important;
+        color: black !important;
+        font-family: Georgia, 'Times New Roman', serif !important;
     }
-    
-    .app-container {
-        padding-bottom: 0 !important;
-        box-shadow: none !important;
-        max-width: 100% !important;
-    }
-    
-    /* Professional header for print */
-    .reports-content::before {
-        content: "PAYMENT ANALYSIS REPORT";
-        display: block;
-        font-size: 24pt;
-        font-weight: 900;
-        text-align: center;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 3px solid var(--primary);
-        color: var(--primary);
-    }
-    
-    /* Report metadata for print */
-    .report-summary::after {
-        content: "Analysis Date: " attr(data-date) " | Period: " attr(data-period);
-        display: block;
-        margin-top: 10px;
-        font-size: 9pt;
-        color: var(--slate-600);
-        text-align: center;
-    }
-    
-    /* Enhanced table styles for print */
-    .result-row {
-        page-break-inside: avoid;
-        border-bottom: 1px solid var(--slate-200) !important;
-    }
-    
-    .breakdown-details {
-        page-break-inside: avoid;
-        border: 2px solid var(--primary) !important;
-    }
-    
-    /* Footer for print */
-    .reports-content::after {
-        content: "Generated by Payment Analyzer Professional v9.0 Enhanced | © 2024 | Page " counter(page);
-        display: block;
-        text-align: center;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid var(--slate-300);
-        font-size: 9pt;
-        color: var(--slate-500);
-    }
-    
-    /* Hide non-printable elements */
+
+    /* Hide non-print elements */
     .watermark,
+    .upload-section,
+    .loading-overlay,
+    .modal-overlay,
+    .validation-alert,
+    .settings-btn,
+    .remove-btn,
+    .report-actions,
+    .print-btn,
+    .print-helper-text,
+    .logo-mark,
+    .company-header,
+    .meta-badge,
+    .recovery-banner,
+    .state-actions,
+    /* Hide RATE column (4th) AND STATUS column (11th) in print */
+    thead th:nth-child(4),
+    tbody td:nth-child(4),
+    tfoot td:nth-child(4),
+    thead th:nth-child(11),
+    tbody td:nth-child(11),
+    tfoot td:nth-child(11) {
+        display: none !important;
+    }
+
+    /* Document container */
+    .document {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        background: white !important;
+    }
+
+    /* Report header - keep original design but optimize space */
+    .report-header {
+        background: #f5f5f5 !important;
+        color: black !important;
+        padding: 12pt !important;
+        border: 1pt solid #333 !important;
+        margin-bottom: 10pt !important;
+        page-break-after: avoid;
+    }
+
+    .report-header::before {
+        display: none !important;
+    }
+
+    .report-title {
+        font-size: 16pt !important;
+        color: black !important;
+        text-shadow: none !important;
+        margin-bottom: 6pt !important;
+        font-weight: 900 !important;
+        text-align: center !important;
+        font-family: Georgia, serif !important;
+    }
+
+    .report-subtitle {
+        font-size: 11pt !important;
+        color: #444 !important;
+        margin-bottom: 10pt !important;
+        text-align: center !important;
+        font-weight: 600 !important;
+        font-family: Verdana, Arial, sans-serif !important;
+    }
+
+    .report-metadata {
+        background: white !important;
+        border: 0.5pt solid #666 !important;
+        padding: 6pt !important;
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0 !important;
+    }
+
+    .metadata-item {
+        text-align: center !important;
+        border-right: 0.5pt solid #ddd !important;
+        padding: 0 4pt !important;
+    }
+
+    .metadata-item:last-child {
+        border-right: none !important;
+    }
+
+    .metadata-label {
+        font-size: 7pt !important;
+        color: #666 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3pt !important;
+        font-weight: 600 !important;
+        font-family: Verdana, Arial, sans-serif !important;
+        margin-bottom: 2pt !important;
+    }
+
+    .metadata-value {
+        font-size: 9pt !important;
+        color: black !important;
+        font-weight: 700 !important;
+        font-family: Georgia, serif !important;
+    }
+
+    /* KPI section */
+    .kpi-section {
+        background: white !important;
+        padding: 0 !important;
+        margin-bottom: 10pt !important;
+        page-break-inside: auto;
+    }
+
+    .section-header {
+        margin-bottom: 6pt !important;
+        page-break-after: avoid;
+        border-bottom: 1pt solid #333 !important;
+        padding-bottom: 3pt !important;
+    }
+
+    .section-header::after {
+        display: none !important;
+    }
+
+    .section-number {
+        background: black !important;
+        color: white !important;
+        width: 18pt !important;
+        height: 18pt !important;
+        font-size: 9pt !important;
+        box-shadow: none !important;
+        margin-right: 6pt !important;
+        font-weight: bold !important;
+    }
+
+    .section-title {
+        font-size: 11pt !important;
+        color: black !important;
+        font-weight: 800 !important;
+        font-family: Verdana, Arial, sans-serif !important;
+    }
+
+    /* KPI cards - max 5 in single row */
+    .kpi-grid {
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 6pt !important;
+        margin-bottom: 10pt !important;
+    }
+
+    .kpi-card {
+        background: white !important;
+        border: 1pt solid #666 !important;
+        padding: 6pt !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        min-height: 45pt !important;
+    }
+
+    .kpi-card:nth-child(n+6) {
+        display: none !important;
+    }
+
+    .kpi-card.primary {
+        border: 1pt solid black !important;
+        background: #fafafa !important;
+    }
+
+    .kpi-card.success {
+        border: 1pt solid black !important;
+        background: #fafafa !important;
+    }
+
+    .kpi-card.danger {
+        border: 1pt solid black !important;
+        background: #f5f5f5 !important;
+    }
+
+    .kpi-card#differenceCard.success {
+        border: 1pt solid black !important;
+        background: #fafafa !important;
+    }
+
+    .kpi-card#differenceCard.danger {
+        border: 1pt solid black !important;
+        background: #f5f5f5 !important;
+    }
+
+    .kpi-label {
+        font-size: 6pt !important;
+        color: #555 !important;
+        margin-bottom: 2pt !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.2pt !important;
+        font-weight: 700 !important;
+        line-height: 1.1 !important;
+        font-family: Verdana, Arial, sans-serif !important;
+    }
+
+    .kpi-value {
+        font-size: 12pt !important;
+        color: black !important;
+        margin-bottom: 2pt !important;
+        font-weight: 900 !important;
+        line-height: 1 !important;
+        font-family: Georgia, serif !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    .kpi-change {
+        font-size: 6pt !important;
+        color: #555 !important;
+        line-height: 1.1 !important;
+        font-family: Verdana, Arial, sans-serif !important;
+    }
+
+    /* Table section */
+    .table-section {
+        background: white !important;
+        padding: 0 !important;
+        margin-bottom: 10pt !important;
+    }
+
+    .table-wrapper {
+        border: 0.75pt solid black !important;
+        box-shadow: none !important;
+        margin-top: 6pt !important;
+        overflow: visible !important;
+    }
+
+    table {
+        width: 100% !important;
+        font-size: 8pt !important;
+        table-layout: fixed !important;
+        border-collapse: collapse !important;
+        font-family: Verdana, Arial, sans-serif !important;
+    }
+
+    /* Column widths optimized (RATE and STATUS columns hidden) - 9 visible columns */
+    colgroup {
+        display: table-column-group !important;
+    }
+    
+    col:nth-child(4),
+    col:nth-child(11) {
+        display: none !important;
+        width: 0 !important;
+    }
+    
+    /* Apply consistent widths and borders to all rows */
+    thead th:nth-child(1),
+    tbody td:nth-child(1),
+    tfoot td:nth-child(1) { width: 12% !important; }
+    
+    thead th:nth-child(2),
+    tbody td:nth-child(2),
+    tfoot td:nth-child(2) { width: 10% !important; }
+    
+    thead th:nth-child(3),
+    tbody td:nth-child(3),
+    tfoot td:nth-child(3) { width: 14% !important; }
+    
+    thead th:nth-child(5),
+    tbody td:nth-child(5),
+    tfoot td:nth-child(5) { width: 12% !important; }
+    
+    thead th:nth-child(6),
+    tbody td:nth-child(6),
+    tfoot td:nth-child(6) { width: 13% !important; }
+    
+    thead th:nth-child(7),
+    tbody td:nth-child(7),
+    tfoot td:nth-child(7) { 
+        width: 11% !important;
+        border-right: 1pt solid #333 !important;
+    }
+    
+    thead th:nth-child(8),
+    tbody td:nth-child(8),
+    tfoot td:nth-child(8) { width: 13% !important; }
+    
+    thead th:nth-child(9),
+    tbody td:nth-child(9),
+    tfoot td:nth-child(9) { 
+        width: 12% !important;
+        border-right: 1pt solid #333 !important;
+    }
+    
+    thead th:nth-child(10),
+    tbody td:nth-child(10),
+    tfoot td:nth-child(10) { width: 13% !important; }
+
+    thead {
+        background: #e8e8e8 !important;
+        display: table-header-group !important;
+    }
+
+    thead th {
+        background: #e8e8e8 !important;
+        color: black !important;
+        font-size: 7pt !important;
+        padding: 4pt 2pt !important;
+        border-bottom: 0.75pt solid black !important;
+        border-right: 0.5pt solid #ccc !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.2pt !important;
+        line-height: 1.2 !important;
+        vertical-align: middle !important;
+        font-family: Verdana, Arial, sans-serif !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-break: normal !important;
+    }
+
+    thead th:nth-child(3) {
+        font-size: 6.5pt !important;
+        letter-spacing: 0.1pt !important;
+        padding: 4pt 1pt !important;
+    }
+
+    thead th.text-right {
+        text-align: right !important;
+    }
+
+    tbody tr:hover {
+        background: transparent !important;
+    }
+
+    tbody td {
+        padding: 3pt 2pt !important;
+        font-size: 7.5pt !important;
+        color: black !important;
+        border-right: 0.5pt solid #e8e8e8 !important;
+        vertical-align: middle !important;
+        line-height: 1.2 !important;
+        font-family: Verdana, Arial, sans-serif !important;
+        text-align: center !important;
+        font-weight: normal !important;
+    }
+
+    tbody td:nth-child(7) {
+        border-right: 1pt solid #ccc !important;
+    }
+
+    tbody td:nth-child(1) {
+        font-weight: normal !important;
+    }
+    
+    tbody td:nth-child(1) .cell-date {
+        font-weight: normal !important;
+    }
+
+    .cell-currency {
+        font-size: 8pt !important;
+        color: black !important;
+        font-weight: normal !important;
+        text-align: right !important;
+        padding-right: 3pt !important;
+        font-family: Georgia, serif !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    tbody td:nth-child(10) {
+        font-weight: 700 !important;
+        font-size: 8pt !important;
+    }
+    
+    tbody td:nth-child(10) .cell-currency {
+        font-weight: 700 !important;
+        font-size: 8pt !important;
+    }
+
+    .cell-date {
+        font-size: 7.5pt !important;
+        color: black !important;
+        font-weight: normal !important;
+        font-family: Georgia, serif !important;
+    }
+
+    .cell-day {
+        color: #444 !important;
+        font-size: 7pt !important;
+        font-weight: normal !important;
+    }
+
+    .cell-number {
+        font-size: 8pt !important;
+        color: black !important;
+        font-weight: normal !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    tfoot {
+        background: #333 !important;
+        color: white !important;
+        display: table-footer-group !important;
+        page-break-inside: avoid;
+    }
+
+    tfoot td {
+        padding: 4pt 3pt !important;
+        font-size: 8pt !important;
+        font-weight: 800 !important;
+        border-top: 1pt solid black !important;
+        border-right: 0.5pt solid #555 !important;
+        color: white !important;
+        display: table-cell !important;
+        visibility: visible !important;
+    }
+    
+    tfoot td:nth-child(4) {
+        display: none !important;
+    }
+    
+    tfoot td:nth-child(11) {
+        display: none !important;
+    }
+
+    tfoot td:first-child {
+        padding-left: 5pt !important;
+        text-align: left !important;
+        font-weight: 900 !important;
+    }
+
+    tfoot td:nth-child(3) {
+        display: table-cell !important;
+        text-align: center !important;
+        font-weight: 900 !important;
+        font-size: 9pt !important;
+    }
+
+    tfoot .cell-currency {
+        font-size: 9pt !important;
+        color: white !important;
+        font-weight: 800 !important;
+        text-align: right !important;
+        font-family: Georgia, serif !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    #footerBase {
+        display: table-cell !important;
+        visibility: visible !important;
+    }
+
+    /* Settlement section */
+    .settlement-section {
+        background: white !important;
+        padding: 0 !important;
+        page-break-inside: auto;
+        margin-bottom: 10pt !important;
+    }
+
+    .settlement-grid {
+        display: grid !important;
+        grid-template-columns: 65% 35% !important;
+        gap: 8pt !important;
+        width: 100% !important;
+    }
+
+    .breakdown-details {
+        background: white !important;
+        border: 0.75pt solid black !important;
+        padding: 6pt !important;
+        width: 100% !important;
+    }
+
+    .breakdown-row {
+        padding: 2pt 0 !important;
+        border-bottom: 0.5pt solid #ddd !important;
+        display: flex !important;
+        justify-content: space-between !important;
+    }
+
+    .breakdown-row:last-child {
+        border-bottom: none !important;
+    }
+
+    .breakdown-label {
+        font-size: 7pt !important;
+        color: #333 !important;
+        font-weight: 600 !important;
+        font-family: Verdana, Arial, sans-serif !important;
+    }
+
+    .breakdown-value {
+        font-size: 8.5pt !important;
+        color: black !important;
+        font-weight: 700 !important;
+        font-family: Georgia, serif !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    .breakdown-row.total {
+        border-top: 1pt solid black !important;
+        margin-top: 3pt !important;
+        padding-top: 3pt !important;
+    }
+
+    .breakdown-row.total .breakdown-label {
+        font-size: 10pt !important;
+        color: black !important;
+        font-weight: 900 !important;
+    }
+
+    .payment-status {
+        background: white !important;
+        color: black !important;
+        border: none !important;
+        border-top: 1.5pt solid black !important;
+        border-right: 1.5pt solid black !important;
+        border-bottom: 1.5pt solid black !important;
+        border-left: 1.5pt solid black !important;
+        padding: 8pt !important;
+        box-shadow: none !important;
+        text-align: center !important;
+        min-height: 70pt !important;
+        display: block !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+    }
+
+    .payment-status.positive {
+        border: none !important;
+        border-top: 2pt double black !important;
+        border-right: 2pt double black !important;
+        border-bottom: 2pt double black !important;
+        border-left: 2pt double black !important;
+        background: #fafafa !important;
+    }
+
+    .status-icon {
+        font-size: 16pt !important;
+        margin-bottom: 3pt !important;
+        line-height: 1 !important;
+        display: block !important;
+        position: relative !important;
+        z-index: 2 !important;
+    }
+
+    .status-label {
+        font-size: 6pt !important;
+        color: #555 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3pt !important;
+        font-weight: 700 !important;
+        margin-bottom: 2pt !important;
+        font-family: Verdana, Arial, sans-serif !important;
+        position: relative !important;
+        z-index: 2 !important;
+    }
+
+    .status-value {
+        font-size: 12pt !important;
+        color: black !important;
+        font-weight: 900 !important;
+        font-family: Georgia, serif !important;
+        position: relative !important;
+        z-index: 2 !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    /* Hide non-printable elements */
     .bottom-nav,
     .page-header,
     .header-btn,
@@ -1710,7 +2535,7 @@ body {
     .pull-indicator {
         display: none !important;
     }
-    
+
     .page {
         padding: 0 !important;
         display: block !important;
@@ -1843,6 +2668,33 @@ body {
 .file-type-badge.invoice {
     background: rgba(16, 185, 129, 0.1);
     color: var(--success);
+}
+
+.file-update-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+    color: white;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    animation: updateBadgePulse 2s ease-in-out infinite;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+@keyframes updateBadgePulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
 }
 
 /* === Analysis Preview === */
@@ -2219,71 +3071,37 @@ body {
 }
 
 
-/* === Enhanced Print Styles === */
+/* === PRINT-ONLY FIX v6.0.0 ===
+   Scope: Daily table footer alignment (hide RATE/STATUS correctly in TFOOT);
+          Payment Status border parity + centered text.
+   Runtime UI untouched.
+*/
 @media print {
-    .report-header.enhanced-header {
-        background: none !important;
-        color: var(--primary) !important;
-        border: 2px solid var(--primary);
-        page-break-inside: avoid;
-    }
-    
-    .report-header.enhanced-header * {
-        color: var(--primary) !important;
-    }
-    
-    .report-company {
-        color: var(--primary) !important;
-        border-bottom: 2px solid var(--primary);
-        padding-bottom: 8px;
-        margin-bottom: 16px;
-    }
-    
-    .kpi-card {
-        box-shadow: none !important;
-        border: 1px solid var(--slate-300) !important;
-        page-break-inside: avoid;
-    }
-    
-    .table-section {
-        box-shadow: none !important;
-        border: 1px solid var(--slate-300) !important;
-        page-break-inside: avoid;
-    }
-    
-    .data-table {
-        min-width: 100% !important;
-        font-size: 0.75rem;
-    }
-    
-    .data-table th {
-        background: var(--slate-100) !important;
-        position: static !important;
-    }
-    
-    .settlement-breakdown {
-        background: var(--slate-50) !important;
-        page-break-inside: avoid;
-    }
-    
-    .analysis-preview,
-    .upload-area,
-    .file-remove,
-    .bottom-nav,
-    .page-header,
-    .table-actions,
-    .validation-alert {
-        display: none !important;
-    }
-    
-    @page {
-        size: A4;
-        margin: 15mm;
-    }
-    
-    .report-container {
-        max-width: 100% !important;
-    }
+  /* Footer alignment when RATE (4) and STATUS (11) are hidden in THEAD/TBODY */
+  .table-section thead th:nth-child(4),
+  .table-section tbody td:nth-child(4) { display: none !important; }
+  .table-section thead th:nth-child(11),
+  .table-section tbody td:nth-child(11) { display: none !important; }
+
+  /* TFOOT mapping (first cell has colspan=2):
+     cells index => [1:TOTALS(colspan=2), 2:Consignments, 3:RATE placeholder, 4:Base, 5:Pickups, 6:Bonuses, 7:Expected, 8:Paid, 9:Difference, 10:STATUS placeholder] */
+  .table-section tfoot td { display: table-cell !important; }
+  .table-section tfoot td:nth-child(3)  { display: none !important; }
+  .table-section tfoot td:nth-child(10) { display: none !important; }
+
+  /* Payment Status — make border match breakdown-details and center contents */
+  .payment-status {
+    background: #fff !important;
+    color: #111 !important;
+    border: 1px solid var(--slate-200) !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 35px !important;
+  }
 }
 
 /* === Enhanced Onboarding Styles === */
@@ -2531,6 +3349,14 @@ body {
     margin-bottom: 50px;
 }
 
+.cta-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
 .primary-cta-btn {
     display: inline-flex;
     align-items: center;
@@ -2584,6 +3410,35 @@ body {
 }
 
 .primary-cta-btn:hover .btn-arrow {
+    transform: translateX(4px);
+}
+
+.secondary-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 36px;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    border: 2px solid var(--slate-200);
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.secondary-cta-btn:hover {
+    transform: translateY(-2px);
+    background: var(--slate-200);
+    border-color: var(--accent);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-cta-btn:hover .btn-arrow {
     transform: translateX(4px);
 }
 
@@ -2685,9 +3540,17 @@ body {
         padding: 20px 16px;
     }
     
-    .primary-cta-btn {
+    .cta-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .primary-cta-btn,
+    .secondary-cta-btn {
         font-size: 1rem;
         padding: 16px 32px;
+        width: 100%;
+        justify-content: center;
     }
     
     .tips-list {
@@ -2855,6 +3718,12 @@ body {
     font-weight: 600;
     font-size: 0.75rem;
     transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.step-circle:hover {
+    background: var(--slate-300);
+    transform: scale(1.05);
 }
 
 .step.active .step-circle {
@@ -2863,9 +3732,19 @@ body {
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
+.step.active .step-circle:hover {
+    background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+    transform: scale(1.05);
+}
+
 .step.completed .step-circle {
     background: var(--success);
     color: white;
+}
+
+.step.completed .step-circle:hover {
+    background: #059669;
+    transform: scale(1.05);
 }
 
 .step-label {
@@ -2942,6 +3821,157 @@ body {
     color: var(--slate-600);
     line-height: 1.6;
     font-weight: 500;
+}
+
+/* Input Method Toggle */
+.input-method-toggle {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    justify-content: center;
+}
+
+.method-btn {
+    flex: 1;
+    max-width: 280px;
+    background: white;
+    border: 2px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.method-btn:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+.method-btn.active {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(37, 99, 235, 0.05) 100%);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+}
+
+.method-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.method-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.method-desc {
+    font-size: 12px;
+    color: var(--slate-500);
+    font-weight: 500;
+}
+
+.method-btn.active .method-desc {
+    color: var(--accent);
+}
+
+/* Manual Entry Container */
+.manual-entry-container {
+    margin-bottom: 32px;
+}
+
+.manual-entry-area {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 3px dashed var(--slate-300);
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.manual-entry-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 400px;
+}
+
+.manual-entry-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.manual-entry-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.manual-entry-text {
+    text-align: center;
+}
+
+.manual-entry-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.manual-entry-subtitle {
+    font-size: 14px;
+    color: var(--slate-600);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.manual-entry-btn {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.manual-entry-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+
+@media (max-width: 768px) {
+    .input-method-toggle {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .method-btn {
+        max-width: none;
+    }
 }
 
 /* Enhanced Upload Area */
@@ -3327,17 +4357,6 @@ body {
     z-index: 1;
 }
 
-.reports-content {
-    padding: 20px 16px;
-    max-width: 1200px;
-    margin: 0 auto;
-    background: rgba(255, 255, 255, 0.9);
-    min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    position: relative;
-}
-
 .reports-content::before {
     content: '';
     position: absolute;
@@ -3572,6 +4591,97 @@ body {
         </div>
     </div>
     
+    <!-- Manual Entry Modal -->
+    <div class="manual-entry-overlay" id="manualEntryOverlay">
+        <div class="manual-entry-modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span class="modal-icon">✏️</span>
+                    <span>Manual Data Entry</span>
+                </div>
+                <button class="modal-close" id="closeManualEntry" aria-label="Close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="manualEntryForm" class="manual-entry-form">
+                    <div class="form-section">
+                        <h3 class="form-section-title">Date Information</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="entryDate" class="form-label">Date</label>
+                                <input type="date" id="entryDate" class="form-input" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="entryDay" class="form-label">Day Type</label>
+                                <select id="entryDay" class="form-input" required>
+                                    <option value="">Select day</option>
+                                    <option value="monday">Monday</option>
+                                    <option value="tuesday">Tuesday</option>
+                                    <option value="wednesday">Wednesday</option>
+                                    <option value="thursday">Thursday</option>
+                                    <option value="friday">Friday</option>
+                                    <option value="saturday">Saturday</option>
+                                    <option value="sunday">Sunday</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="form-section-title">Delivery Information</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="consignments" class="form-label">Consignments</label>
+                                <input type="number" id="consignments" class="form-input" min="0" step="1" placeholder="0" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="baseAmount" class="form-label">Base Amount (£)</label>
+                                <input type="number" id="baseAmount" class="form-input" min="0" step="0.01" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="pickups" class="form-label">Pickups</label>
+                                <input type="number" id="pickups" class="form-input" min="0" step="1" placeholder="0">
+                            </div>
+                            <div class="form-field">
+                                <label for="bonuses" class="form-label">Bonuses (£)</label>
+                                <input type="number" id="bonuses" class="form-input" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="form-section-title">Payment Information</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="expectedTotal" class="form-label">Expected Total (£)</label>
+                                <input type="number" id="expectedTotal" class="form-input" min="0" step="0.01" placeholder="0.00" readonly>
+                                <span class="form-help">Calculated automatically</span>
+                            </div>
+                            <div class="form-field">
+                                <label for="paidAmount" class="form-label">Paid Amount (£)</label>
+                                <input type="number" id="paidAmount" class="form-input" min="0" step="0.01" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field full-width">
+                                <label for="difference" class="form-label">Difference</label>
+                                <input type="text" id="difference" class="form-input" readonly>
+                                <span class="form-help">Shows overpayment (+) or underpayment (-)</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelManualEntry">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveManualEntry" form="manualEntryForm">Add Entry</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Dashboard Page -->
     <div class="page active" id="dashboard-page">
         <div class="page-header">
@@ -3604,7 +4714,15 @@ body {
             <!-- Executive Summary -->
             <div class="executive-summary" id="executiveSummary" style="display: none;">
                 <div class="summary-header">
-                    <div class="summary-title">Executive Summary</div>
+                    <div class="summary-title">
+                        Executive Summary
+                        <div class="analysis-filter-indicator" id="analysisFilterIndicator" style="display: none;">
+                            <span class="filter-text">Viewing Single Analysis</span>
+                            <button class="clear-filter-btn" id="clearAnalysisFilter" title="Show all analyses">
+                                <span>×</span>
+                            </button>
+                        </div>
+                    </div>
                     <div class="summary-period" id="summaryPeriod">This Month</div>
                 </div>
                 <div class="summary-stats">
@@ -3742,7 +4860,11 @@ body {
             <div class="quick-actions" style="display: none;">
                 <button class="action-btn" id="quickAnalyze">
                     <span>📊</span>
-                    <span>Start New Analysis</span>
+                    <span>Upload & Analyze</span>
+                </button>
+                <button class="action-btn" id="quickManualEntry">
+                    <span>✏️</span>
+                    <span>Manual Entry</span>
                 </button>
                 <button class="action-btn secondary" id="viewReports">
                     <span>📈</span>
@@ -3770,8 +4892,8 @@ body {
                         <div class="step-card">
                             <div class="step-number">1</div>
                             <div class="step-icon">📤</div>
-                            <h3 class="step-title">Upload Documents</h3>
-                            <p class="step-description">Drop your runsheets and invoices to start analyzing</p>
+                            <h3 class="step-title">Add Your Data</h3>
+                            <p class="step-description">Upload PDF documents or enter data manually</p>
                         </div>
                         <div class="step-card">
                             <div class="step-number">2</div>
@@ -3808,6 +4930,11 @@ body {
                             <p class="feature-description">Your data is safely stored and always accessible</p>
                         </div>
                         <div class="feature-card">
+                            <div class="feature-icon">✏️</div>
+                            <h4 class="feature-title">Manual Entry</h4>
+                            <p class="feature-description">Quick data input without PDF documents</p>
+                        </div>
+                        <div class="feature-card">
                             <div class="feature-icon">🖨️</div>
                             <h4 class="feature-title">Export Ready</h4>
                             <p class="feature-description">Print or export professional reports</p>
@@ -3817,11 +4944,18 @@ body {
 
                 <!-- Call to Action -->
                 <div class="cta-section">
-                    <button class="primary-cta-btn" id="emptyStartAnalysis">
-                        <span class="btn-icon">🚀</span>
-                        <span class="btn-text">Start Your First Analysis</span>
-                        <span class="btn-arrow">→</span>
-                    </button>
+                    <div class="cta-buttons">
+                        <button class="primary-cta-btn" id="emptyStartAnalysis">
+                            <span class="btn-icon">📤</span>
+                            <span class="btn-text">Upload Documents</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                        <button class="secondary-cta-btn" id="emptyStartManual">
+                            <span class="btn-icon">✏️</span>
+                            <span class="btn-text">Manual Entry</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
                     <p class="cta-note">No registration required • Works offline • Free to use</p>
                 </div>
 
@@ -3831,7 +4965,7 @@ body {
                     <div class="tips-list">
                         <div class="tip-item">
                             <span class="tip-icon">📋</span>
-                            <span class="tip-text">Upload both runsheets and invoices for complete analysis</span>
+                            <span class="tip-text">Upload PDFs or use manual entry for quick data input</span>
                         </div>
                         <div class="tip-item">
                             <span class="tip-icon">⚙️</span>
@@ -3890,11 +5024,25 @@ body {
             <!-- Enhanced Upload Section -->
             <div class="upload-section-enhanced">
                 <div class="section-header">
-                    <h2 class="section-title">Upload Your Documents</h2>
-                    <p class="section-subtitle">Upload your runsheets and invoices to get started with payment analysis</p>
+                    <h2 class="section-title">Add Your Data</h2>
+                    <p class="section-subtitle">Upload your documents or enter data manually to get started with payment analysis</p>
                 </div>
 
-                <div class="upload-area-container">
+                <!-- Data Input Method Toggle -->
+                <div class="input-method-toggle">
+                    <button class="method-btn active" id="uploadMethodBtn" data-method="upload">
+                        <span class="method-icon">📄</span>
+                        <span class="method-label">Upload Files</span>
+                        <span class="method-desc">PDF documents</span>
+                    </button>
+                    <button class="method-btn" id="manualMethodBtn" data-method="manual">
+                        <span class="method-icon">✏️</span>
+                        <span class="method-label">Manual Entry</span>
+                        <span class="method-desc">Enter data by hand</span>
+                    </button>
+                </div>
+
+                <div class="upload-area-container" id="uploadContainer">
                     <div class="upload-area enhanced-upload-v2" id="uploadArea">
                         <div class="upload-background-pattern"></div>
                         <div class="upload-content">
@@ -3926,6 +5074,28 @@ body {
                         </div>
                     </div>
                     <input accept=".pdf" class="file-input" id="fileInput" multiple type="file"/>
+                </div>
+
+                <!-- Manual Entry Container -->
+                <div class="manual-entry-container" id="manualContainer" style="display: none;">
+                    <div class="manual-entry-area">
+                        <div class="manual-entry-content">
+                            <div class="manual-entry-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </div>
+                            <div class="manual-entry-text">
+                                <h3 class="manual-entry-title">Ready for Manual Entry</h3>
+                                <p class="manual-entry-subtitle">Click below to enter your payment data manually</p>
+                                <button class="manual-entry-btn" id="openManualEntryBtn">
+                                    <span class="btn-icon">✏️</span>
+                                    <span>Add Entry</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- File List Section -->
@@ -4091,8 +5261,8 @@ body {
                                 </svg>
                             </div>
                         </div>
-                        <div class="kpi-value" id="kpiExpected">£0.00</div>
-                        <div class="kpi-subtitle" id="kpiExpectedSub">Total earnings</div>
+                        <div class="kpi-value" id="reportKpiExpected">£0.00</div>
+                        <div class="kpi-subtitle" id="reportKpiExpectedSub">Total earnings</div>
                     </div>
                     
                     <div class="kpi-card kpi-secondary">
@@ -4105,11 +5275,11 @@ body {
                                 </svg>
                             </div>
                         </div>
-                        <div class="kpi-value" id="kpiPaid">£0.00</div>
-                        <div class="kpi-subtitle" id="kpiPaidSub">Amount received</div>
+                        <div class="kpi-value" id="reportKpiPaid">£0.00</div>
+                        <div class="kpi-subtitle" id="reportKpiPaidSub">Amount received</div>
                     </div>
                     
-                    <div class="kpi-card" id="kpiDifferenceCard">
+                    <div class="kpi-card" id="reportKpiDifferenceCard">
                         <div class="kpi-header">
                             <div class="kpi-title">Difference</div>
                             <div class="kpi-icon">
@@ -4118,7 +5288,7 @@ body {
                                 </svg>
                             </div>
                         </div>
-                        <div class="kpi-value" id="kpiDifference">£0.00</div>
+                        <div class="kpi-value" id="reportKpiDifference">£0.00</div>
                         <div class="kpi-trend" id="kpiTrend">
                             <span id="kpiTrendText">-</span>
                         </div>
@@ -5433,10 +6603,34 @@ exports.updateFileList = function(files) {
     let runsheets = 0;
     let invoices = 0;
     
+    // Check for existing analysis to detect file updates
+    const State = requireModule('stateModule');
+    const savedState = State.load();
+    const lastAnalysisFiles = savedState?.files?.uploaded || [];
+
     files.forEach(file => {
         const fileType = file.name.toLowerCase().includes('runsheet') ? 'runsheet' : 'invoice';
         if (fileType === 'runsheet') runsheets++;
         else invoices++;
+        
+        // Check if this file has been updated since last analysis
+        const lastAnalyzedFile = lastAnalysisFiles.find(f => 
+            f.name === file.name && f.size === file.size
+        );
+        
+        const currentFileModified = file.file?.lastModified || 0;
+        const isFileUpdated = lastAnalyzedFile && 
+            currentFileModified > 0 && 
+            (!lastAnalyzedFile.lastModified || currentFileModified > lastAnalyzedFile.lastModified);
+        
+        // Debug logging for file update detection
+        if (lastAnalyzedFile) {
+            console.log(`📄 File ${file.name}:`, {
+                isUpdated: isFileUpdated,
+                currentModified: new Date(currentFileModified).toLocaleString(),
+                lastModified: lastAnalyzedFile.lastModified ? new Date(lastAnalyzedFile.lastModified).toLocaleString() : 'Unknown'
+            });
+        }
         
         const div = document.createElement('div');
         div.className = 'file-item';
@@ -5444,9 +6638,16 @@ exports.updateFileList = function(files) {
         const safeName = file.name.replace(/[<>]/g, '');
         const safeId = String(file.id).replace(/[<>"']/g, '');
         
+        // Add update indicator if file has been modified
+        const updateIndicator = isFileUpdated ? 
+            '<div class="file-update-indicator" title="File has been updated since last analysis">!</div>' : '';
+        
+        const iconClass = isFileUpdated ? 'file-icon updated' : 'file-icon';
+        
         div.innerHTML = `
-            <div class="file-icon">
+            <div class="${iconClass}">
                 ${fileType === 'runsheet' ? '📦' : '💰'}
+                ${updateIndicator}
             </div>
             <div class="file-info">
                 <div class="file-name">${safeName}</div>
@@ -5455,6 +6656,7 @@ exports.updateFileList = function(files) {
                     <span class="file-type-badge ${fileType}">
                         ${fileType === 'runsheet' ? 'Runsheet' : 'Invoice'}
                     </span>
+                    ${isFileUpdated ? '<span class="file-update-badge">Updated</span>' : ''}
                 </div>
             </div>
             <button class="file-remove" data-file-id="${safeId}" aria-label="Remove ${safeName}">
@@ -5498,6 +6700,69 @@ exports.updateFileList = function(files) {
 };
 
 /**
+ * Updates the manual entries list display
+ * @param {Array} entries - Array of manual entry objects
+ */
+exports.updateManualEntriesList = function(entries) {
+    try {
+        const entriesList = document.getElementById('manualEntriesList');
+        if (!entriesList) {
+            console.error('Manual entries list element not found');
+            return;
+        }
+        
+        entriesList.innerHTML = '';
+        
+        if (entries.length === 0) {
+            entriesList.innerHTML = '<div class="empty-state"><div class="empty-message">No manual entries added</div></div>';
+            return;
+        }
+        
+        entries.forEach(entry => {
+            const div = document.createElement('div');
+            div.className = 'manual-entry-item';
+            
+            // Calculate totals for this entry
+            const totalDeliveries = parseInt(entry.deliveries) || 0;
+            const totalPayments = (parseFloat(entry.basePayment) || 0) + (parseFloat(entry.bonusPayment) || 0);
+            
+            // Format date
+            const entryDate = new Date(entry.date);
+            const formattedDate = entryDate.toLocaleDateString('en-GB', {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short'
+            });
+            
+            div.innerHTML = `
+                <div class="entry-info">
+                    <div class="entry-date">${formattedDate}</div>
+                    <div class="entry-details">
+                        <span class="deliveries-count">${totalDeliveries} deliveries</span>
+                        <span class="payment-amount">£${totalPayments.toFixed(2)}</span>
+                    </div>
+                </div>
+                <button class="entry-remove" data-entry-id="${entry.id}" aria-label="Remove entry for ${formattedDate}">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" aria-hidden="true">
+                        <path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            `;
+            entriesList.appendChild(div);
+        });
+        
+        console.log(`📝 Updated manual entries list: ${entries.length} entries displayed`);
+        
+    } catch (error) {
+        console.error('Error updating manual entries list:', error);
+        const entriesList = document.getElementById('manualEntriesList');
+        if (entriesList) {
+            entriesList.innerHTML = '<div class="empty-state"><div class="empty-message">Error updating entries list</div></div>';
+        }
+    }
+};
+
+/**
  * Renders the comprehensive financial analysis report
  * @param {Object} data - Analysis data object containing results, totals, and metadata
  * @param {Array} data.results - Daily breakdown results
@@ -5532,9 +6797,9 @@ exports.renderReport = function(data) {
     document.getElementById('reportStatus').textContent = totals.differenceTotal >= 0 ? 'Balanced' : 'Discrepancy';
     
     // Update KPIs
-    document.getElementById('kpiExpected').textContent = `£${totals.expectedTotal.toFixed(2)}`;
-    document.getElementById('kpiPaid').textContent = `£${totals.paidTotal.toFixed(2)}`;
-    document.getElementById('kpiDifference').textContent = `£${Math.abs(totals.differenceTotal).toFixed(2)}`;
+    document.getElementById('reportKpiExpected').textContent = `£${totals.expectedTotal.toFixed(2)}`;
+    document.getElementById('reportKpiPaid').textContent = `£${totals.paidTotal.toFixed(2)}`;
+    document.getElementById('reportKpiDifference').textContent = `£${Math.abs(totals.differenceTotal).toFixed(2)}`;
     document.getElementById('kpiConsignments').textContent = totals.totalConsignments || '0';
     
     // Update KPI subtitles
@@ -5543,7 +6808,7 @@ exports.renderReport = function(data) {
     document.getElementById('kpiConsignmentsSub').textContent = `Avg: ${avgConsignments}/day`;
     
     // Update difference card style
-    const diffCard = document.getElementById('kpiDifferenceCard');
+    const diffCard = document.getElementById('reportKpiDifferenceCard');
     const trendElement = document.getElementById('kpiTrend');
     
     if (totals.differenceTotal >= 0) {
@@ -5706,6 +6971,7 @@ exports.getSettingsFormData = function() {
 // Dashboard Module with enhanced features
 let currentView = 'monthly'; // 'monthly' or 'weekly'
 let currentCalendarMonth = new Date();
+let selectedAnalysisId = null; // null = show all analyses, string = show specific analysis
 
 exports.init = function() {
     const Router = requireModule('routerModule');
@@ -5714,7 +6980,8 @@ exports.init = function() {
     Router.registerPageHandler('dashboard', {
         onLoad: () => {
             console.log('📊 Loading dashboard');
-            exports.refresh();
+            // Set initial view to update period display correctly
+            setView(currentView);
         }
     });
     
@@ -5730,12 +6997,18 @@ exports.init = function() {
     // Calendar navigation
     document.getElementById('calPrev').addEventListener('click', () => {
         currentCalendarMonth.setMonth(currentCalendarMonth.getMonth() - 1);
+        console.log('📅 Calendar: Previous month selected -', currentCalendarMonth.toLocaleDateString());
         renderCalendar();
+        // Update period display and refresh all dashboard data
+        setView(currentView);
     });
     
     document.getElementById('calNext').addEventListener('click', () => {
         currentCalendarMonth.setMonth(currentCalendarMonth.getMonth() + 1);
+        console.log('📅 Calendar: Next month selected -', currentCalendarMonth.toLocaleDateString());
         renderCalendar();
+        // Update period display and refresh all dashboard data
+        setView(currentView);
     });
     
     // Action buttons
@@ -5743,12 +7016,79 @@ exports.init = function() {
     document.getElementById('quickAnalyze').addEventListener('click', () => {
         Router.navigate('analysis');
     });
+    document.getElementById('quickManualEntry').addEventListener('click', () => {
+        Router.navigate('analysis');
+        // Set to manual mode and trigger manual entry
+        setTimeout(() => {
+            const analysisModule = requireModule('analysisModule');
+            if (analysisModule.setInputMethod) {
+                analysisModule.setInputMethod('manual');
+            }
+        }, 100);
+    });
     document.getElementById('viewReports').addEventListener('click', () => {
         Router.navigate('reports');
     });
     document.getElementById('emptyStartAnalysis').addEventListener('click', () => {
         Router.navigate('analysis');
     });
+    document.getElementById('emptyStartManual').addEventListener('click', () => {
+        Router.navigate('analysis');
+        // Set to manual mode and trigger manual entry
+        setTimeout(() => {
+            const analysisModule = requireModule('analysisModule');
+            if (analysisModule.setInputMethod) {
+                analysisModule.setInputMethod('manual');
+            }
+        }, 100);
+    });
+    
+    // Clear analysis filter button
+    document.getElementById('clearAnalysisFilter').addEventListener('click', () => {
+        exports.clearAnalysisSelection();
+    });
+};
+
+// Function to set selected analysis for dashboard filtering
+exports.setSelectedAnalysis = function(analysisId) {
+    selectedAnalysisId = analysisId;
+    console.log('📊 Dashboard: Selected analysis changed to', analysisId || 'All analyses');
+    
+    // Show filter indicator
+    const filterIndicator = document.getElementById('analysisFilterIndicator');
+    if (filterIndicator) {
+        filterIndicator.style.display = analysisId ? 'flex' : 'none';
+    }
+    
+    // Set calendar to the month of the selected analysis
+    if (analysisId) {
+        const State = requireModule('stateModule');
+        const analyses = State.getAllAnalyses();
+        const analysis = analyses[analysisId];
+        
+        if (analysis && analysis.metadata && analysis.metadata.createdAt) {
+            const analysisDate = new Date(analysis.metadata.createdAt);
+            currentCalendarMonth = new Date(analysisDate.getFullYear(), analysisDate.getMonth(), 1);
+            console.log('📅 Calendar set to analysis month:', currentCalendarMonth.toLocaleDateString());
+        }
+    }
+    
+    // Refresh dashboard to show data from selected analysis
+    setView(currentView);
+};
+
+// Function to clear analysis selection (show all data)
+exports.clearAnalysisSelection = function() {
+    selectedAnalysisId = null;
+    console.log('📊 Dashboard: Showing all analyses data');
+    
+    // Hide filter indicator
+    const filterIndicator = document.getElementById('analysisFilterIndicator');
+    if (filterIndicator) {
+        filterIndicator.style.display = 'none';
+    }
+    
+    setView(currentView);
 };
 
 function setView(view) {
@@ -5758,8 +7098,25 @@ function setView(view) {
     document.getElementById('monthlyToggle').classList.toggle('active', view === 'monthly');
     document.getElementById('weeklyToggle').classList.toggle('active', view === 'weekly');
     
-    // Update period text
-    document.getElementById('summaryPeriod').textContent = view === 'monthly' ? 'This Month' : 'This Week';
+    // Update period text with selected calendar month
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    if (view === 'monthly') {
+        const selectedMonthName = monthNames[currentCalendarMonth.getMonth()];
+        const selectedYear = currentCalendarMonth.getFullYear();
+        const currentYear = new Date().getFullYear();
+        
+        // Show year only if different from current year
+        if (selectedYear === currentYear) {
+            document.getElementById('summaryPeriod').textContent = selectedMonthName;
+        } else {
+            document.getElementById('summaryPeriod').textContent = `${selectedMonthName} ${selectedYear}`;
+        }
+    } else {
+        const selectedMonthName = monthNames[currentCalendarMonth.getMonth()];
+        document.getElementById('summaryPeriod').textContent = `${selectedMonthName} Week`;
+    }
     
     // Refresh data for new view
     exports.refresh();
@@ -5798,9 +7155,13 @@ function renderCalendar() {
     const datesWithData = new Set();
     
     Object.values(analyses).forEach(analysis => {
-        if (analysis.results) {
-            analysis.results.forEach(result => {
-                const date = new Date(result.date);
+        if (analysis.details && analysis.details.daily) {
+            analysis.details.daily.forEach(result => {
+                // Convert shortened date format (MM-DD) to full date
+                const year = new Date().getFullYear();
+                const [month, day] = result.d.split('-');
+                const date = new Date(year, parseInt(month) - 1, parseInt(day));
+                
                 if (date.getMonth() === currentCalendarMonth.getMonth() && 
                     date.getFullYear() === currentCalendarMonth.getFullYear()) {
                     datesWithData.add(date.getDate());
@@ -5948,24 +7309,29 @@ function showChartTooltip(event, text) {
 
 function getWeeklyData(analyses) {
     const data = [];
-    const today = new Date();
+    // Use mid-month of selected calendar month for weekly view
+    const midMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth(), 15);
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     
     for (let i = 6; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
+        const date = new Date(midMonth);
+        date.setDate(midMonth.getDate() - i);
         
         let expected = 0;
         let actual = 0;
         
         // Sum up data for this day across all analyses
         Object.values(analyses).forEach(analysis => {
-            if (analysis.results) {
-                analysis.results.forEach(result => {
-                    const resultDate = new Date(result.date);
+            if (analysis.details && analysis.details.daily) {
+                analysis.details.daily.forEach(result => {
+                    // Convert shortened date format (MM-DD) to full date
+                    const year = new Date().getFullYear();
+                    const [month, day] = result.d.split('-');
+                    const resultDate = new Date(year, parseInt(month) - 1, parseInt(day));
+                    
                     if (resultDate.toDateString() === date.toDateString()) {
-                        expected += result.expectedTotal || 0;
-                        actual += result.paidAmount || 0;
+                        expected += result.e || 0;  // expectedTotal -> e
+                        actual += result.p || 0;    // paidAmount -> p
                     }
                 });
             }
@@ -5983,11 +7349,12 @@ function getWeeklyData(analyses) {
 
 function getMonthlyData(analyses) {
     const data = [];
-    const today = new Date();
+    // Use the selected calendar month to show its weeks
+    const monthStart = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth(), 1);
     
     for (let i = 3; i >= 0; i--) {
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() - (i * 7 + today.getDay()));
+        const weekStart = new Date(monthStart);
+        weekStart.setDate(monthStart.getDate() + (i * 7));
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 6);
         
@@ -5996,12 +7363,16 @@ function getMonthlyData(analyses) {
         
         // Sum up data for this week across all analyses
         Object.values(analyses).forEach(analysis => {
-            if (analysis.results) {
-                analysis.results.forEach(result => {
-                    const resultDate = new Date(result.date);
+            if (analysis.details && analysis.details.daily) {
+                analysis.details.daily.forEach(result => {
+                    // Convert shortened date format (MM-DD) to full date
+                    const year = new Date().getFullYear();
+                    const [month, day] = result.d.split('-');
+                    const resultDate = new Date(year, parseInt(month) - 1, parseInt(day));
+                    
                     if (resultDate >= weekStart && resultDate <= weekEnd) {
-                        expected += result.expectedTotal || 0;
-                        actual += result.paidAmount || 0;
+                        expected += result.e || 0;  // expectedTotal -> e
+                        actual += result.p || 0;    // paidAmount -> p
                     }
                 });
             }
@@ -6041,10 +7412,12 @@ function calculateForecasts(analyses) {
     
     const avgDaily = totalDays > 0 ? totalRevenue / totalDays : 0;
     
-    // Simple forecasts
+    // Simple forecasts based on selected calendar month
     const nextWeek = avgDaily * 5; // 5 working days
-    const daysLeftInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() - new Date().getDate();
-    const monthEnd = avgDaily * Math.min(daysLeftInMonth, 20); // Max 20 working days
+    const selectedMonthLastDay = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() + 1, 0).getDate();
+    const selectedMonthCurrentDay = Math.min(new Date().getDate(), selectedMonthLastDay);
+    const daysLeftInSelectedMonth = selectedMonthLastDay - selectedMonthCurrentDay;
+    const monthEnd = avgDaily * Math.min(daysLeftInSelectedMonth, 20); // Max 20 working days
     const dailyTarget = avgDaily * 1.1; // 10% growth target
     
     return {
@@ -6057,10 +7430,30 @@ function calculateForecasts(analyses) {
 exports.refresh = function() {
     try {
         const State = requireModule('stateModule');
-        const analyses = State.getAllAnalyses();
-        const analysesArray = Object.values(analyses);
+        const allAnalyses = State.getAllAnalyses();
         
-        console.log('📊 Dashboard refresh - analyses found:', analysesArray.length);
+        // Filter analyses based on selection
+        let analyses, analysesArray;
+        if (selectedAnalysisId) {
+            // Show only selected analysis
+            const selectedAnalysis = allAnalyses[selectedAnalysisId];
+            if (selectedAnalysis) {
+                analyses = { [selectedAnalysisId]: selectedAnalysis };
+                analysesArray = [selectedAnalysis];
+                console.log('📊 Dashboard refresh - showing selected analysis:', selectedAnalysisId);
+            } else {
+                console.warn('📊 Selected analysis not found, showing all analyses');
+                analyses = allAnalyses;
+                analysesArray = Object.values(allAnalyses);
+                selectedAnalysisId = null; // Reset invalid selection
+            }
+        } else {
+            // Show all analyses
+            analyses = allAnalyses;
+            analysesArray = Object.values(allAnalyses);
+            console.log('📊 Dashboard refresh - showing all analyses:', analysesArray.length);
+        }
+        
         if (analysesArray.length > 0) {
             console.log('📊 Sample analysis structure:', analysesArray[0]);
         }
@@ -6104,18 +7497,20 @@ exports.refresh = function() {
     Router.setNavBadge('reports', analysesArray.length);
     Router.setNavBadge('history', analysesArray.length);
     
-    // Calculate metrics based on current view
+    // Calculate metrics based on current view and selected calendar month
     const now = new Date();
     let periodStart, periodEnd;
     
     if (currentView === 'monthly') {
-        periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        // Use the selected calendar month instead of current month
+        periodStart = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth(), 1);
+        periodEnd = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth() + 1, 0);
     } else {
-        // Weekly - last 7 days
-        periodStart = new Date(now);
-        periodStart.setDate(now.getDate() - 6);
-        periodEnd = now;
+        // Weekly view: Show 7 days from the selected calendar month (use 15th as middle point)
+        const midMonth = new Date(currentCalendarMonth.getFullYear(), currentCalendarMonth.getMonth(), 15);
+        periodStart = new Date(midMonth);
+        periodStart.setDate(midMonth.getDate() - 6);
+        periodEnd = new Date(midMonth);
     }
     
     // Calculate totals for current period
@@ -6126,14 +7521,18 @@ exports.refresh = function() {
     let daysWithData = 0;
     
     analysesArray.forEach(analysis => {
-        if (analysis.results) {
-            analysis.results.forEach(result => {
-                const resultDate = new Date(result.date);
+        if (analysis.details && analysis.details.daily) {
+            analysis.details.daily.forEach(result => {
+                // Convert shortened date format (MM-DD) to full date
+                const year = new Date().getFullYear();
+                const [month, day] = result.d.split('-');
+                const resultDate = new Date(year, parseInt(month) - 1, parseInt(day));
+                
                 if (resultDate >= periodStart && resultDate <= periodEnd) {
-                    currentRevenue += result.expectedTotal || 0;
-                    currentDeliveries += result.consignments || 0;
-                    currentExpected += result.expectedTotal || 0;
-                    currentPaid += result.paidAmount || 0;
+                    currentRevenue += result.e || 0;  // expectedTotal -> e
+                    currentDeliveries += result.c || 0;  // consignments -> c
+                    currentExpected += result.e || 0;
+                    currentPaid += result.p || 0;  // paidAmount -> p
                     daysWithData++;
                 }
             });
@@ -6158,12 +7557,16 @@ exports.refresh = function() {
     let prevDeliveries = 0;
     
     analysesArray.forEach(analysis => {
-        if (analysis.results) {
-            analysis.results.forEach(result => {
-                const resultDate = new Date(result.date);
+        if (analysis.details && analysis.details.daily) {
+            analysis.details.daily.forEach(result => {
+                // Convert shortened date format (MM-DD) to full date
+                const year = new Date().getFullYear();
+                const [month, day] = result.d.split('-');
+                const resultDate = new Date(year, parseInt(month) - 1, parseInt(day));
+                
                 if (resultDate >= prevPeriodStart && resultDate <= prevPeriodEnd) {
-                    prevRevenue += result.expectedTotal || 0;
-                    prevDeliveries += result.consignments || 0;
+                    prevRevenue += result.e || 0;  // expectedTotal -> e
+                    prevDeliveries += result.c || 0;  // consignments -> c
                 }
             });
         }
@@ -6206,6 +7609,15 @@ exports.refresh = function() {
     // Render chart
     renderChart(analyses);
     
+    // Debug logging for data verification
+    if (selectedAnalysisId) {
+        console.log('📊 Dashboard showing single analysis data:', {
+            analysisId: selectedAnalysisId,
+            dateRange: `${periodStart.toLocaleDateString()} - ${periodEnd.toLocaleDateString()}`,
+            dataPoints: analysesArray.length
+        });
+    }
+    
     // Calculate and update forecasts
     const forecasts = calculateForecasts(analyses);
     document.getElementById('forecastWeek').textContent = `£${forecasts.nextWeek.toFixed(2)}`;
@@ -6224,9 +7636,12 @@ exports.refresh = function() {
 <script id="analysisModule" type="application/x-module">
 // Analysis Module - Enhanced with production features
 let uploadedFiles = [];
+let manualEntries = [];
 let lastAnalysisData = null;
 let hasBeenAnalyzed = false;
 let currentFilesSignature = null;
+let currentStep = 1;
+let currentInputMethod = 'upload'; // 'upload' or 'manual'
 
 // File management
 function detectFileType(filename) {
@@ -6234,6 +7649,48 @@ function detectFileType(filename) {
     if (name.includes('runsheet') || name.includes('dv_')) return 'runsheet';
     if (name.includes('self') || name.includes('invoice') || name.includes('bill')) return 'invoice';
     return 'unknown';
+}
+
+// Step management functions
+function updateSteps() {
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step, index) => {
+        const stepNumber = index + 1;
+        step.classList.remove('active', 'completed');
+        
+        if (stepNumber < currentStep) {
+            step.classList.add('completed');
+        } else if (stepNumber === currentStep) {
+            step.classList.add('active');
+        }
+    });
+}
+
+function setStep(stepNumber) {
+    if (stepNumber >= 1 && stepNumber <= 3) {
+        currentStep = stepNumber;
+        updateSteps();
+        
+        // Show/hide relevant sections based on step
+        const uploadSection = document.querySelector('.upload-section-enhanced');
+        const validateSection = document.querySelector('.validate-section');
+        const analyzeSection = document.querySelector('.analyze-section');
+        
+        if (uploadSection) uploadSection.style.display = stepNumber === 1 ? 'block' : 'none';
+        if (validateSection) validateSection.style.display = stepNumber === 2 ? 'block' : 'none';
+        if (analyzeSection) analyzeSection.style.display = stepNumber === 3 ? 'block' : 'none';
+        
+        console.log(`📍 Step changed to: ${stepNumber}`);
+    }
+}
+
+function canProgressToStep(stepNumber) {
+    switch (stepNumber) {
+        case 1: return true; // Always can go to step 1
+        case 2: return uploadedFiles.length > 0; // Need files to validate
+        case 3: return uploadedFiles.length > 0; // Need files to analyze
+        default: return false;
+    }
 }
 
 exports.init = function() {
@@ -6246,6 +7703,22 @@ exports.init = function() {
             // Update UI to reflect current file state
             requireModule('uiModule').updateFileList(uploadedFiles);
             updateAnalyzeButton();
+            updateSteps();
+        }
+    });
+    
+    // Add click handlers to step circles for navigation
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.step-circle')) {
+            const step = e.target.closest('.step');
+            const stepNumber = parseInt(step.dataset.step);
+            
+            if (canProgressToStep(stepNumber)) {
+                setStep(stepNumber);
+                requireModule('uiModule').showToast(`Switched to step ${stepNumber}`, 'info');
+            } else {
+                requireModule('uiModule').showToast('Complete previous steps first', 'warning');
+            }
         }
     });
     
@@ -6314,9 +7787,11 @@ exports.init = function() {
             uploadedFiles = [];
             hasBeenAnalyzed = false;
             currentFilesSignature = null;
+            setStep(1); // Reset to step 1
             requireModule('uiModule').updateFileList(uploadedFiles);
             updateAnalyzeButton();
             document.getElementById('fileInput').value = '';
+            requireModule('uiModule').showToast('All files cleared', 'info');
         }
     });
     
@@ -6325,14 +7800,56 @@ exports.init = function() {
     
     // Start New Analysis button
     document.getElementById('startNewAnalysisBtn').addEventListener('click', () => {
-        console.log('✨ Start New Analysis clicked - clearing files');
+        console.log('✨ Start New Analysis clicked - clearing all data');
         uploadedFiles = [];
+        manualEntries = [];
         hasBeenAnalyzed = false;
         currentFilesSignature = null;
+        setStep(1); // Reset to step 1
         document.getElementById('fileInput').value = '';
         requireModule('uiModule').updateFileList(uploadedFiles);
+        requireModule('uiModule').updateManualEntriesList(manualEntries);
         updateAnalyzeButton();
         requireModule('uiModule').showToast('Ready for new analysis', 'success');
+    });
+    
+    // Input method toggle
+    document.getElementById('uploadMethodBtn').addEventListener('click', () => {
+        setInputMethod('upload');
+    });
+    
+    document.getElementById('manualMethodBtn').addEventListener('click', () => {
+        setInputMethod('manual');
+    });
+    
+    // Manual entry modal handlers
+    document.getElementById('openManualEntryBtn').addEventListener('click', () => {
+        showManualEntryModal();
+    });
+    
+    document.getElementById('closeManualEntry').addEventListener('click', () => {
+        hideManualEntryModal();
+    });
+    
+    document.getElementById('cancelManualEntry').addEventListener('click', () => {
+        hideManualEntryModal();
+    });
+    
+    document.getElementById('manualEntryForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleManualEntrySubmit();
+    });
+    
+    // Manual entry form calculations
+    ['consignments', 'baseAmount', 'pickups', 'bonuses', 'paidAmount'].forEach(fieldId => {
+        document.getElementById(fieldId).addEventListener('input', calculateManualEntryTotals);
+    });
+    
+    // Auto-set day when date changes
+    document.getElementById('entryDate').addEventListener('change', (e) => {
+        const date = new Date(e.target.value);
+        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        document.getElementById('entryDay').value = dayNames[date.getDay()];
     });
 };
 
@@ -6358,6 +7875,14 @@ function handleFileSelect(event) {
     console.log(`  Total uploaded files: ${uploadedFiles.length}`);
     requireModule('uiModule').updateFileList(uploadedFiles);
     updateAnalyzeButton();
+    
+    // Auto-progress to step 2 when files are uploaded
+    if (uploadedFiles.length > 0 && currentStep === 1) {
+        setTimeout(() => {
+            setStep(2);
+            requireModule('uiModule').showToast('Files uploaded! Ready to validate', 'success');
+        }, 500);
+    }
 }
 
 function removeFile(fileId) {
@@ -6370,6 +7895,12 @@ function removeFile(fileId) {
     
     requireModule('uiModule').updateFileList(uploadedFiles);
     updateAnalyzeButton();
+    
+    // Go back to step 1 if no files remain
+    if (uploadedFiles.length === 0 && currentStep > 1) {
+        setStep(1);
+        requireModule('uiModule').showToast('No files remaining. Upload files to continue', 'info');
+    }
 }
 
 function updateAnalyzeButton() {
@@ -6377,27 +7908,43 @@ function updateAnalyzeButton() {
     const startNewBtn = document.getElementById('startNewAnalysisBtn');
     
     const hasFiles = uploadedFiles.length > 0;
+    const hasManualEntries = manualEntries.length > 0;
+    const hasData = hasFiles || hasManualEntries;
+    
     const newFilesSignature = hasFiles ? generateFilesSignature(uploadedFiles) : null;
     const filesChanged = newFilesSignature !== currentFilesSignature;
     
-    console.log('🔄 Updating button states:', { hasFiles, hasBeenAnalyzed, filesChanged });
+    console.log('🔄 Updating button states:', { 
+        hasFiles, 
+        hasManualEntries, 
+        hasData, 
+        hasBeenAnalyzed, 
+        filesChanged,
+        currentInputMethod 
+    });
     
-    if (!hasFiles) {
-        // No files - disable both buttons
+    if (!hasData) {
+        // No data at all - disable both buttons
         analyzeBtn.disabled = true;
         startNewBtn.style.display = 'none';
         hasBeenAnalyzed = false;
         currentFilesSignature = null;
-    } else if (hasBeenAnalyzed && !filesChanged) {
-        // Same files already analyzed - disable analyze, show start new
+    } else if (hasBeenAnalyzed && !filesChanged && currentInputMethod === 'upload') {
+        // Same files already analyzed (upload mode) - disable analyze, show start new
         analyzeBtn.disabled = true;
         startNewBtn.style.display = 'inline-flex';
+    } else if (hasBeenAnalyzed && currentInputMethod === 'manual') {
+        // Manual mode - always allow re-analysis since entries can be modified
+        analyzeBtn.disabled = false;
+        startNewBtn.style.display = 'inline-flex';
     } else {
-        // Has files and (not analyzed OR files changed) - enable analyze, hide start new
+        // Has data and (not analyzed OR files changed OR manual mode) - enable analyze, hide start new
         analyzeBtn.disabled = false;
         startNewBtn.style.display = 'none';
         hasBeenAnalyzed = false;
-        currentFilesSignature = newFilesSignature;
+        if (hasFiles) {
+            currentFilesSignature = newFilesSignature;
+        }
     }
 }
 
@@ -6408,7 +7955,16 @@ function generateFilesSignature(files) {
 
 // Enhanced analysis with detailed progress updates
 async function analyze() {
-    if (uploadedFiles.length === 0) return;
+    const hasFiles = uploadedFiles.length > 0;
+    const hasManualEntries = manualEntries.length > 0;
+    
+    if (!hasFiles && !hasManualEntries) {
+        console.log('⚠️ No data to analyze');
+        return;
+    }
+    
+    // Progress to step 3 when analysis starts
+    setStep(3);
     
     const UI = requireModule('uiModule');
     const Parser = requireModule('parserModule');
@@ -6417,13 +7973,29 @@ async function analyze() {
     const Router = requireModule('routerModule');
     
     console.log('\n🔍 STARTING ANALYSIS...');
-    console.log(`Files to analyze: ${uploadedFiles.length}`);
-    uploadedFiles.forEach((f, i) => {
-        console.log(`  ${i + 1}. ${f.name} (${f.type})`);
-    });
+    console.log(`Input method: ${currentInputMethod}`);
     
-    // Progress stages
-    const stages = [
+    if (currentInputMethod === 'upload') {
+        console.log(`Files to analyze: ${uploadedFiles.length}`);
+        uploadedFiles.forEach((f, i) => {
+            console.log(`  ${i + 1}. ${f.name} (${f.type})`);
+        });
+    } else {
+        console.log(`Manual entries to analyze: ${manualEntries.length}`);
+        manualEntries.forEach((e, i) => {
+            console.log(`  ${i + 1}. ${e.date} - ${e.deliveries} deliveries`);
+        });
+    }
+    
+    // Progress stages - different for manual vs upload mode
+    const stages = currentInputMethod === 'manual' ? [
+        { percent: 10, text: 'Initializing analysis...' },
+        { percent: 30, text: 'Loading payment rules...' },
+        { percent: 50, text: 'Processing manual entries...' },
+        { percent: 70, text: 'Calculating payments...' },
+        { percent: 90, text: 'Generating report...' },
+        { percent: 100, text: 'Analysis complete!' }
+    ] : [
         { percent: 10, text: 'Initializing analysis...' },
         { percent: 20, text: 'Loading payment rules...' },
         { percent: 30, text: 'Reading PDF files...' },
@@ -6446,11 +8018,14 @@ async function analyze() {
         }
     }
     
-    // Check if these files have been analyzed before
-    const files = uploadedFiles.map(f => f.file);
-    console.log('🔍 Checking for existing analysis...');
-    console.log('📁 Current files:', files.map(f => ({ name: f.name, size: f.size, lastModified: f.lastModified })));
-    const existingAnalysis = State.findExistingAnalysis(files);
+    // Check if these files have been analyzed before (only for upload mode)
+    let existingAnalysis = null;
+    if (currentInputMethod === 'upload' && hasFiles) {
+        const files = uploadedFiles.map(f => f.file);
+        console.log('🔍 Checking for existing analysis...');
+        console.log('📁 Current files:', files.map(f => ({ name: f.name, size: f.size, lastModified: f.lastModified })));
+        existingAnalysis = State.findExistingAnalysis(files);
+    }
     
     if (existingAnalysis) {
         console.log('📦 Found existing analysis for these files!');
@@ -6535,11 +8110,28 @@ async function analyze() {
         console.log(`Early arrival bonus: £${rules.earlyBonus.toFixed(2)}/day (weekdays only)`);
         console.log('============================\n');
         
-        updateStage(); // Stage 2: Reading PDFs
+        let aggregateResult;
         
-        // Parse all documents
-        console.log('📄 Calling Parser.parseDocuments...');
-        const aggregateResult = await Parser.parseDocuments(files, rules);
+        if (currentInputMethod === 'manual') {
+            updateStage(); // Stage 2: Processing manual entries
+            
+            console.log('📝 Processing manual entries...');
+            aggregateResult = processManualEntries();
+            
+            if (!aggregateResult) {
+                console.log('❌ No manual entries to process');
+                UI.showToast('No manual entries to process', 'error');
+                UI.showLoading(false);
+                return;
+            }
+        } else {
+            updateStage(); // Stage 2: Reading PDFs
+            
+            // Parse all documents
+            const files = uploadedFiles.map(f => f.file);
+            console.log('📄 Calling Parser.parseDocuments...');
+            aggregateResult = await Parser.parseDocuments(files, rules);
+        }
         
         updateStage(); // Stage 3: Extracting data
         
@@ -6757,7 +8349,7 @@ async function analyze() {
             version: State.VERSION,
             lastAnalysis: lastAnalysisData,
             lastModified: Date.now(),
-            files: {
+            files: currentInputMethod === 'upload' ? {
                 uploaded: uploadedFiles.map(f => ({
                     name: f.name,
                     size: f.size,
@@ -6765,14 +8357,25 @@ async function analyze() {
                     lastModified: f.file.lastModified || 0
                 })),
                 processed: processedData
+            } : {
+                manual: manualEntries.map(e => ({...e})),
+                processed: processedData
             },
+            inputMethod: currentInputMethod,
             rules: rules
         });
         
         // ONLY save as new analysis when actually performing analysis
         console.log('💾 Saving as new analysis entry...');
         console.log('💾 Analysis data structure:', lastAnalysisData);
-        State.saveAnalysis(files, lastAnalysisData, processedData);
+        
+        if (currentInputMethod === 'upload') {
+            const files = uploadedFiles.map(f => f.file);
+            State.saveAnalysis(files, lastAnalysisData, processedData);
+        } else {
+            // For manual entries, use a different method or adapt saveAnalysis
+            State.saveAnalysis([], lastAnalysisData, processedData, { inputMethod: 'manual', entries: manualEntries });
+        }
         
         updateStage(); // Stage 8: Complete
         
@@ -6785,12 +8388,16 @@ async function analyze() {
         
         UI.showToast('Analysis complete!', 'success');
         
-        // Clear files after successful analysis
-        uploadedFiles = [];
-        document.getElementById('fileInput').value = '';
-        
-        // Update UI to reflect cleared files
-        requireModule('uiModule').updateFileList(uploadedFiles);
+        // Clear data after successful analysis
+        if (currentInputMethod === 'upload') {
+            uploadedFiles = [];
+            document.getElementById('fileInput').value = '';
+            requireModule('uiModule').updateFileList(uploadedFiles);
+        } else {
+            // For manual mode, optionally clear entries or keep them for modification
+            // manualEntries = []; // Uncomment to clear after analysis
+            requireModule('uiModule').updateManualEntriesList(manualEntries);
+        }
         
         // Mark analysis as completed and update button states
         hasBeenAnalyzed = true;
@@ -6811,6 +8418,207 @@ async function analyze() {
         UI.hideValidationAlert();
     }
 }
+
+// Manual Entry Functions
+function setInputMethod(method) {
+    currentInputMethod = method;
+    console.log('📝 Input method changed to:', method);
+    
+    // Update button states
+    document.getElementById('uploadMethodBtn').classList.toggle('active', method === 'upload');
+    document.getElementById('manualMethodBtn').classList.toggle('active', method === 'manual');
+    
+    // Show/hide appropriate containers
+    document.getElementById('uploadContainer').style.display = method === 'upload' ? 'block' : 'none';
+    document.getElementById('manualContainer').style.display = method === 'manual' ? 'block' : 'none';
+    
+    // Update analyze button based on current data
+    updateAnalyzeButton();
+}
+
+function showManualEntryModal() {
+    // Reset form
+    document.getElementById('manualEntryForm').reset();
+    
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('entryDate').value = today;
+    
+    // Auto-set day
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    document.getElementById('entryDay').value = dayNames[new Date().getDay()];
+    
+    // Show modal
+    document.getElementById('manualEntryOverlay').classList.add('show');
+    
+    // Focus first input
+    setTimeout(() => {
+        document.getElementById('entryDate').focus();
+    }, 100);
+}
+
+function hideManualEntryModal() {
+    document.getElementById('manualEntryOverlay').classList.remove('show');
+}
+
+function calculateManualEntryTotals() {
+    // Get values
+    const consignments = parseFloat(document.getElementById('consignments').value) || 0;
+    const baseAmount = parseFloat(document.getElementById('baseAmount').value) || 0;
+    const pickups = parseFloat(document.getElementById('pickups').value) || 0;
+    const bonuses = parseFloat(document.getElementById('bonuses').value) || 0;
+    const paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
+    
+    // Calculate expected total (base amount + bonuses)
+    const expectedTotal = baseAmount + bonuses;
+    
+    // Calculate difference
+    const difference = paidAmount - expectedTotal;
+    
+    // Update fields
+    document.getElementById('expectedTotal').value = expectedTotal.toFixed(2);
+    
+    const differenceField = document.getElementById('difference');
+    if (difference > 0) {
+        differenceField.value = `+£${difference.toFixed(2)} (Overpaid)`;
+        differenceField.style.color = '#10b981';
+    } else if (difference < 0) {
+        differenceField.value = `-£${Math.abs(difference).toFixed(2)} (Underpaid)`;
+        differenceField.style.color = '#dc2626';
+    } else {
+        differenceField.value = '£0.00 (Exact)';
+        differenceField.style.color = '#64748b';
+    }
+}
+
+function handleManualEntrySubmit() {
+    console.log('📝 Manual entry form submitted');
+    
+    // Get form data
+    const formData = {
+        date: document.getElementById('entryDate').value,
+        day: document.getElementById('entryDay').value,
+        consignments: parseInt(document.getElementById('consignments').value) || 0,
+        baseAmount: parseFloat(document.getElementById('baseAmount').value) || 0,
+        pickups: parseInt(document.getElementById('pickups').value) || 0,
+        bonuses: parseFloat(document.getElementById('bonuses').value) || 0,
+        expectedTotal: parseFloat(document.getElementById('expectedTotal').value) || 0,
+        paidAmount: parseFloat(document.getElementById('paidAmount').value) || 0
+    };
+    
+    // Basic validation
+    if (!formData.date || !formData.day) {
+        requireModule('uiModule').showToast('Please fill in date information', 'error');
+        return;
+    }
+    
+    if (formData.consignments === 0 && formData.baseAmount === 0) {
+        requireModule('uiModule').showToast('Please enter consignments and base amount', 'error');
+        return;
+    }
+    
+    // Calculate difference
+    formData.difference = formData.paidAmount - formData.expectedTotal;
+    
+    // Add entry to list
+    const entry = {
+        id: Date.now() + Math.random(),
+        ...formData,
+        createdAt: new Date().toISOString()
+    };
+    
+    manualEntries.push(entry);
+    console.log('📝 Manual entry added:', entry);
+    
+    // Update UI
+    requireModule('uiModule').updateManualEntriesList(manualEntries);
+    updateAnalyzeButton();
+    hideManualEntryModal();
+    
+    requireModule('uiModule').showToast(`Entry added for ${new Date(formData.date).toLocaleDateString()}`, 'success');
+}
+
+function removeManualEntry(entryId) {
+    console.log('🗑️ Removing manual entry with ID:', entryId);
+    manualEntries = manualEntries.filter(e => e.id !== parseFloat(entryId));
+    
+    // Reset analysis state when entries change
+    hasBeenAnalyzed = false;
+    currentFilesSignature = null;
+    
+    requireModule('uiModule').updateManualEntriesList(manualEntries);
+    updateAnalyzeButton();
+    
+    requireModule('uiModule').showToast('Entry removed', 'info');
+}
+
+// Convert manual entries to analysis format
+function processManualEntries() {
+    if (manualEntries.length === 0) {
+        return null;
+    }
+    
+    console.log('📝 Processing manual entries for analysis:', manualEntries.length);
+    
+    // Create analysis structure similar to file processing
+    const processedData = {
+        daily: manualEntries.map(entry => ({
+            d: formatDateForAnalysis(entry.date), // MM-DD format
+            day: entry.day,
+            c: entry.consignments,
+            r: 2.00, // Default rate - could be made configurable
+            b: entry.baseAmount,
+            p: entry.pickups,
+            bonus: entry.bonuses,
+            e: entry.expectedTotal,
+            paid: entry.paidAmount,
+            diff: entry.difference
+        }))
+    };
+    
+    // Calculate totals
+    const totals = {
+        totalDays: manualEntries.length,
+        totalConsignments: manualEntries.reduce((sum, e) => sum + e.consignments, 0),
+        totalBase: manualEntries.reduce((sum, e) => sum + e.baseAmount, 0),
+        totalPickups: manualEntries.reduce((sum, e) => sum + e.pickups, 0),
+        totalBonuses: manualEntries.reduce((sum, e) => sum + e.bonuses, 0),
+        expectedTotal: manualEntries.reduce((sum, e) => sum + e.expectedTotal, 0),
+        paidTotal: manualEntries.reduce((sum, e) => sum + e.paidAmount, 0),
+        totalDifference: manualEntries.reduce((sum, e) => sum + e.difference, 0)
+    };
+    
+    return {
+        source: 'manual_entry',
+        metadata: {
+            entryCount: manualEntries.length,
+            createdAt: new Date().toISOString(),
+            dateRange: getDateRange(manualEntries)
+        },
+        details: processedData,
+        totals: totals
+    };
+}
+
+function formatDateForAnalysis(dateString) {
+    const date = new Date(dateString);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}-${day}`;
+}
+
+function getDateRange(entries) {
+    if (entries.length === 0) return null;
+    
+    const dates = entries.map(e => new Date(e.date)).sort();
+    const start = dates[0].toLocaleDateString();
+    const end = dates[dates.length - 1].toLocaleDateString();
+    
+    return start === end ? start : `${start} - ${end}`;
+}
+
+// Export functions for external access
+exports.setInputMethod = setInputMethod;
 </script>
 
 <!-- Reports Module -->
@@ -6990,14 +8798,23 @@ exports.loadAnalysis = function(analysisId) {
     const State = requireModule('stateModule');
     const UI = requireModule('uiModule');
     const Router = requireModule('routerModule');
+    const Dashboard = requireModule('dashboardModule');
     
     const analyses = State.getAllAnalyses();
     const analysis = analyses[analysisId];
     
     if (analysis) {
-        UI.renderReport(analysis);
-        Router.navigate('reports');
-        UI.showToast('Analysis loaded', 'success');
+        // Set the selected analysis in dashboard and navigate there
+        Dashboard.setSelectedAnalysis(analysisId);
+        Router.navigate('dashboard');
+        
+        // Get analysis date for user feedback
+        const analysisDate = analysis.metadata?.createdAt ? 
+            new Date(analysis.metadata.createdAt).toLocaleDateString() : 'Unknown date';
+        
+        UI.showToast(`Viewing analysis from ${analysisDate}`, 'success');
+    } else {
+        UI.showToast('Analysis not found', 'error');
     }
 };
 </script>

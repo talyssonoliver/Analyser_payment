@@ -6,8 +6,6 @@
 
 A professional, mobile-first web application for analyzing payment documents and generating comprehensive financial reports. Built with modern web technologies for courier services, delivery companies, and financial analysis.
 
-![Payment Analyzer Screenshot](https://via.placeholder.com/800x400/3b82f6/ffffff?text=Payment+Analyzer+Professional)
-
 ## ✨ Features
 
 ### 📊 **Advanced Document Analysis**
