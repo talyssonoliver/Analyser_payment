@@ -61,3 +61,6 @@ build/
 CLAUDE.md
 payment-analyzer-v8.2.txt
 C:\taly\Analyser\payment-analyzer-v6.1.2.txt
+
+# Data files with potentially sensitive information
+seed_data/
