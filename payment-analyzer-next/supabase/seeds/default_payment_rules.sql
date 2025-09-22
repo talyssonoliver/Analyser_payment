@@ -1,0 +1,31 @@
+-- Default payment rules seed data
+-- This will be used to create default rules for new users
+
+-- Insert default payment rules template
+-- This will be used when creating rules for new users via the application
+-- The actual rules will be inserted via the application when a user signs up
+
+-- Example of how default rules would look:
+-- INSERT INTO payment_rules (
+--   user_id, 
+--   version, 
+--   weekday_rate, 
+--   saturday_rate, 
+--   unloading_bonus, 
+--   attendance_bonus, 
+--   early_bonus,
+--   is_active,
+--   valid_from
+-- ) VALUES (
+--   '00000000-0000-0000-0000-000000000000', -- placeholder user_id
+--   1,
+--   2.00,  -- £2.00 weekday rate
+--   3.00,  -- £3.00 saturday rate  
+--   30.00, -- £30.00 unloading bonus
+--   25.00, -- £25.00 attendance bonus
+--   50.00, -- £50.00 early bonus
+--   true,
+--   CURRENT_DATE
+-- );
+
+-- Note: Actual default rules are created via the application using DEFAULT_PAYMENT_RULES constants

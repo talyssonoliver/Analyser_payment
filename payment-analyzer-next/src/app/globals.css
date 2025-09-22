@@ -1,0 +1,695 @@
+@import "tailwindcss";
+
+/* ===== PAYMENT ANALYZER THEME SYSTEM ===== */
+/* Matching original HTML color scheme exactly */
+
+:root {
+  /* === Original Payment Analyzer Colors === */
+  --primary: #0f172a;
+  --primary-light: #1e293b;
+  --accent: #3b82f6;
+  --accent-dark: #2563eb;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  
+  /* === Slate Color Scale === */
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  
+  /* === Typography === */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  
+  /* === Layout === */
+  --bottom-nav-height: 60px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0);
+  --header-height: 50px;
+  
+  /* === Semantic Color Mapping === */
+  --background: var(--slate-50);
+  --foreground: var(--primary);
+  --muted: var(--slate-500);
+  --muted-foreground: var(--slate-600);
+  --card: #ffffff;
+  --card-foreground: var(--primary);
+  --border: var(--slate-200);
+  --input: var(--slate-100);
+  --ring: var(--accent);
+  
+  /* === Component Colors === */
+  --button-primary: var(--accent);
+  --button-primary-hover: var(--accent-dark);
+  --button-secondary: #ffffff;
+  --button-secondary-hover: var(--slate-100);
+  --button-danger: var(--danger);
+  --button-danger-hover: #b91c1c;
+  
+  /* === Status Colors === */
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-error: var(--danger);
+  --status-info: var(--accent);
+  
+  /* === Gradient Definitions === */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  --gradient-success: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+  --gradient-warning: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+  --gradient-danger: linear-gradient(135deg, var(--danger) 0%, #b91c1c 100%);
+  --gradient-background: linear-gradient(180deg, #f0f4f8 0%, #d9e2ec 100%);
+  --gradient-header: linear-gradient(135deg, #ffffff 0%, var(--slate-50) 100%);
+}
+
+/* === Theme-aware Components === */
+.theme-background {
+  background: var(--gradient-background);
+}
+
+.theme-header {
+  background: var(--gradient-header);
+  border-bottom: 1px solid var(--border);
+}
+
+.theme-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+}
+
+.theme-button-primary {
+  background: var(--gradient-accent);
+  color: white;
+  border: none;
+}
+
+.theme-button-primary:hover {
+  background: var(--gradient-accent);
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.theme-button-secondary {
+  background: var(--button-secondary);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.theme-button-secondary:hover {
+  background: var(--button-secondary-hover);
+}
+
+.theme-button-danger {
+  background: var(--gradient-danger);
+  color: white;
+  border: none;
+}
+
+.theme-text-primary {
+  color: var(--primary);
+}
+
+.theme-text-muted {
+  color: var(--muted-foreground);
+}
+
+.theme-text-success {
+  color: var(--success);
+}
+
+.theme-text-warning {
+  color: var(--warning);
+}
+
+.theme-text-danger {
+  color: var(--danger);
+}
+
+.theme-accent {
+  color: var(--accent);
+}
+
+.theme-border {
+  border-color: var(--border);
+}
+
+.theme-input {
+  background: var(--input);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.theme-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* === Legacy Support (for backwards compatibility) === */
+body {
+  --background: var(--slate-50);
+  --foreground: var(--primary);
+}
+
+.dark:root {
+  /* Dark theme would go here if needed in the future */
+  --background: var(--slate-900);
+  --foreground: var(--slate-100);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    /* Auto dark theme detection - disabled for now to match original */
+    /* Original uses light theme only */
+  }
+}
+
+body {
+  font-family: var(--font-primary);
+  line-height: 1.6;
+  color: var(--foreground);
+  background: var(--gradient-background);
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Ensure dark mode transitions work properly */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ===== PRINT CSS OPTIMIZATION FOR A4 PAPER ===== */
+@media print {
+  /* A4 page setup with optimal margins */
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
+    
+    /* Page headers and footers */
+    @top-center {
+      content: "Payment Analysis Report";
+      font-size: 10pt;
+      color: #64748b;
+    }
+    
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 9pt;
+      color: #64748b;
+    }
+  }
+  
+  /* Reset for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  /* Base print styles */
+  html {
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: black !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  }
+  
+  /* Hide non-printable elements */
+  .no-print,
+  .no-print *,
+  nav,
+  .navigation,
+  .sidebar,
+  button:not(.print-keep),
+  .modal,
+  .dropdown,
+  .tooltip,
+  .floating,
+  .sticky,
+  .fixed {
+    display: none !important;
+  }
+  
+  /* Main content optimization */
+  .print-section,
+  .printable {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Page break control */
+  .page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+  
+  .page-break-after {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+  
+  .avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  .avoid-break-before {
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+  }
+  
+  .avoid-break-after {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+  
+  /* Typography optimization */
+  h1 {
+    font-size: 20pt !important;
+    font-weight: bold !important;
+    color: #1e293b !important;
+    margin: 0 0 16pt 0 !important;
+    page-break-after: avoid !important;
+  }
+  
+  h2 {
+    font-size: 16pt !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin: 16pt 0 12pt 0 !important;
+    page-break-after: avoid !important;
+  }
+  
+  h3 {
+    font-size: 14pt !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin: 12pt 0 8pt 0 !important;
+    page-break-after: avoid !important;
+  }
+  
+  p {
+    margin: 0 0 8pt 0 !important;
+    line-height: 1.4 !important;
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+  
+  /* Table optimization for financial reports */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 1px solid #e2e8f0 !important;
+    margin: 8pt 0 16pt 0 !important;
+    font-size: 9pt !important;
+    page-break-inside: auto !important;
+  }
+  
+  thead {
+    display: table-header-group !important;
+    background: #f8fafc !important;
+    font-weight: 600 !important;
+  }
+  
+  tbody {
+    display: table-row-group !important;
+  }
+  
+  tfoot {
+    display: table-footer-group !important;
+    background: #f1f5f9 !important;
+    font-weight: 600 !important;
+    border-top: 2px solid #334155 !important;
+  }
+  
+  th,
+  td {
+    padding: 6pt 4pt !important;
+    border: 1px solid #e2e8f0 !important;
+    text-align: left !important;
+    vertical-align: top !important;
+  }
+  
+  th {
+    background: #f8fafc !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    font-size: 8pt !important;
+  }
+  
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  /* Zebra striping for readability */
+  tbody tr:nth-child(even) {
+    background: #f8fafc !important;
+  }
+  
+  /* Financial data styling */
+  .currency,
+  .money,
+  .amount {
+    text-align: right !important;
+    font-family: 'Courier New', monospace !important;
+    font-weight: 500 !important;
+  }
+  
+  .positive {
+    color: #059669 !important;
+  }
+  
+  .negative {
+    color: #dc2626 !important;
+  }
+  
+  /* Card and section styling */
+  .card,
+  .section {
+    margin: 0 0 16pt 0 !important;
+    padding: 8pt !important;
+    border: 1px solid #e2e8f0 !important;
+    background: white !important;
+    page-break-inside: avoid !important;
+  }
+  
+  /* Charts and images */
+  img,
+  svg,
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+  }
+  
+  /* Chart containers */
+  .chart-container {
+    page-break-inside: avoid !important;
+    margin: 8pt 0 !important;
+  }
+  
+  /* KPI and stats styling */
+  .kpi-card,
+  .stat-card {
+    display: inline-block !important;
+    width: 48% !important;
+    margin: 0 1% 8pt 0 !important;
+    padding: 6pt !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #f8fafc !important;
+    text-align: center !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .kpi-value {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+    color: #1e293b !important;
+  }
+  
+  .kpi-label {
+    font-size: 8pt !important;
+    color: #64748b !important;
+    margin-top: 2pt !important;
+  }
+  
+  /* Layout optimization */
+  .grid {
+    display: block !important;
+  }
+  
+  .grid > * {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 8pt !important;
+  }
+  
+  /* Flexbox fallbacks */
+  .flex {
+    display: block !important;
+  }
+  
+  .flex-col {
+    display: block !important;
+  }
+  
+  .flex-row {
+    display: block !important;
+  }
+  
+  /* Badge and status indicators */
+  .badge,
+  .status-badge {
+    padding: 2pt 4pt !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0 !important;
+    font-size: 8pt !important;
+    font-weight: 500 !important;
+  }
+  
+  .status-complete {
+    background: #f0fdf4 !important;
+    color: #166534 !important;
+    border-color: #bbf7d0 !important;
+  }
+  
+  .status-pending {
+    background: #fffbeb !important;
+    color: #92400e !important;
+    border-color: #fed7aa !important;
+  }
+  
+  .status-error {
+    background: #fef2f2 !important;
+    color: #991b1b !important;
+    border-color: #fca5a5 !important;
+  }
+  
+  /* Summary sections */
+  .summary-section {
+    margin: 16pt 0 !important;
+    padding: 8pt !important;
+    border: 2px solid #1e293b !important;
+    background: #f8fafc !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .summary-title {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+    color: #1e293b !important;
+    margin: 0 0 8pt 0 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 4pt !important;
+  }
+  
+  /* Footer information */
+  .print-footer {
+    position: fixed !important;
+    bottom: 10mm !important;
+    left: 0 !important;
+    right: 0 !important;
+    text-align: center !important;
+    font-size: 8pt !important;
+    color: #64748b !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding-top: 4pt !important;
+    background: white !important;
+  }
+  
+  /* Hide interactive elements */
+  a[href]:after {
+    content: none !important;
+  }
+  
+  /* Optimize specific components */
+  .calendar {
+    page-break-inside: avoid !important;
+    font-size: 8pt !important;
+  }
+  
+  .calendar-day {
+    width: auto !important;
+    height: auto !important;
+    padding: 2pt !important;
+  }
+  
+  /* Reports specific styling */
+  .report-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    color: white !important;
+    padding: 12pt !important;
+    margin: 0 0 16pt 0 !important;
+    page-break-after: avoid !important;
+  }
+  
+  .report-title {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    margin: 0 0 8pt 0 !important;
+  }
+  
+  .report-subtitle {
+    font-size: 12pt !important;
+    opacity: 0.9 !important;
+    margin: 0 !important;
+  }
+  
+  /* Analysis breakdown table */
+  .analysis-table {
+    width: 100% !important;
+    font-size: 8pt !important;
+  }
+  
+  .analysis-table th {
+    font-size: 7pt !important;
+    padding: 4pt 3pt !important;
+  }
+  
+  .analysis-table td {
+    padding: 4pt 3pt !important;
+  }
+  
+  /* Compact view optimizations */
+  .compact-view table {
+    font-size: 7pt !important;
+  }
+  
+  .compact-view th,
+  .compact-view td {
+    padding: 2pt !important;
+  }
+  
+  /* Ensure proper contrast */
+  .text-slate-900 {
+    color: #0f172a !important;
+  }
+  
+  .text-slate-600 {
+    color: #475569 !important;
+  }
+  
+  .text-blue-600 {
+    color: #2563eb !important;
+  }
+  
+  .text-green-600 {
+    color: #059669 !important;
+  }
+  
+  .text-red-600 {
+    color: #dc2626 !important;
+  }
+  
+  /* Background overrides for print */
+  .bg-slate-50,
+  .bg-gray-50,
+  .bg-blue-50,
+  .bg-green-50 {
+    background: #f8fafc !important;
+  }
+  
+  .bg-white {
+    background: white !important;
+  }
+  
+  /* Border optimizations */
+  .border,
+  .border-slate-200,
+  .border-gray-200 {
+    border-color: #e2e8f0 !important;
+  }
+  
+  /* Shadow overrides */
+  .shadow,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Prevent page breaks */
+  .kpi-card,
+  .report-header,
+  .settlement-breakdown {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Ensure spacing */
+  .mb-2 {
+    margin-bottom: 4pt !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 6pt !important;
+  }
+  
+  .mt-4 {
+    margin-top: 6pt !important;
+  }
+}
+
+/* === Enhanced Report Styling === */
+.kpi-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kpi-card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  transition: all 0.3s ease;
+}
+
+.report-header::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}

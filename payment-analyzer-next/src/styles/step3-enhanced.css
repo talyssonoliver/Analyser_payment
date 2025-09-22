@@ -1,0 +1,700 @@
+/**
+ * Step 3 Enhanced Styles
+ * Matching original HTML exactly
+ */
+
+/* === Analyze Section Base === */
+.analyze-section {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.analyze-section.active {
+  display: block;
+}
+
+.analyze-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* === Analyze Header === */
+.analyze-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.analyze-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--slate-900, #0f172a);
+  margin-bottom: 8px;
+}
+
+.analyze-subtitle {
+  font-size: 1rem;
+  color: var(--slate-600, #475569);
+  margin-bottom: 0;
+}
+
+/* === Empty State === */
+.empty-analysis-state {
+  text-align: center;
+  padding: 48px 16px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--slate-200, #e2e8f0);
+  margin: 24px 0;
+}
+
+.empty-analysis-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-analysis-message {
+  color: var(--slate-500, #64748b);
+  margin-bottom: 24px;
+  font-size: 1.125rem;
+}
+
+/* === Analysis Summary Section === */
+.analysis-summary {
+  margin: 24px 0;
+  padding: 24px;
+  background: white;
+  border: 1px solid var(--slate-200, #e2e8f0);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.summary-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--slate-900, #0f172a);
+  margin-bottom: 20px;
+}
+
+/* === Enhanced Summary Cards (5 Cards) === */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.preview-card.enhanced {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--slate-200, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.preview-card.enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: var(--accent, #3b82f6);
+}
+
+.preview-card.enhanced.positive {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-color: #22c55e;
+}
+
+.preview-card.enhanced.negative {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: #ef4444;
+}
+
+.preview-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.preview-card .card-icon {
+  font-size: 1.5rem;
+}
+
+.preview-card .card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--slate-700, #334155);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preview-card .card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--slate-900, #0f172a);
+  margin-bottom: 4px;
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Cascadia Code', monospace);
+}
+
+.preview-card.positive .card-value {
+  color: #16a34a;
+}
+
+.preview-card.negative .card-value {
+  color: #dc2626;
+}
+
+.preview-card .card-subtitle {
+  font-size: 0.75rem;
+  color: var(--slate-500, #64748b);
+  font-weight: 500;
+}
+
+/* === Week Data Summary Section === */
+.week-data-summary {
+  margin: 32px 0;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid var(--slate-200, #e2e8f0);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.week-summary-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--slate-900, #0f172a);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.week-summary-title::before {
+  content: '📅';
+  font-size: 1.125rem;
+}
+
+/* === Week Summary Container === */
+.week-summary-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* === Week Group === */
+.week-group {
+  background: white;
+  border: 1px solid var(--slate-200, #e2e8f0);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.week-group:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* === Week Header (Clickable) === */
+.week-header {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-bottom: 1px solid var(--slate-200, #e2e8f0);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.week-header:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+}
+
+.week-header.expanded {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-bottom-color: var(--accent, #3b82f6);
+}
+
+.week-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.week-info {
+  flex: 1;
+}
+
+.week-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--slate-900, #0f172a);
+  margin-bottom: 4px;
+}
+
+.week-date-range {
+  font-size: 0.875rem;
+  color: var(--slate-600, #475569);
+  font-weight: 500;
+}
+
+.week-summary-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 16px;
+}
+
+/* === Week Badge === */
+.week-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Cascadia Code', monospace);
+}
+
+.week-badge.positive {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #166534;
+  border: 1px solid #22c55e;
+}
+
+.week-badge.negative {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+/* === Week Toggle Icon === */
+.week-toggle-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate-500, #64748b);
+  transition: transform 0.3s ease;
+}
+
+.week-toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* === Week Content (Collapsible) === */
+.week-content {
+  display: none;
+  overflow: hidden;
+}
+
+/* Remove CSS class-based expansion - use direct style manipulation like original */
+/* This matches exactly how the original HTML works */
+
+/* === Week Days List === */
+.week-days-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* === Enhanced Daily Cards === */
+.step2-entry-card.enhanced-daily-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--slate-200, #e2e8f0);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.step2-entry-card.enhanced-daily-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.step2-entry-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--slate-100, #f1f5f9);
+}
+
+.day-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--slate-900, #0f172a);
+}
+
+.day-date {
+  font-size: 0.875rem;
+  color: var(--slate-600, #475569);
+  font-weight: 500;
+}
+
+/* === Status Badge === */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge.positive {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #166534;
+  border: 1px solid #22c55e;
+}
+
+.status-badge.negative {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+/* === Amounts Section === */
+.amounts-section {
+  margin-bottom: 16px;
+}
+
+.amount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 0.9rem;
+}
+
+.amount-label {
+  font-weight: 500;
+  color: var(--slate-700, #334155);
+}
+
+.amount-value {
+  font-weight: 700;
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Cascadia Code', monospace);
+  color: var(--slate-900, #0f172a);
+}
+
+.amount-row.difference {
+  border-top: 1px solid var(--slate-200, #e2e8f0);
+  margin-top: 8px;
+  padding-top: 12px;
+  font-size: 1rem;
+}
+
+.amount-row.difference.positive .amount-value {
+  color: #16a34a;
+}
+
+.amount-row.difference.negative .amount-value {
+  color: #dc2626;
+}
+
+/* === Breakdown Section === */
+.breakdown-section {
+  padding-top: 12px;
+  border-top: 1px solid var(--slate-100, #f1f5f9);
+}
+
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.breakdown-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.breakdown-label {
+  font-size: 0.75rem;
+  color: var(--slate-500, #64748b);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.breakdown-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--slate-900, #0f172a);
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Cascadia Code', monospace);
+}
+
+.bonus-tooltip-trigger {
+  cursor: help;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+/* === Week Totals === */
+.week-totals {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 8px;
+  border-top: 1px solid var(--slate-200, #e2e8f0);
+}
+
+.week-totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.total-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--slate-200, #e2e8f0);
+}
+
+.total-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--slate-700, #334155);
+}
+
+.total-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--slate-900, #0f172a);
+  font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Cascadia Code', monospace);
+}
+
+/* === Week Report Button === */
+.week-report-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--accent, #3b82f6) 0%, var(--accent-dark, #2563eb) 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.week-report-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.week-report-btn:active {
+  transform: translateY(0);
+}
+
+/* === Analysis Actions === */
+.analysis-actions-container {
+  margin: 32px 0;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* === Buttons === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent, #3b82f6) 0%, var(--accent-dark, #2563eb) 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--slate-700, #334155);
+  border: 1px solid var(--slate-300, #cbd5e1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:hover {
+  background: var(--slate-50, #f8fafc);
+  border-color: var(--slate-400, #94a3b8);
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 1rem;
+}
+
+.btn-text {
+  font-size: inherit;
+}
+
+/* === Week Empty State === */
+.week-empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--slate-500, #64748b);
+}
+
+.week-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.week-empty-message {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--slate-700, #334155);
+}
+
+.week-empty-subtitle {
+  font-size: 0.875rem;
+  color: var(--slate-500, #64748b);
+}
+
+/* === Responsive Design === */
+@media (max-width: 640px) {
+  .analyze-section {
+    padding: 12px;
+  }
+  
+  .analysis-summary,
+  .week-data-summary {
+    margin: 16px 0;
+    padding: 16px;
+  }
+  
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .preview-card.enhanced {
+    padding: 16px;
+  }
+  
+  .preview-card .card-value {
+    font-size: 1.25rem;
+  }
+  
+  .week-header {
+    padding: 12px 16px;
+  }
+  
+  .week-title {
+    font-size: 1rem;
+  }
+  
+  .week-date-range {
+    font-size: 0.75rem;
+  }
+  
+  .week-days-list {
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .step2-entry-card.enhanced-daily-card {
+    padding: 12px;
+  }
+  
+  .breakdown-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .week-totals-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .analysis-actions-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (min-width: 768px) {
+  .preview-card.enhanced {
+    padding: 24px;
+  }
+  
+  .week-header-content {
+    align-items: flex-start;
+  }
+  
+  .week-info {
+    flex: 1;
+  }
+}
+
+/* === Animations === */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* === CSS Variables for Compatibility === */
+:root {
+  --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+  --accent: #3b82f6;
+  --accent-dark: #2563eb;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+}
