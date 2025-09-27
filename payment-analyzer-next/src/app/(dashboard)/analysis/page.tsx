@@ -12,7 +12,7 @@ import { ManualEntry } from '@/components/analysis/manual-entry';
 import { WorkflowCards } from '@/components/analysis/workflow-cards';
 import { EntryCards } from '@/components/analysis/entry-cards';
 import { Step3AnalyzeSectionV2 } from '@/components/analysis/step3-analyze-section-v2';
-import { LegacyUploadArea } from '@/components/analysis/legacy-upload-area';
+import { FileUpload } from '@/components/analysis/file-upload';
 import { ValidationSystem } from '@/components/analysis/validation-badge-system';
 import { ProgressOverlay, useProgressOverlay } from '@/components/analysis/progress-overlay';
 import { RecoveryBanner } from '@/components/ui/recovery-banner';
@@ -1347,12 +1347,13 @@ export default function AnalysisPage() {
             </div>
           </div>
 
-          {/* Legacy Upload Area */}
-          <LegacyUploadArea
+          {/* File Upload Area */}
+          <FileUpload
             onFilesSelected={handleFilesUploaded}
             maxFiles={50}
             maxSizePerFile={50 * 1024 * 1024} // 50MB
             acceptedTypes={['.pdf']}
+            showProgressSimulation={true}
           />
 
           {/* Manual Entry Modal */}
