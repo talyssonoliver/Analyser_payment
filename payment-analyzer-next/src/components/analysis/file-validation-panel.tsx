@@ -5,13 +5,13 @@
 
 'use client';
 
-import React from 'react';
-import { 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Info, 
-  FileText as FileError, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Info,
+  FileText as FileError,
   Clock,
   RefreshCw
 } from 'lucide-react';
@@ -20,6 +20,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ValidationResult } from '@/lib/domain/services/file-validation-service';
+import { FileFingerprintService, FileComparison, FingerprintValidation } from '@/lib/services/file-fingerprint-service';
 
 export interface FileValidationPanelProps {
   validationResult: ValidationResult | null;
@@ -27,6 +28,10 @@ export interface FileValidationPanelProps {
   onRetryValidation?: () => void;
   onFixIssue?: (issueType: string, data?: unknown) => void;
   className?: string;
+  // New props for fingerprint functionality
+  files?: File[];
+  showFingerprintDetails?: boolean;
+  onFingerprintValidationComplete?: (validation: FingerprintValidation) => void;
 }
 
 export function FileValidationPanel({
@@ -34,9 +39,98 @@ export function FileValidationPanel({
   isValidating = false,
   onRetryValidation,
   onFixIssue,
-  className = ''
+  className = '',
+  files = [],
+  showFingerprintDetails = false,
+  onFingerprintValidationComplete
 }: FileValidationPanelProps) {
-  if (isValidating) {
+  // State for fingerprint validation
+  const [fingerprintValidation, setFingerprintValidation] = useState<FingerprintValidation | null>(null);
+  const [fingerprintLoading, setFingerprintLoading] = useState(false);
+  const [fileComparisons, setFileComparisons] = useState<Record<string, FileComparison>>({});
+
+  // Fingerprint validation effect
+  useEffect(() => {
+    const validateFingerprints = async () => {
+      if (files.length === 0) return;
+
+      try {
+        setFingerprintLoading(true);
+        const validation = await FileFingerprintService.validateFileSet(files);
+        setFingerprintValidation(validation);
+        onFingerprintValidationComplete?.(validation);
+
+        // Generate individual file comparisons for detailed display
+        const comparisons: Record<string, FileComparison> = {};
+        for (const file of files) {
+          const comparison = await FileFingerprintService.compareWithExisting(file);
+          const key = `${file.name}-${file.size}-${file.lastModified}`;
+          comparisons[key] = comparison;
+        }
+        setFileComparisons(comparisons);
+
+      } catch (error) {
+        console.error('Fingerprint validation failed:', error);
+        setFingerprintValidation(null);
+      } finally {
+        setFingerprintLoading(false);
+      }
+    };
+
+    if (files.length > 0) {
+      validateFingerprints();
+    }
+  }, [files, onFingerprintValidationComplete]);
+
+  // Get individual file fingerprint indicator
+  const getFileIndicator = useCallback((file: File) => {
+    const key = `${file.name}-${file.size}-${file.lastModified}`;
+    const comparison = fileComparisons[key];
+
+    if (!comparison) {
+      return {
+        variant: 'secondary' as const,
+        icon: '⏳',
+        text: 'Checking...',
+        description: 'Analyzing file fingerprint'
+      };
+    }
+
+    if (comparison.isDuplicate) {
+      return {
+        variant: 'error' as const,
+        icon: '🔄',
+        text: 'Duplicate',
+        description: 'This file was already processed'
+      };
+    }
+
+    if (comparison.hasChanged) {
+      return {
+        variant: 'warning' as const,
+        icon: '📝',
+        text: 'Modified',
+        description: `File has been ${comparison.changeType || 'changed'} since last analysis`
+      };
+    }
+
+    if (comparison.previousFingerprint) {
+      return {
+        variant: 'success' as const,
+        icon: '✅',
+        text: 'Unchanged',
+        description: 'File matches previous analysis'
+      };
+    }
+
+    return {
+      variant: 'default' as const,
+      icon: '🆕',
+      text: 'New',
+      description: 'First time processing this file'
+    };
+  }, [fileComparisons]);
+  if (isValidating || fingerprintLoading) {
     return (
       <Card className={`border-blue-200 bg-blue-50 ${className}`}>
         <div className="p-4">
@@ -44,38 +138,55 @@ export function FileValidationPanel({
             <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
             <div>
               <h3 className="font-semibold text-blue-900">
-                Validating Files...
+                {isValidating ? 'Validating Files...' : 'Analyzing File Fingerprints...'}
               </h3>
               <p className="text-sm text-blue-700 mt-1">
                 Checking file integrity, updates, and duplicates
               </p>
             </div>
           </div>
-          <Progress value={75} className="mt-3 h-2" />
+          <Progress value={fingerprintLoading ? 50 : 75} className="mt-3 h-2" />
         </div>
       </Card>
     );
   }
 
-  if (!validationResult) return null;
+  if (!validationResult && !fingerprintValidation) return null;
 
-  const { isValid, errors, warnings, isUpdated, duplicateFiles, existingAnalysis } = validationResult;
+  // Merge validation results - prioritize validationResult if available
+  const mergedValidation = validationResult || {
+    isValid: fingerprintValidation?.isValid ?? true,
+    errors: fingerprintValidation?.errors ?? [],
+    warnings: fingerprintValidation?.warnings ?? [],
+    isUpdated: false,
+    duplicateFiles: [],
+    existingAnalysis: null
+  };
+
+  const { isValid, errors, warnings, isUpdated, duplicateFiles, existingAnalysis } = mergedValidation;
+
+  // Include fingerprint-specific issues
+  const hasFingerprint = fingerprintValidation !== null;
+  const fingerprintDuplicates = fingerprintValidation?.duplicates ?? [];
+  const allDuplicates = [...(duplicateFiles || []), ...fingerprintDuplicates.map(d => d.current)];
+  const hasFingerprintIssues = fingerprintDuplicates.length > 0 || (fingerprintValidation?.warnings?.length || 0) > 0;
+  const combinedWarnings = [...warnings, ...(fingerprintValidation?.warnings || [])];
 
   const getStatusIcon = () => {
     if (!isValid) return <XCircle className="w-5 h-5 text-red-600" />;
-    if (warnings.length > 0 || isUpdated) return <AlertTriangle className="w-5 h-5 text-amber-600" />;
+    if (combinedWarnings.length > 0 || isUpdated || hasFingerprintIssues) return <AlertTriangle className="w-5 h-5 text-amber-600" />;
     return <CheckCircle className="w-5 h-5 text-green-600" />;
   };
 
   const getStatusText = () => {
     if (!isValid) return 'Validation Failed';
-    if (warnings.length > 0 || isUpdated) return 'Validation Passed with Warnings';
+    if (combinedWarnings.length > 0 || isUpdated || hasFingerprintIssues) return 'Validation Passed with Warnings';
     return 'Validation Passed';
   };
 
   const getStatusColor = () => {
     if (!isValid) return 'red';
-    if (warnings.length > 0 || isUpdated) return 'amber';
+    if (combinedWarnings.length > 0 || isUpdated || hasFingerprintIssues) return 'amber';
     return 'green';
   };
 
@@ -145,16 +256,16 @@ export function FileValidationPanel({
         )}
 
         {/* Warnings */}
-        {warnings.length > 0 && (
+        {combinedWarnings.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
               <span className="font-medium text-amber-900">
-                Warnings ({warnings.length})
+                Warnings ({combinedWarnings.length})
               </span>
             </div>
             <div className="space-y-2">
-              {warnings.map((warning, index) => (
+              {combinedWarnings.map((warning, index) => (
                 <div
                   key={index}
                   className="bg-amber-100 border border-amber-200 rounded-lg p-3"
@@ -215,43 +326,59 @@ export function FileValidationPanel({
           </div>
         )}
 
-        {/* Duplicate Files */}
-        {duplicateFiles && duplicateFiles.length > 0 && (
+        {/* Duplicate Files - Enhanced with fingerprint data */}
+        {allDuplicates && allDuplicates.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
               <FileError className="w-4 h-4 text-orange-600" />
               <span className="font-medium text-orange-900">
-                Duplicate Files ({duplicateFiles.length})
+                Duplicate Files ({allDuplicates.length})
               </span>
             </div>
             <div className="space-y-2">
-              {duplicateFiles.map((file, index) => (
-                <div
-                  key={index}
-                  className="bg-orange-100 border border-orange-200 rounded-lg p-3"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="text-sm text-orange-800 font-medium">
-                        {file.name}
-                      </span>
-                      <p className="text-xs text-orange-600 mt-1">
-                        {formatFileSize(file.size)} • Modified {new Date(file.lastModified).toLocaleDateString()}
-                      </p>
+              {allDuplicates.map((file, index) => {
+                // Find corresponding fingerprint duplicate info
+                const fingerprintDup = fingerprintDuplicates.find(d => d.current.name === file.name);
+                return (
+                  <div
+                    key={index}
+                    className="bg-orange-100 border border-orange-200 rounded-lg p-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm text-orange-800 font-medium">
+                            {file.name}
+                          </span>
+                          {fingerprintDup && (
+                            <Badge variant="secondary" className="text-xs">
+                              {fingerprintDup.type}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-orange-600">
+                          {formatFileSize(file.size)} • Modified {new Date(file.lastModified).toLocaleDateString()}
+                        </p>
+                        {fingerprintDup?.existing && (
+                          <p className="text-xs text-orange-500 mt-1">
+                            Previously processed: {new Date(fingerprintDup.existing.processedAt).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      {onFixIssue && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onFixIssue('duplicate', file)}
+                          className="text-orange-600 hover:text-orange-700 hover:bg-orange-200 ml-2"
+                        >
+                          Remove
+                        </Button>
+                      )}
                     </div>
-                    {onFixIssue && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onFixIssue('duplicate', file)}
-                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-200 ml-2"
-                      >
-                        Remove
-                      </Button>
-                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -290,12 +417,60 @@ export function FileValidationPanel({
           </div>
         )}
 
+        {/* Fingerprint Analysis Details */}
+        {showFingerprintDetails && files.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Info className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-blue-900">
+                File Analysis Details ({files.length})
+              </span>
+            </div>
+            <div className="space-y-2">
+              {files.map((file, index) => {
+                const indicator = getFileIndicator(file);
+                const key = `${file.name}-${file.size}-${file.lastModified}`;
+                const comparison = fileComparisons[key];
+
+                return (
+                  <div
+                    key={index}
+                    className="bg-slate-50 border border-slate-200 rounded-lg p-3"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-slate-900">
+                            {file.name}
+                          </span>
+                          <Badge variant={indicator.variant} className="text-xs">
+                            <span className="mr-1">{indicator.icon}</span>
+                            {indicator.text}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-600">
+                          {indicator.description}
+                        </p>
+                        {comparison?.previousFingerprint && (
+                          <p className="text-xs text-slate-500 mt-1">
+                            Last seen: {new Date(comparison.previousFingerprint.processedAt).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Success State */}
-        {isValid && warnings.length === 0 && !isUpdated && (
+        {isValid && combinedWarnings.length === 0 && !isUpdated && !hasFingerprintIssues && (
           <div className="flex items-center gap-2 text-green-800">
             <CheckCircle className="w-4 h-4" />
             <span className="text-sm font-medium">
-              All files passed validation successfully
+              All files passed validation and fingerprint analysis successfully
             </span>
           </div>
         )}

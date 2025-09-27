@@ -17,7 +17,6 @@ import { ValidationSystem } from '@/components/analysis/validation-badge-system'
 import { ProgressOverlay, useProgressOverlay } from '@/components/analysis/progress-overlay';
 import { RecoveryBanner } from '@/components/ui/recovery-banner';
 import { FileValidationPanel } from '@/components/analysis/file-validation-panel';
-import { FileUpdateDetector, FileUpdateInfo } from '@/components/analysis/file-update-detector';
 import { InlineReportModal } from '@/components/analysis/inline-report-modal';
 import { SessionRecoveryService, RecoveryBanner as RecoveryBannerType } from '@/lib/services/session-recovery-service';
 import { FileFingerprintService } from '@/lib/services/file-fingerprint-service';
@@ -81,7 +80,6 @@ export default function AnalysisPage() {
   // File validation state
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
-  const [fileUpdates, setFileUpdates] = useState<FileUpdateInfo[]>([]);
   
   // Step management
   const {
@@ -603,19 +601,7 @@ export default function AnalysisPage() {
       
       setValidationResult(validation);
       
-      // Check for file updates and create update objects
-      if (validation.isUpdated) {
-        // This would be populated with actual update information
-        // For now, create a basic structure
-        const updates = uploadedFiles.map(file => ({
-          fileName: file.name,
-          lastModified: file.lastModified - (24 * 60 * 60 * 1000), // Mock previous date
-          currentModified: file.lastModified,
-          analysisId: 'mock-analysis-id',
-          analysisName: 'Previous Analysis'
-        }));
-        setFileUpdates(updates);
-      }
+      // File updates are now handled by the enhanced FileValidationPanel
       
     } catch (error) {
       console.error('File validation failed:', error);
@@ -638,19 +624,7 @@ export default function AnalysisPage() {
       
       setValidationResult(validation);
       
-      // Check for file updates and create update objects
-      if (validation.isUpdated) {
-        // This would be populated with actual update information
-        // For now, create a basic structure
-        const updates = filesToValidate.map(file => ({
-          fileName: file.name,
-          lastModified: file.lastModified - (24 * 60 * 60 * 1000), // Mock previous date
-          currentModified: file.lastModified,
-          analysisId: 'mock-analysis-id',
-          analysisName: 'Previous Analysis'
-        }));
-        setFileUpdates(updates);
-      }
+      // File updates are now handled by the enhanced FileValidationPanel
       
     } catch (error) {
       console.error('File validation failed:', error);
@@ -1226,29 +1200,24 @@ export default function AnalysisPage() {
           </div>
         )}
 
-        {/* File Update Detector */}
-        {fileUpdates.length > 0 && (
-          <FileUpdateDetector
-            updates={fileUpdates}
-            onUpdateFile={(fileName, analysisId) => {
-              toast.info(`Updating ${fileName} from analysis ${analysisId}`);
-              // Implement actual update logic here
-            }}
-            onIgnoreUpdates={() => {
-              setFileUpdates([]);
-              toast.info('File updates ignored');
-            }}
-            onDismiss={() => setFileUpdates([])}
-            className="mb-6"
-          />
-        )}
 
         {/* File Validation Panel */}
-        {(uploadedFiles.length > 0 && validationResult) && (
+        {uploadedFiles.length > 0 && (
           <FileValidationPanel
             validationResult={validationResult}
             isValidating={isValidating}
+            files={uploadedFiles}
+            showFingerprintDetails={true}
             onRetryValidation={() => handleFileValidationForFiles(uploadedFiles)}
+            onFingerprintValidationComplete={(validation) => {
+              // Handle fingerprint validation completion
+              if (!validation.isValid) {
+                validation.errors.forEach(error => toast.error(error));
+              }
+              if (validation.warnings.length > 0) {
+                validation.warnings.forEach(warning => toast.warning(warning));
+              }
+            }}
             onFixIssue={(issueType, data) => {
               switch (issueType) {
                 case 'update':
