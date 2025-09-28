@@ -39,7 +39,6 @@
 
 .legacy-step2 .validate-header {
   text-align: center;
-  margin-bottom: 32px;
 }
 
 .legacy-step2 .validate-title {
@@ -230,7 +229,6 @@
   padding: 24px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 32px;
   animation: slideIn 0.3s ease;
 }
 
@@ -385,7 +383,6 @@
 /* Files Section */
 .legacy-step2 .files-section {
     animation: slideIn 0.3s ease;
-    margin-bottom: 32px;
 }
 
 .legacy-step2 .files-header {

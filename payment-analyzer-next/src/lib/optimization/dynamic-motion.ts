@@ -49,20 +49,24 @@ export const loadFramerMotion = async () => {
   return { motion, AnimatePresence };
 };
 
-// Fallback components for SSR and loading states  
-export const StaticDiv = (props: MotionDivProps = {} as MotionDivProps) => {
-  // Only extract the props we want to pass to DOM, ignore everything else
-  const { children, className, style, onClick } = props;
-  
-  // Create div with only standard DOM props - ignore all motion props
-  return React.createElement('div', { 
-    className, 
-    style, 
-    onClick 
+// Fallback components for SSR and loading states
+export const StaticDiv: React.FC<MotionDivProps> = ({
+  children,
+  className,
+  style,
+  onClick,
+  ...rest
+} = {}) => {
+  // Return a regular div, ignoring all motion props
+  return React.createElement('div', {
+    className,
+    style,
+    onClick
   }, children);
 };
 
-export const StaticPresence = (props: AnimatePresenceProps = {} as AnimatePresenceProps) => {
-  const { children } = props;
+export const StaticPresence: ComponentType<AnimatePresenceProps> = ({
+  children
+} = {}) => {
   return React.createElement(React.Fragment, null, children);
 };

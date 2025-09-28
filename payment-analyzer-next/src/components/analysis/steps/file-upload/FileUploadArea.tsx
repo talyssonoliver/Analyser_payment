@@ -6,11 +6,6 @@
 'use client';
 
 import { useEffect, ComponentType, useState } from 'react';
-import {
-  loadFramerMotion,
-  StaticDiv,
-  type MotionDivProps,
-} from '@/lib/optimization/dynamic-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatFileSize } from '@/lib/utils';
@@ -32,15 +27,12 @@ export function FileUploadArea({
   onFileInputChange,
   isProcessing,
 }: FileUploadAreaProps) {
-  // Dynamic motion loading
-  const [MotionDiv, setMotionDiv] = useState<ComponentType<MotionDivProps>>(StaticDiv);
-
-  useEffect(() => {
-    // Load framer-motion only when component mounts and user might interact
-    loadFramerMotion().then(({ motion }) => {
-      setMotionDiv(motion.div as ComponentType<MotionDivProps>);
-    });
-  }, []);
+  // Simple motion component - just use a regular div for now
+  const MotionDiv = ({ children, className, animate, transition, ...props }: any) => (
+    <div className={className} {...props}>
+      {children}
+    </div>
+  );
 
   return (
     <Card

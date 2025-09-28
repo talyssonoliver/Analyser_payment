@@ -21,6 +21,7 @@ export interface FileUploadProps {
   readonly isProcessing?: boolean;
   readonly className?: string;
   readonly showProgressSimulation?: boolean;
+  readonly hideMethodToggle?: boolean;
 }
 
 export interface FileUploadAreaProps {

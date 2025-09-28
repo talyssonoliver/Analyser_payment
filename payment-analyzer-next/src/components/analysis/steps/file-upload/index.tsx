@@ -35,11 +35,12 @@ export function FileUpload({
   isProcessing = false,
   className,
   showProgressSimulation = false,
-}: FileUploadProps) {
+  hideMethodToggle = false,
+}: Readonly<FileUploadProps>) {
   // Use legacy prop if provided
   const effectiveMaxFileSize = maxSizePerFile || maxFileSize;
 
-  // Input method state for toggle functionality
+  // Input method state for toggle functionality - only if toggle is not hidden
   const [inputMethod, setInputMethod] = useState<InputMethod>('upload');
 
   // File upload hook integration
@@ -88,17 +89,19 @@ export function FileUpload({
 
   return (
     <div className={cn('space-y-6', className)}>
-      {/* Upload method toggle */}
-      <div className="flex justify-center">
-        <FileUploadMethods
-          activeMethod={inputMethod}
-          onMethodChange={handleMethodChange}
-          disabled={disabled || isProcessing}
-        />
-      </div>
+      {/* Upload method toggle - only show if not hidden */}
+      {!hideMethodToggle && (
+        <div className="flex justify-center">
+          <FileUploadMethods
+            activeMethod={inputMethod}
+            onMethodChange={handleMethodChange}
+            disabled={disabled || isProcessing}
+          />
+        </div>
+      )}
 
-      {/* Conditional rendering based on input method */}
-      {inputMethod === 'upload' && (
+      {/* Conditional rendering based on input method - or always show upload area if toggle is hidden */}
+      {(hideMethodToggle || inputMethod === 'upload') && (
         <div className="upload-section-enhanced space-y-4">
           {/* File upload area */}
           <FileUploadArea
@@ -129,7 +132,7 @@ export function FileUpload({
         </div>
       )}
 
-      {inputMethod === 'manual' && (
+      {!hideMethodToggle && inputMethod === 'manual' && (
         <div className="manual-entry-container">
           {/* Manual entry placeholder - would be implemented separately */}
           <div className="text-center py-12 text-slate-500">

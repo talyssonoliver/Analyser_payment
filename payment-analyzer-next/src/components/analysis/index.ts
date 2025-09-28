@@ -24,6 +24,11 @@ export { EntryCards } from './shared/entry-cards';
 export { WorkflowCards } from './shared/workflow-cards';
 export { Step3AnalyzeSectionV2 } from './shared/step3-analyze-section-v2';
 
+// Containers - Step container components
+export { Step1Container } from './containers/Step1Container';
+export { Step2Container } from './containers/Step2Container';
+export { Step3Container } from './containers/Step3Container';
+
 // Legacy exports removed - replaced with pure React components in results/
 
 // Types
