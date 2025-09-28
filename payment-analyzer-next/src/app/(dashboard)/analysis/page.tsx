@@ -216,30 +216,6 @@ export default function AnalysisPage() {
     }
   };
 
-  // File validation handler
-  const handleFileValidation = async () => {
-    if (uploadedFiles.length === 0) return;
-
-    setIsValidating(true);
-    try {
-      const validation = await fileValidationService.validateFiles(uploadedFiles, {
-        maxFileSize: 50 * 1024 * 1024, // 50MB
-        allowedTypes: ['application/pdf'],
-        checkForUpdates: true,
-        checkForDuplicates: true,
-      });
-
-      setValidationResult(validation);
-
-      // File updates are now handled by the enhanced FileValidationPanel
-
-    } catch (error) {
-      console.error('File validation failed:', error);
-      toast.error('File validation failed');
-    } finally {
-      setIsValidating(false);
-    }
-  };
 
   // File validation handler for specific files
   async function handleFileValidationForFiles(filesToValidate: File[]) {
