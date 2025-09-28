@@ -140,8 +140,7 @@ export function UpdateAnalysisDialog({
             <Label className="text-base font-semibold mb-2 block">Upload Files</Label>
             <FileUpload
               onFilesAdded={handleFilesSelected}
-              accept=".pdf"
-              multiple
+              acceptedTypes={['.pdf']}
               maxFiles={10}
             />
             {files.length > 0 && (

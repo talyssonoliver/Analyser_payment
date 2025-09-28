@@ -1419,8 +1419,6 @@ export default function AnalysisPage() {
             lastAnalysisData={step3AnalysisData}
             manualEntries={hookManualEntries}
             currentInputMethod={inputMethod}
-            hasBeenAnalyzed={isAnalysisComplete}
-            uploadedFiles={hookUploadedFiles}
             onSetStep={setStep}
             onStartNewAnalysis={handleStep3NewAnalysis}
             onViewDetailedReport={handleStep3ViewDetailedReport}

@@ -18,8 +18,6 @@ interface Step3Props {
   lastAnalysisData: AnalysisData | null;
   manualEntries: ManualEntry[];
   currentInputMethod: 'upload' | 'manual';
-  hasBeenAnalyzed: boolean;
-  uploadedFiles: File[];
 
   // Callbacks
   onSetStep: (step: number) => void;
@@ -34,8 +32,6 @@ export function Step3AnalyzeSectionV2({
   lastAnalysisData,
   manualEntries,
   currentInputMethod,
-  hasBeenAnalyzed,
-  uploadedFiles,
   onSetStep,
   onViewDetailedReport,
   onStartNewAnalysis,
@@ -140,32 +136,6 @@ export function Step3AnalyzeSectionV2({
     }
   }, [lastAnalysisData, router, getWeekStartDate, getWeekEndDate]);
 
-  // Handle week title navigation
-  const handleWeekTitleClick = useCallback((weekNumber: number, weekYear: number) => {
-    console.log(`📅 Week title clicked: Week ${weekNumber}, ${weekYear}`);
-
-    try {
-      // Create week info object
-      const weekInfo: WeekInfo = {
-        week: weekNumber,
-        year: weekYear
-      };
-
-      // Get analysis ID for navigation
-      const analysisId = lastAnalysisData?.id || undefined;
-
-      // Set return URL to current analysis page
-      const currentUrl = window.location.pathname + window.location.search;
-      weekNavigationService.setReturnUrl(currentUrl);
-
-      // Navigate to week-specific report
-      weekNavigationService.navigateToWeekReport(weekInfo, analysisId, router);
-    } catch (error) {
-      console.error('Failed to navigate to week report:', error);
-      // Fallback: show inline week report
-      handleViewWeekReport(weekNumber, weekYear, 0);
-    }
-  }, [lastAnalysisData, router, handleViewWeekReport]);
 
   // Handle week expand/collapse toggle
   const toggleWeek = useCallback((weekId: string) => {
@@ -181,15 +151,6 @@ export function Step3AnalyzeSectionV2({
     }
     setExpandedWeeks(newExpanded);
   }, [expandedWeeks]);
-
-  // Get week number of year
-  const getWeekOfYear = useCallback((date: Date): number => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-  }, []);
 
   // Empty state component
   const EmptyState = () => (
@@ -233,8 +194,6 @@ export function Step3AnalyzeSectionV2({
               <div className="week-data-summary">
                 <div className="weeks-container">
                   {weekGroups.map((week, index) => {
-                    const weekNumber = getWeekOfYear(week.weekStart);
-                    const weekYear = week.weekStart.getFullYear();
                     const weekId = `week-${index}`;
 
                     return (

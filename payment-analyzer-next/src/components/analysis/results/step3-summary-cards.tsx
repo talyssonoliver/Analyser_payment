@@ -4,22 +4,22 @@
  */
 
 import React from 'react';
-import { AnalysisData, GlobalState } from './types';
+import { AnalysisData } from './types';
 import { ManualEntry } from '@/types/core';
 
 interface Step3SummaryCardsProps {
-  analysisData: AnalysisData | null;
-  manualEntries: ManualEntry[];
-  currentInputMethod: 'upload' | 'manual';
+  readonly analysisData: AnalysisData | null;
+  readonly manualEntries: ManualEntry[];
+  readonly currentInputMethod: 'upload' | 'manual';
 }
 
 export function Step3SummaryCards({
   analysisData,
   manualEntries,
   currentInputMethod
-}: Step3SummaryCardsProps) {
+}: Readonly<Step3SummaryCardsProps>) {
   // If we have analysis results from file upload, use those
-  if (analysisData && analysisData.totals) {
+  if (analysisData?.totals) {
     const totals = analysisData.totals;
     const difference = (totals.paidTotal || 0) - (totals.expectedTotal || 0);
     const differenceClass = difference >= 0 ? 'positive' : 'negative';
