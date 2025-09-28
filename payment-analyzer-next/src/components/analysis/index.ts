@@ -27,5 +27,5 @@ export { Step3AnalyzeSectionV2 } from './shared/step3-analyze-section-v2';
 // Legacy exports removed - replaced with pure React components in results/
 
 // Types
-export type { UploadedFile } from './steps/file-upload';
+export type { UploadedFile } from '../../hooks/use-file-upload';
 export type { ManualEntryData } from './steps/manual-entry';

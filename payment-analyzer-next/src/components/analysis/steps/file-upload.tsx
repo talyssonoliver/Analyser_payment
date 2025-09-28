@@ -5,18 +5,18 @@
 
 'use client';
 
-import { useCallback, useState, useRef, useEffect, ComponentType, useMemo } from 'react';
-import { 
-  loadFramerMotion, 
-  StaticDiv, 
-  StaticPresence, 
-  type MotionDivProps, 
-  type AnimatePresenceProps 
+import { useEffect, ComponentType, useState } from 'react';
+import {
+  loadFramerMotion,
+  StaticDiv,
+  StaticPresence,
+  type MotionDivProps,
+  type AnimatePresenceProps
 } from '@/lib/optimization/dynamic-motion';
-import { 
-  File, 
-  X, 
-  FileText, 
+import {
+  File,
+  X,
+  FileText,
   AlertCircle,
   CheckCircle,
   Loader2
@@ -26,15 +26,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn, formatFileSize } from '@/lib/utils';
-
-export interface UploadedFile {
-  id: string;
-  file: File;
-  status: 'uploading' | 'success' | 'error' | 'processing';
-  progress: number;
-  error?: string;
-  fileType?: 'runsheet' | 'invoice' | 'unknown';
-}
+import { useFileUpload, type UploadedFile } from '@/hooks/use-file-upload';
 
 export interface FileUploadProps {
   readonly onFilesSelected?: (files: File[]) => void;
@@ -67,19 +59,32 @@ export function FileUpload({
   className,
   showProgressSimulation = false,
 }: FileUploadProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [dragCounter, setDragCounter] = useState(0);
-  const [internalUploadedFiles, setInternalUploadedFiles] = useState<UploadedFile[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const uploadedFiles = externalUploadedFiles || internalUploadedFiles;
-  const setUploadedFiles = useMemo(
-    () => externalUploadedFiles ? () => {} : setInternalUploadedFiles,
-    [externalUploadedFiles]
-  );
-
   // Use legacy prop if provided
   const effectiveMaxFileSize = maxSizePerFile || maxFileSize;
+
+  const {
+    uploadedFiles,
+    isDragOver,
+    fileInputRef,
+    handleDrop,
+    handleDrag,
+    handleDragIn,
+    handleDragLeave,
+    handleFileInputChange,
+    removeFile,
+    clearAll,
+    openFileDialog,
+  } = useFileUpload({
+    maxFiles,
+    maxFileSize: effectiveMaxFileSize,
+    acceptedTypes,
+    showProgressSimulation,
+    onFilesSelected,
+    onFilesAdded,
+    onFileRemoved,
+    onClearAll,
+    uploadedFiles: externalUploadedFiles,
+  });
 
   // Dynamic motion loading
   const [motionComponents, setMotionComponents] = useState<{
@@ -99,190 +104,6 @@ export function FileUpload({
       });
     });
   }, []);
-
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDragIn = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragCounter(prev => prev + 1);
-    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-      setIsDragOver(true);
-    }
-  }, []);
-
-  const handleDragOut = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const newCounter = dragCounter - 1;
-    if (newCounter === 0) {
-      setIsDragOver(false);
-    }
-    setDragCounter(newCounter);
-  }, [dragCounter]);
-
-  // Detect file type based on filename (from legacy component)
-  const detectFileType = useCallback((filename: string): 'runsheet' | 'invoice' | 'unknown' => {
-    const lowerName = filename.toLowerCase();
-    if (lowerName.includes('runsheet') || lowerName.includes('run_sheet') || lowerName.includes('run-sheet')) {
-      return 'runsheet';
-    }
-    if (lowerName.includes('invoice') || lowerName.includes('bill') || lowerName.includes('dv_')) {
-      return 'invoice';
-    }
-    return 'unknown';
-  }, []);
-
-  // Validate files (enhanced from legacy component)
-  const validateFiles = useCallback((files: FileList | File[]): { valid: File[], errors: string[] } => {
-    const fileArray = Array.from(files);
-    const errors: string[] = [];
-    const valid: File[] = [];
-
-    // Check total count
-    if (uploadedFiles.length + fileArray.length > maxFiles) {
-      errors.push(`Maximum ${maxFiles} files allowed`);
-      return { valid, errors };
-    }
-
-    fileArray.forEach(file => {
-      // Check file type (support both MIME types and extensions)
-      const isValidType = acceptedTypes.some(type => {
-        if (type.startsWith('.')) {
-          return file.name.toLowerCase().endsWith(type.substring(1));
-        }
-        return file.type === type;
-      });
-
-      if (!isValidType) {
-        errors.push(`${file.name}: Only PDF files are allowed`);
-        return;
-      }
-
-      // Check file size
-      if (file.size > effectiveMaxFileSize) {
-        errors.push(`${file.name}: File size exceeds ${Math.round(effectiveMaxFileSize / (1024 * 1024))}MB limit`);
-        return;
-      }
-
-      // Check for duplicates
-      if (uploadedFiles.some(uploaded => uploaded.file.name === file.name && uploaded.file.size === file.size)) {
-        errors.push(`${file.name}: Duplicate file`);
-        return;
-      }
-
-      valid.push(file);
-    });
-
-    return { valid, errors };
-  }, [uploadedFiles, maxFiles, effectiveMaxFileSize, acceptedTypes]);
-
-  const simulateFileUpload = useCallback(async (uploadedFile: UploadedFile) => {
-    for (let progress = 0; progress <= 100; progress += 10) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setUploadedFiles(prev => prev.map(f =>
-        f.id === uploadedFile.id ? { ...f, progress } : f
-      ));
-    }
-  }, [setUploadedFiles]);
-
-  const simulateFileProcessing = useCallback(async (uploadedFile: UploadedFile) => {
-    setUploadedFiles(prev => prev.map(f =>
-      f.id === uploadedFile.id ? { ...f, status: 'processing', progress: 0 } : f
-    ));
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setUploadedFiles(prev => prev.map(f =>
-      f.id === uploadedFile.id ? { ...f, status: 'success', progress: 100 } : f
-    ));
-  }, [setUploadedFiles]);
-
-  const handleFileError = useCallback((uploadedFile: UploadedFile) => {
-    setUploadedFiles(prev => prev.map(f =>
-      f.id === uploadedFile.id ? { ...f, status: 'error', error: 'Processing failed' } : f
-    ));
-  }, [setUploadedFiles]);
-
-  const markFilesAsSuccess = useCallback((newFiles: UploadedFile[]) => {
-    const newFileIds = new Set(newFiles.map(f => f.id));
-    setUploadedFiles(prev => prev.map(f =>
-      newFileIds.has(f.id) ? { ...f, status: 'success', progress: 100 } : f
-    ));
-  }, [setUploadedFiles]);
-
-  const processFiles = useCallback(async (files: File[]) => {
-    const newFiles: UploadedFile[] = files.map(file => ({
-      file,
-      id: `${file.name}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-      status: 'uploading' as const,
-      progress: 0,
-      fileType: detectFileType(file.name)
-    }));
-
-    setUploadedFiles(prev => [...prev, ...newFiles]);
-
-    if (showProgressSimulation) {
-      for (const uploadedFile of newFiles) {
-        try {
-          await simulateFileUpload(uploadedFile);
-          await simulateFileProcessing(uploadedFile);
-        } catch {
-          handleFileError(uploadedFile);
-        }
-      }
-    } else {
-      markFilesAsSuccess(newFiles);
-    }
-
-    onFilesSelected?.(files);
-    onFilesAdded?.(files);
-  }, [detectFileType, setUploadedFiles, showProgressSimulation, simulateFileUpload, simulateFileProcessing, handleFileError, markFilesAsSuccess, onFilesSelected, onFilesAdded]);
-
-  const handleFiles = useCallback(async (files: FileList | File[]) => {
-    if (disabled) return;
-
-    const { valid, errors } = validateFiles(files);
-
-    if (errors.length > 0) {
-      // You can replace this with your preferred toast/notification system
-      errors.forEach(error => console.error(error));
-      return;
-    }
-
-    if (valid.length === 0) {
-      return;
-    }
-
-    await processFiles(valid);
-  }, [disabled, validateFiles, processFiles]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-    setDragCounter(0);
-
-    if (disabled) return;
-
-    const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
-  }, [disabled, handleFiles]);
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      handleFiles(Array.from(e.target.files));
-    }
-    // Reset input
-    e.target.value = '';
-  };
-
-  const openFileDialog = () => {
-    if (!disabled) {
-      fileInputRef.current?.click();
-    }
-  };
 
   const getFileIcon = (file: UploadedFile) => {
     switch (file.fileType) {
@@ -336,7 +157,7 @@ export function FileUpload({
         )}
         onClick={openFileDialog}
         onDragEnter={handleDragIn}
-        onDragLeave={handleDragOut}
+        onDragLeave={handleDragLeave}
         onDragOver={handleDrag}
         onDrop={handleDrop}
         padding="lg"
@@ -433,7 +254,7 @@ export function FileUpload({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onClearAll}
+                onClick={clearAll}
                 disabled={disabled || isProcessing}
               >
                 Clear All
@@ -501,7 +322,7 @@ export function FileUpload({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onFileRemoved(file.id)}
+                        onClick={() => removeFile(file.id)}
                         disabled={disabled || isProcessing}
                         className="text-slate-400 hover:text-red-600"
                       >
