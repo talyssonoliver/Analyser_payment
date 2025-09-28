@@ -79,6 +79,8 @@ const toneStyles: Record<KPICardTone, {
 
 
 
+export type TrendDirection = 'up' | 'down' | 'flat'
+
 export interface KPICardProps {
   readonly label: React.ReactNode
   readonly value: React.ReactNode
@@ -88,6 +90,8 @@ export interface KPICardProps {
   readonly iconBackgroundClassName?: string
   readonly className?: string
   readonly children?: React.ReactNode
+  readonly trend?: React.ReactNode
+  readonly trendDirection?: TrendDirection
 }
 
 export function KPICard({
@@ -99,6 +103,8 @@ export function KPICard({
   iconBackgroundClassName,
   className,
   children,
+  trend,
+  trendDirection,
 }: KPICardProps) {
   const toneStyle = toneStyles[tone]
 
@@ -132,6 +138,14 @@ export function KPICard({
           <div className={cn('text-2xl font-bold tracking-tight', toneStyle.value)}>{value}</div>
           {description ? (
             <div className={cn('text-xs font-medium', toneStyle.description)}>{description}</div>
+          ) : null}
+          {trend ? (
+            <div className={cn('text-xs font-medium flex items-center gap-1', toneStyle.trend)}>
+              {trendDirection === 'up' && '↗'}
+              {trendDirection === 'down' && '↘'}
+              {trendDirection === 'flat' && '→'}
+              {trend}
+            </div>
           ) : null}
         </div>
 
