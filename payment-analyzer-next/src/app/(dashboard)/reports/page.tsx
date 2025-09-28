@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Reports Page
  * Complete implementation matching original HTML functionality
  */
@@ -7,14 +7,16 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui';
+import { KPICard } from '@/components/ui/kpi-card';
 import { ExportModal } from '@/components/export/export-modal';
-import { ManualEntry } from '@/components/analysis/manual-entry';
-import type { ManualEntryData } from '@/components/analysis/manual-entry';
+import { ManualEntry } from '@/components/analysis';
+import type { ManualEntryData } from '@/components/analysis';
 import { analysisRepository } from '@/lib/repositories/analysis-repository';
 import type { AnalysisWithDetails, DailyEntryRecord } from '@/lib/repositories/analysis-repository';
 import type { AnalysisStatus } from '@/types/core';
 import type { LocalStorageExportData } from '@/lib/services/export-service';
 import { useAuth } from '@/lib/providers/auth-provider';
+import { useToast } from '@/components/ui/toast';
 import { AnalysisStorageService } from '@/lib/services/analysis-storage-service';
 import { weekNavigationService } from '@/lib/services/week-navigation-service';
 import { Edit2 } from 'lucide-react';
@@ -75,8 +77,17 @@ interface ReportData {
   };
 }
 
+const currencyFormatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'GBP',
+  minimumFractionDigits: 2,
+});
+
+const formatCurrency = (value: number) => currencyFormatter.format(value);
+
 export default function ReportsPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [compactView, setCompactView] = useState(false);
@@ -421,9 +432,9 @@ export default function ReportsPage() {
     });
 
     // Determine report type and period display based on filtering
-    let reportType = 'Financial Analysis Report';
+    let reportType: string;
     let periodDisplay = '';
-    let reportTotalDays = dailyEntries.length;
+    let reportTotalDays: number;
 
     // Check if this is actually a single-day analysis
     const isSingleDayAnalysis = dailyEntries.length === 1;
@@ -486,6 +497,104 @@ export default function ReportsPage() {
     };
   }, [filterDailyEntries, mapDailyEntryRecordToReportFormat]);
 
+  // Helper to extract URL parameters
+  const extractUrlParameters = useCallback(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      analysisId: urlParams.get('analysis'),
+      dayFilter: urlParams.get('day'),
+      weekFilter: urlParams.get('week'),
+      startDate: urlParams.get('start'),
+      endDate: urlParams.get('end')
+    };
+  }, []);
+
+  // Helper to determine final parameters from URL and navigation state
+  const determineFinalParameters = useCallback((urlParams: ReturnType<typeof extractUrlParameters>) => {
+    const selectedWeek = weekNavigationService.getSelectedWeek();
+    const weekAnalysisId = weekNavigationService.getAnalysisId();
+
+    // Priority 1: URL parameters override navigation state
+    // Priority 2: Week navigation state if no URL parameters
+    let finalAnalysisId = urlParams.analysisId;
+    let finalWeekFilter = urlParams.weekFilter;
+    let finalStartDate = urlParams.startDate;
+    let finalEndDate = urlParams.endDate;
+
+    if (!urlParams.analysisId && !urlParams.weekFilter && selectedWeek && weekAnalysisId) {
+      console.log('🔍 Reports Debug - Using week navigation state as fallback');
+      finalAnalysisId = weekAnalysisId;
+      finalWeekFilter = selectedWeek.week.toString();
+
+      const weekStartDate = getWeekStartDate(selectedWeek.year, selectedWeek.week);
+      const weekEndDate = getWeekEndDate(selectedWeek.year, selectedWeek.week);
+      finalStartDate = weekStartDate.toISOString().split('T')[0];
+      finalEndDate = weekEndDate.toISOString().split('T')[0];
+
+      console.log('🔍 Reports Debug - Calculated week date range:', finalStartDate, 'to', finalEndDate);
+    }
+
+    return { finalAnalysisId, finalWeekFilter, finalStartDate, finalEndDate, selectedWeek, weekAnalysisId };
+  }, [getWeekStartDate, getWeekEndDate]);
+
+  // Helper to load analysis data based on ID
+  const loadAnalysisData = useCallback(async (userId: string, analysisId: string | null) => {
+    if (!analysisId) {
+      return await loadLatestAnalysis(userId);
+    }
+
+    const idType = validateAnalysisId(analysisId);
+    if (idType === 'invalid') {
+      console.error('🔍 Reports Debug - Invalid analysis ID format:', analysisId);
+      return null;
+    }
+
+    return idType === 'session'
+      ? await loadAnalysisBySessionId(userId, analysisId)
+      : await loadAnalysisByUuid(userId, analysisId);
+  }, [loadAnalysisBySessionId]);
+
+  // Helper to process loaded analysis data
+  const processAnalysisData = useCallback((analysisData: AnalysisWithDetails, urlParams: ReturnType<typeof extractUrlParameters>, finalParams: ReturnType<typeof determineFinalParameters>) => {
+    console.log('🔍 Reports Debug - Analysis data structure:', {
+      id: analysisData.id,
+      hasDaily: !!analysisData.daily_entries?.length,
+      hasTotals: !!analysisData.analysis_totals,
+      dailyCount: analysisData.daily_entries?.length || 0,
+      workingDays: analysisData.working_days,
+      status: analysisData.status
+    });
+
+    const reportData = convertDatabaseAnalysisToReportData(
+      analysisData,
+      urlParams.dayFilter,
+      finalParams.finalWeekFilter,
+      finalParams.finalStartDate,
+      finalParams.finalEndDate
+    );
+
+    console.log('🔍 Reports Debug - Converted report data:', {
+      totalDays: reportData.totalDays,
+      dailyEntriesCount: reportData.dailyEntries.length,
+      hasValidData: reportData.totalDays > 0,
+      filteredByDay: !!urlParams.dayFilter,
+      filteredByWeek: !!finalParams.finalWeekFilter,
+      usedWeekNavigation: !!(finalParams.selectedWeek && finalParams.weekAnalysisId && !urlParams.analysisId)
+    });
+
+    setReportData(reportData);
+    setIsDailyReport(!!urlParams.dayFilter || (reportData.totalDays === 1 && reportData.reportType === 'Daily Report'));
+    setCurrentAnalysisId(analysisData.id);
+
+    // Clear week navigation state after successful load
+    if (finalParams.selectedWeek && finalParams.weekAnalysisId && !urlParams.analysisId) {
+      console.log('🔍 Reports Debug - Clearing week navigation state after successful load');
+      setTimeout(() => weekNavigationService.clearSelectedWeek(), 1000);
+    }
+
+    console.log('✅ Reports Debug - Report data set successfully from database');
+  }, [convertDatabaseAnalysisToReportData]);
+
   // Load report data from Supabase database
   useEffect(() => {
     const loadReportData = async () => {
@@ -499,109 +608,15 @@ export default function ReportsPage() {
         console.log('🔍 Reports Debug - Loading from database...');
         console.log('🔍 Reports Debug - User ID:', user.id);
 
-        // Check if there's a specific analysis ID and filters in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const analysisId = urlParams.get('analysis');
-        const dayFilter = urlParams.get('day');
-        const weekFilter = urlParams.get('week');
-        const startDate = urlParams.get('start');
-        const endDate = urlParams.get('end');
-        console.log('🔍 Reports Debug - Analysis ID requested:', analysisId);
-        console.log('🔍 Reports Debug - Day filter requested:', dayFilter);
-        console.log('🔍 Reports Debug - Week filter requested:', weekFilter);
-        console.log('🔍 Reports Debug - Date range requested:', startDate, 'to', endDate);
+        const urlParams = extractUrlParameters();
+        console.log('🔍 Reports Debug - URL parameters:', urlParams);
 
-        // Check for week navigation state (legacy State.getSelectedWeek() behavior)
-        const selectedWeek = weekNavigationService.getSelectedWeek();
-        const weekAnalysisId = weekNavigationService.getAnalysisId();
-        console.log('🔍 Reports Debug - Selected week from navigation service:', selectedWeek);
-        console.log('🔍 Reports Debug - Week analysis ID from navigation service:', weekAnalysisId);
+        const finalParams = determineFinalParameters(urlParams);
 
-        // Priority 1: URL parameters override navigation state
-        // Priority 2: Week navigation state if no URL parameters
-        let finalAnalysisId = analysisId;
-        let finalWeekFilter = weekFilter;
-        let finalStartDate = startDate;
-        let finalEndDate = endDate;
-
-        if (!analysisId && !weekFilter && selectedWeek && weekAnalysisId) {
-          // Use week navigation state as fallback
-          console.log('🔍 Reports Debug - Using week navigation state as fallback');
-          finalAnalysisId = weekAnalysisId;
-          finalWeekFilter = selectedWeek.week.toString();
-
-          // Calculate date range from week info
-          const weekStartDate = getWeekStartDate(selectedWeek.year, selectedWeek.week);
-          const weekEndDate = getWeekEndDate(selectedWeek.year, selectedWeek.week);
-          finalStartDate = weekStartDate.toISOString().split('T')[0];
-          finalEndDate = weekEndDate.toISOString().split('T')[0];
-
-          console.log('🔍 Reports Debug - Calculated week date range:', finalStartDate, 'to', finalEndDate);
-        }
-
-        let analysisData: AnalysisWithDetails | null = null;
-
-        if (finalAnalysisId) {
-          // Validate analysis ID format
-          const idType = validateAnalysisId(finalAnalysisId);
-
-          if (idType === 'invalid') {
-            console.error('🔍 Reports Debug - Invalid analysis ID format:', finalAnalysisId);
-            setReportData(null);
-            setLoading(false);
-            return;
-          }
-
-          // Load analysis based on ID type
-          if (idType === 'session') {
-            analysisData = await loadAnalysisBySessionId(user.id, finalAnalysisId);
-          } else {
-            analysisData = await loadAnalysisByUuid(user.id, finalAnalysisId);
-          }
-
-          if (!analysisData) {
-            setReportData(null);
-            setLoading(false);
-            return;
-          }
-        } else {
-          // No specific ID provided, load most recent analysis
-          analysisData = await loadLatestAnalysis(user.id);
-        }
+        const analysisData = await loadAnalysisData(user.id, finalParams.finalAnalysisId);
 
         if (analysisData) {
-          console.log('🔍 Reports Debug - Analysis data structure:', {
-            id: analysisData.id,
-            hasDaily: !!analysisData.daily_entries?.length,
-            hasTotals: !!analysisData.analysis_totals,
-            dailyCount: analysisData.daily_entries?.length || 0,
-            workingDays: analysisData.working_days,
-            status: analysisData.status
-          });
-
-          // Convert database analysis to report format using final parameters
-          const reportData = convertDatabaseAnalysisToReportData(analysisData, dayFilter, finalWeekFilter, finalStartDate, finalEndDate);
-          console.log('🔍 Reports Debug - Converted report data:', {
-            totalDays: reportData.totalDays,
-            dailyEntriesCount: reportData.dailyEntries.length,
-            hasValidData: reportData.totalDays > 0,
-            filteredByDay: !!dayFilter,
-            filteredByWeek: !!finalWeekFilter,
-            usedWeekNavigation: !!(selectedWeek && weekAnalysisId && !analysisId)
-          });
-          setReportData(reportData);
-          // Set isDailyReport for both explicit day filter and single-day analyses
-          setIsDailyReport(!!dayFilter || (reportData.totalDays === 1 && reportData.reportType === 'Daily Report'));
-          // Store the analysis ID for edit functionality
-          setCurrentAnalysisId(analysisData.id);
-
-          // Clear week navigation state after successful load to prevent stale state
-          if (selectedWeek && weekAnalysisId && !analysisId) {
-            console.log('🔍 Reports Debug - Clearing week navigation state after successful load');
-            // Use a timeout to prevent immediate clearing during navigation
-            setTimeout(() => weekNavigationService.clearSelectedWeek(), 1000);
-          }
-          console.log('✅ Reports Debug - Report data set successfully from database');
+          processAnalysisData(analysisData, urlParams, finalParams);
         } else {
           console.log('❌ Reports Debug - No analysis data found in database');
           setReportData(null);
@@ -615,7 +630,7 @@ export default function ReportsPage() {
     };
 
     loadReportData();
-  }, [user?.id, getWeekEndDate, getWeekStartDate, loadAnalysisBySessionId, convertDatabaseAnalysisToReportData]); // Add missing dependencies
+  }, [user?.id, extractUrlParameters, determineFinalParameters, loadAnalysisData, processAnalysisData]);
 
   const handleExport = useCallback(() => {
     if (!reportData) return;
@@ -681,6 +696,24 @@ export default function ReportsPage() {
     };
   }, [handleExport]);
 
+  // Handle ESC key for modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showEditModal) {
+        setShowEditModal(false);
+        setEditingEntry(null);
+      }
+    };
+
+    if (showEditModal) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showEditModal]);
+
   // Handle edit day data - Open manual entry modal
   const handleEditDayData = useCallback((entry: DailyEntry) => {
     setEditingEntry(entry);
@@ -717,13 +750,21 @@ export default function ReportsPage() {
         window.location.reload();
       } else {
         console.error('❌ Failed to update entry:', result.error.message);
-        // TODO: Show user-friendly error message
+        toast({
+          title: 'Update Failed',
+          description: result.error?.message ?? 'We could not update this entry. Please try again.',
+          type: 'error',
+        });
       }
     } catch (error) {
       console.error('❌ Failed to update entry:', error);
-      // TODO: Show user-friendly error message
+      toast({
+        title: 'Update Failed',
+        description: error instanceof Error ? error.message : 'We could not update this entry. Please try again.',
+        type: 'error',
+      });
     }
-  }, [editingEntry, currentAnalysisId, user]);
+  }, [editingEntry, currentAnalysisId, toast, user]);
 
 
 
@@ -852,6 +893,11 @@ export default function ReportsPage() {
     );
   }
 
+  const totals = reportData.totals;
+  const differenceAmount = totals.difference ?? 0;
+  const differenceTone = differenceAmount >= 0 ? 'success' : 'danger';
+  const differenceDescription = differenceAmount >= 0 ? 'Overpaid' : 'Underpaid';
+
   return (
     <div className="min-h-screen theme-background">
       <div className="container mx-auto px-2 py-0 space-y-2">
@@ -939,46 +985,31 @@ export default function ReportsPage() {
         </div>
 
         {/* Enhanced KPI Dashboard */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 relative overflow-hidden kpi-card bg-gradient-to-br from-white to-slate-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-200">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600"></div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-medium text-slate-600 uppercase tracking-wide kpi-label">Expected Total</div>
-            </div>
-            <div className="text-3xl font-bold text-slate-900 kpi-value">£{(reportData.totals.expected || 0).toFixed(2)}</div>
-            <div className="text-sm text-slate-500 kpi-label">Total earnings</div>
-          </Card>
-
-          <Card className="p-6 relative overflow-hidden kpi-card bg-gradient-to-br from-white to-slate-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-200">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-400"></div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-medium text-slate-600 uppercase tracking-wide kpi-label">Paid Amount</div>
-            </div>
-            <div className="text-3xl font-bold text-slate-900 kpi-value">£{(reportData.totals.paid || 0).toFixed(2)}</div>
-            <div className="text-sm text-slate-500 kpi-label">Amount received</div>
-          </Card>
-
-          <Card className="p-6 relative overflow-hidden kpi-card bg-gradient-to-br from-white to-slate-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-200">
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${reportData.totals.difference >= 0 ? 'bg-green-600' : 'bg-red-600'}`}></div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-medium text-slate-600 uppercase tracking-wide kpi-label">Difference</div>
-            </div>
-            <div className={`text-3xl font-bold kpi-value ${reportData.totals.difference >= 0 ? 'text-green-600 positive' : 'text-red-600 negative'}`}>
-              £{(reportData.totals.difference || 0).toFixed(2)}
-            </div>
-            <div className={`text-sm px-2 py-1 rounded-full inline-block badge ${reportData.totals.difference >= 0 ? 'bg-green-100 text-green-800 status-complete' : 'bg-red-100 text-red-800 status-error'}`}>
-              {reportData.totals.difference >= 0 ? 'Overpaid' : 'Underpaid'}
-            </div>
-          </Card>
-
-          <Card className="p-6 relative overflow-hidden kpi-card bg-gradient-to-br from-white to-slate-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-200">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600"></div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-medium text-slate-600 uppercase tracking-wide kpi-label">Consignments</div>
-            </div>
-            <div className="text-3xl font-bold text-slate-900 kpi-value">{reportData.totals.consignments}</div>
-            <div className="text-sm text-slate-500 kpi-label">Total deliveries</div>
-          </Card>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-2">
+          <KPICard
+            label="Expected Total"
+            value={formatCurrency(totals.expected ?? 0)}
+            description="Total earnings"
+            tone="info"
+          />
+          <KPICard
+            label="Paid Amount"
+            value={formatCurrency(totals.paid ?? 0)}
+            description="Amount received"
+            tone="success"
+          />
+          <KPICard
+            label="Difference"
+            value={formatCurrency(differenceAmount)}
+            description={differenceDescription}
+            tone={differenceTone}
+          />
+          <KPICard
+            label="Consignments"
+            value={totals.consignments?.toLocaleString('en-GB') ?? '0'}
+            description="Total deliveries"
+            tone="primary"
+          />
         </div>
 
         {/* Analysis Breakdown - Show table only for multi-day reports */}
@@ -988,7 +1019,12 @@ export default function ReportsPage() {
             <div className="p-6 border-b border-slate-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-slate-900">
-                  {isDailyReport ? 'Daily Analysis Breakdown' : (viewMode === 'week' ? 'Daily Analysis Breakdown' : 'Monthly Analysis Summary')}
+                  {(() => {
+                    if (isDailyReport || viewMode === 'week') {
+                      return 'Daily Analysis Breakdown';
+                    }
+                    return 'Monthly Analysis Summary';
+                  })()}
                 </h3>
                 <button 
                   onClick={() => setCompactView(!compactView)}
@@ -1123,14 +1159,19 @@ export default function ReportsPage() {
         {showEditModal && editingEntry && (
           <dialog
             open
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-[99999] p-4 overflow-y-auto border-0 max-w-none max-h-none w-full h-full"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setShowEditModal(false);
-                setEditingEntry(null);
-              }
-            }}
+            aria-labelledby="edit-modal-title"
+            className="fixed inset-0 bg-transparent backdrop:bg-black/50 backdrop:backdrop-blur-sm z-[99999] p-0 m-0 border-0 max-w-none max-h-none w-full h-full flex items-start justify-center overflow-y-auto"
           >
+            <form method="dialog" className="contents">
+              <button
+                type="submit"
+                aria-label="Close modal"
+                className="fixed inset-0 cursor-default"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingEntry(null);
+                }}
+              />
             <div className="bg-white rounded-2xl max-w-2xl w-full my-8 shadow-2xl relative">
               <ManualEntry
                 onClose={() => {
@@ -1152,9 +1193,11 @@ export default function ReportsPage() {
                 }}
               />
             </div>
+            </form>
           </dialog>
         )}
       </div>
     </div>
   );
 }
+

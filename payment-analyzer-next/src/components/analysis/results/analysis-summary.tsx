@@ -14,6 +14,7 @@ import {
 } from '@/lib/utils/export-utils';
 import { WeekReportGenerator } from '@/lib/utils/week-report-generator';
 import { toast } from '@/lib/utils/toast';
+import '@/styles/summary-cards-fix.css';
 
 interface AnalysisSummaryData {
   totalActual: number;

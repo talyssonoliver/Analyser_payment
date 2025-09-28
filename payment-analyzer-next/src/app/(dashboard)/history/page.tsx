@@ -134,7 +134,7 @@ const renderMainContent = (props: MainContentProps) => {
           {/* Month Header */}
           <button
             onClick={() => toggleMonth(month.monthKey)}
-            className="w-full flex items-center justify-between p-4 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-left"
+            className="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-left"
           >
             <div className="flex items-center gap-3">
               {renderExpandIcon(expandedMonths.has(month.monthKey))}
@@ -149,7 +149,7 @@ const renderMainContent = (props: MainContentProps) => {
 
           {/* Expanded Month Content */}
           {expandedMonths.has(month.monthKey) && (
-            <div className="ml-4 mt-2 space-y-2">
+            <div className="mt-2 space-y-2 md:pl-4 md:border-l md:border-slate-200">
               {month.weeks.map(week => (
                 <div key={week.weekKey}>
                   {/* Week Header */}
@@ -188,16 +188,16 @@ const renderMainContent = (props: MainContentProps) => {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right w-full sm:w-auto">
                       <div className="font-semibold text-slate-900">£{week.totalAmount.toFixed(2)}</div>
                     </div>
                   </div>
 
                   {/* Expanded Week Content - Day Entries */}
                   {expandedWeeks.has(week.weekKey) && (
-                    <div className="ml-6 mt-2 space-y-1">
+                    <div className="mt-2 space-y-1 md:pl-6 md:border-l md:border-slate-100">
                       {week.days.map(day => (
-                        <div key={day.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div key={day.id} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 bg-slate-50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                             <div>
@@ -210,7 +210,7 @@ const renderMainContent = (props: MainContentProps) => {
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <div className="text-right">
+                            <div className="text-left sm:text-right w-full sm:w-auto">
                               <div className="font-semibold text-slate-900">£{day.totalAmount.toFixed(2)}</div>
                             </div>
                             <button
@@ -514,7 +514,7 @@ export default function HistoryPage() {
   };
 
   // Helper function to process and set history data
-  const processHistoryData = (dayEntries: DayEntry[]) => {
+  const processHistoryData = useCallback((dayEntries: DayEntry[]) => {
     if (dayEntries.length === 0) {
       setHistoryData([]);
       setFilteredData([]);
@@ -529,7 +529,7 @@ export default function HistoryPage() {
     if (groupedData.length > 0) {
       setExpandedMonths(new Set([groupedData[0].monthKey]));
     }
-  };
+  }, [groupByHierarchy]);
 
   // Load history data from Supabase database
   useEffect(() => {
@@ -561,7 +561,7 @@ export default function HistoryPage() {
     };
 
     loadHistoryData();
-  }, [user?.id, groupByHierarchy]);
+  }, [user?.id, groupByHierarchy, processHistoryData]);
 
   // Listen for export events from the header button
   useEffect(() => {
@@ -750,7 +750,7 @@ export default function HistoryPage() {
   // Show loading state
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 sm:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -776,7 +776,7 @@ export default function HistoryPage() {
   // Show error state
   if (error) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 sm:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -806,7 +806,7 @@ export default function HistoryPage() {
   // Show unauthenticated state
   if (!user?.id) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 sm:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -834,12 +834,11 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div>
-          <h1 className="mt-4 font-bold text-slate-900 flex items-center gap-2">
-            <FileText className="w-5 h-5" />
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             Your data history organized by time period
           </h1>
         </div>
@@ -850,7 +849,7 @@ export default function HistoryPage() {
         const stats = getTotalStats();
         return (
           <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4">
             <Card className="p-4 rounded-lg border-0 shadow-sm hover:shadow-md transition-all duration-200" style={{ background: 'linear-gradient(135deg, rgb(248, 250, 252) 0%, rgb(226, 232, 240) 100%)' }}>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-50 rounded-lg">
@@ -902,8 +901,8 @@ export default function HistoryPage() {
 
       {/* Search and Filters */}
       <div className="space-y-4" ref={filtersRef}>
-        {/* Search Bar with Filters Button */}
-        <div className="flex gap-2">
+        {/* Search Bar with Filters Button - Horizontal Layout */}
+        <div className="flex items-center gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -916,19 +915,19 @@ export default function HistoryPage() {
           </div>
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center justify-center px-4 py-3 border rounded-lg transition-colors flex-shrink-0 ${
-              showFilters ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-300 hover:bg-slate-50'
+            className={`flex items-center justify-center w-12 h-12 border rounded-lg transition-colors flex-shrink-0 ${
+              showFilters ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-300 hover:bg-slate-50 text-slate-400'
             }`}
+            title="Toggle filters"
           >
             <Filter className="w-4 h-4" />
-            <span className="ml-2 hidden sm:inline">Filters</span>
           </button>
         </div>
 
         {/* Advanced Filters */}
         {showFilters && (
           <Card className="p-4 border border-slate-300" style={{ background: 'linear-gradient(135deg, rgb(248, 250, 252) 0%, rgb(226, 232, 240) 100%)' }}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <div>
                 <label htmlFor="date-filter" className="block text-sm font-medium text-slate-700 mb-2">Date Range</label>
                 <select 

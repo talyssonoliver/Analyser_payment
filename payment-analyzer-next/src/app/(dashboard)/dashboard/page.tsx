@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Dashboard Page
  * Main analytics dashboard with KPIs, charts, and recent analysis
  */
@@ -18,9 +18,10 @@ import {
   DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { KPICard } from '@/components/ui/kpi-card';
 import { analyticsService } from '@/lib/services/analytics-service';
 import { analysisRepository } from '@/lib/repositories/analysis-repository';
-import type { AnalysisWithDetails } from '@/lib/repositories/analysis-repository';
+import type { AnalysisWithDetails, DailyEntryRecord } from '@/lib/repositories/analysis-repository';
 import type { KPIData } from '@/components/charts/kpi-cards';
 import type { RevenueDataPoint } from '@/components/charts/revenue-chart';
 
@@ -49,6 +50,27 @@ interface DailyEntryData {
   expected_total: number;
 }
 
+const currencyFormatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'GBP',
+  minimumFractionDigits: 2,
+});
+
+const formatCurrency = (value: number) => currencyFormatter.format(value);
+
+const getTrendDirection = (value?: number | null) => {
+  if (value === undefined || value === null) {
+    return 'flat' as const;
+  }
+  if (value > 0) {
+    return 'up' as const;
+  }
+  if (value < 0) {
+    return 'down' as const;
+  }
+  return 'flat' as const;
+};
+
 function DashboardPage() {
   const router = useRouter();
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
@@ -63,7 +85,7 @@ function DashboardPage() {
     performance: 0,
     revenueChange: 0,
     deliveriesChange: 0,
-    periodLabel: 'September Week'
+    periodLabel: 'Weekly'
   });
   const [selectedPeriod] = useState('30d');
   
@@ -418,7 +440,7 @@ function DashboardPage() {
 
     // Calculate weeks in the month
     const weeks = [];
-    let weekStart = new Date(firstDay);
+    const weekStart = new Date(firstDay);
     weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Start from Monday
 
     for (let weekNum = 1; weekNum <= 4; weekNum++) {
@@ -431,7 +453,7 @@ function DashboardPage() {
       // Aggregate data for this week
       analyses.forEach(analysis => {
         if (analysis.daily_entries) {
-          analysis.daily_entries.forEach((entry: any) => {
+          analysis.daily_entries.forEach((entry: DailyEntryRecord) => {
             // Handle both string and Date formats, and avoid timezone issues
             const entryDate = new Date(entry.date + 'T00:00:00');
 
@@ -525,21 +547,36 @@ function DashboardPage() {
     router.push(`/analysis?date=${formatDateKey(date)}`);
   };
 
-
-
-
-
   // Helper to search in-memory database data for day entry
   const searchInMemoryDatabaseData = (dateKey: string) => {
+    console.log('🔍 Calendar Debug - searchInMemoryDatabaseData for dateKey:', dateKey);
+    console.log('🔍 Calendar Debug - Available analyses:', data.recentAnalyses.length);
+    
     for (const analysis of data.recentAnalyses) {
       if (!analysis.daily_entries) continue;
+      
+      console.log('🔍 Calendar Debug - Checking analysis:', analysis.id, 'with', analysis.daily_entries.length, 'daily entries');
 
       const dayEntry = analysis.daily_entries.find(entry => {
         const entryDate = new Date(entry.date);
-        return formatDateKey(entryDate) === dateKey && (entry.consignments || 0) > 0;
+        const entryDateKey = formatDateKey(entryDate);
+        const matches = entryDateKey === dateKey && (entry.consignments || 0) > 0;
+        console.log('🔍 Calendar Debug - Entry check:', {
+          originalDate: entry.date,
+          entryDateKey,
+          targetDateKey: dateKey,
+          matches,
+          hasConsignments: (entry.consignments || 0) > 0
+        });
+        return matches;
       });
 
       if (dayEntry) {
+        console.log('🔍 Calendar Debug - Found matching entry:', {
+          date: dayEntry.date,
+          consignments: dayEntry.consignments,
+          analysisId: analysis.id
+        });
         return {
           analysisId: analysis.id,
           analysisName: analysis.period_start
@@ -555,22 +592,37 @@ function DashboardPage() {
         };
       }
     }
+    console.log('🔍 Calendar Debug - No match found in database data');
     return null;
   };
 
   // Helper to search localStorage data for day entry
   const searchLocalStorageData = (dateKey: string) => {
+    console.log('💾 Calendar Debug - searchLocalStorageData for dateKey:', dateKey);
     const localAnalyses = AnalysisStorageService.loadAnalyses();
-    if (!localAnalyses || Object.keys(localAnalyses).length === 0) return null;
+    if (!localAnalyses || Object.keys(localAnalyses).length === 0) {
+      console.log('💾 Calendar Debug - No localStorage analyses found');
+      return null;
+    }
+
+    console.log('💾 Calendar Debug - Found', Object.keys(localAnalyses).length, 'localStorage analyses');
 
     for (const [id, analysis] of Object.entries(localAnalyses)) {
       const typedAnalysis = analysis as Record<string, unknown>;
       if (!typedAnalysis.dailyData || typeof typedAnalysis.dailyData !== 'object') continue;
 
       const dailyData = typedAnalysis.dailyData as Record<string, Record<string, unknown>>;
+      console.log('💾 Calendar Debug - Analysis', id, 'daily data keys:', Object.keys(dailyData));
+      
       const dayEntry = dailyData[dateKey];
+      console.log('💾 Calendar Debug - Looking for dateKey', dateKey, 'found:', !!dayEntry);
 
       if (dayEntry && typeof dayEntry === 'object' && (dayEntry.consignments as number) > 0) {
+        console.log('💾 Calendar Debug - Found matching localStorage entry:', {
+          analysisId: id,
+          dateKey,
+          consignments: dayEntry.consignments
+        });
         return {
           analysisId: id,
           analysisName: typedAnalysis.period as string || `Analysis ${id}`,
@@ -584,17 +636,30 @@ function DashboardPage() {
         };
       }
     }
+    console.log('💾 Calendar Debug - No match found in localStorage data');
     return null;
   };
 
   const loadDayData = (date: Date) => {
     try {
       const dateKey = formatDateKey(date);
+      console.log('🗓️ Calendar Debug - loadDayData called with:', {
+        clickedDate: date.toISOString(),
+        dateKey,
+        formattedDate: date.toLocaleDateString()
+      });
 
       // First try in-memory database data (no DB calls), then localStorage fallback
       const bestMatch = searchInMemoryDatabaseData(dateKey) || searchLocalStorageData(dateKey);
+      
+      console.log('🗓️ Calendar Debug - bestMatch result:', {
+        found: !!bestMatch,
+        analysisId: bestMatch?.analysisId,
+        dataDate: bestMatch ? 'data found' : 'no data'
+      });
 
       if (bestMatch) {
+        console.log('🗓️ Calendar Debug - Setting selectedDayData with dateKey:', dateKey);
         setSelectedDayData({
           date,
           dayData: [{
@@ -605,6 +670,8 @@ function DashboardPage() {
           }]
         });
         setDayModalOpen(true);
+      } else {
+        console.log('🗓️ Calendar Debug - No data found for dateKey:', dateKey);
       }
     } catch (error) {
       console.error('Error loading day data:', error);
@@ -612,6 +679,11 @@ function DashboardPage() {
   };
 
   const handleEditDayData = (analysisId: string, date: string) => {
+    console.log('📊 Calendar Debug - handleEditDayData called with:', {
+      analysisId,
+      date,
+      url: `/reports?analysis=${analysisId}&day=${date}`
+    });
     // Navigate to reports page for this analysis
     router.push(`/reports?analysis=${analysisId}&day=${date}`);
     setDayModalOpen(false);
@@ -1007,6 +1079,45 @@ function DashboardPage() {
 
     // Show executive summary and full dashboard when user has analysis data
     if (showDashboardContent()) {
+      const summaryCards = [
+        {
+          key: 'expected',
+          label: 'Expected',
+          value: formatCurrency(data.totalRevenue),
+          trend: Math.abs(data.revenueChange).toFixed(0) + '% vs last',
+          trendDirection: getTrendDirection(data.revenueChange),
+          tone: 'success' as const,
+          icon: DollarSign,
+        },
+        {
+          key: 'received',
+          label: 'Received',
+          value: formatCurrency(data.totalRevenue),
+          trend: '0% vs last',
+          trendDirection: 'flat' as const,
+          tone: 'info' as const,
+          icon: TrendingUp,
+        },
+        {
+          key: 'pending',
+          label: 'Pending',
+          value: data.deliveries.toLocaleString('en-GB'),
+          trend: Math.abs(data.deliveriesChange).toFixed(0) + '% deliveries',
+          trendDirection: getTrendDirection(data.deliveriesChange),
+          tone: 'warning' as const,
+          icon: Calendar,
+        },
+        {
+          key: 'efficiency',
+          label: 'Efficiency',
+          value: Math.min(100, data.performance).toFixed(0) + '%',
+          trend: getPerformanceLabel(data.performance),
+          trendDirection: 'up' as const,
+          tone: 'primary' as const,
+          icon: BarChart3,
+        },
+      ];
+
       return (
         <div className="dashboard-content">
           {/* View Toggle */}
@@ -1018,73 +1129,21 @@ function DashboardPage() {
             {/* Calendar Widget */}
             {renderCalendarWidget()}
 
-            {/* KPI Grid - Legacy Layout: Expected|Received top, Pending|Efficiency bottom */}
-            <div className="kpi-grid">
-              {/* Top Row - Expected (left) */}
-              <div className="kpi-card success">
-                <div className="kpi-header">
-                  <div className="kpi-label">Expected</div>
-                  <div className="kpi-icon">
-                    <DollarSign className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="kpi-value">£{data.totalRevenue.toFixed(2)}</div>
-                <div className="kpi-trend">
-                  <span className={data.revenueChange >= 0 ? 'trend-up' : 'trend-down'}>
-                    {data.revenueChange >= 0 ? '↑' : '↓'}
-                  </span>
-                  <span>{Math.abs(data.revenueChange).toFixed(0)}% vs last</span>
-                </div>
-              </div>
-
-              {/* Top Row - Received (right) */}
-              <div className="kpi-card info">
-                <div className="kpi-header">
-                  <div className="kpi-label">Received</div>
-                  <div className="kpi-icon">
-                    <TrendingUp className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="kpi-value">£{data.totalRevenue.toFixed(2)}</div>
-                <div className="kpi-trend">
-                  <span className="trend-neutral">→</span>
-                  <span>0% vs last</span>
-                </div>
-              </div>
-
-              {/* Bottom Row - Pending (left) */}
-              <div className="kpi-card warning">
-                <div className="kpi-header">
-                  <div className="kpi-label">Pending</div>
-                  <div className="kpi-icon">
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="kpi-value">{data.deliveries}</div>
-                <div className="kpi-trend">
-                  <span className={data.deliveriesChange >= 0 ? 'trend-up' : 'trend-down'}>
-                    {data.deliveriesChange >= 0 ? '↑' : '↓'}
-                  </span>
-                  <span>{Math.abs(data.deliveriesChange).toFixed(0)}% deliveries</span>
-                </div>
-              </div>
-
-              {/* Bottom Row - Efficiency (right) */}
-              <div className="kpi-card primary">
-                <div className="kpi-header">
-                  <div className="kpi-label">Efficiency</div>
-                  <div className="kpi-icon">
-                    <BarChart3 className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="kpi-value">{Math.min(100, data.performance).toFixed(0)}%</div>
-                <div className="kpi-trend">
-                  <span className="trend-up">↑</span>
-                  <span>{getPerformanceLabel(data.performance)}</span>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 xl:grid-cols-2">
+              {summaryCards.map((card) => (
+                <KPICard
+                  key={card.key}
+                  label={card.label}
+                  value={card.value}
+                  trend={card.trend}
+                  trendDirection={card.trendDirection}
+                  tone={card.tone}
+                  icon={card.icon}
+                />
+              ))}
             </div>
 
+            {/* Revenue Trend - Legacy Style Simple Chart */}
             {/* Revenue Trend - Legacy Style Simple Chart */}
             <div className="chart-container">
               <div className="chart-header">
@@ -1202,8 +1261,15 @@ function DashboardPage() {
               .dashboard-content {
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
-                padding: 20px;
+                gap: 16px;
+                padding: 4px 4px;
+              }
+
+              @media (max-width: 640px) {
+                .dashboard-content {
+                  padding: 2px 4px;
+                  gap: 6px;
+                }
               }
 
               .executive-summary {
@@ -1493,97 +1559,6 @@ function DashboardPage() {
               }
 
               
-              .kpi-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-                margin-bottom: 24px;
-              }
-              
-              .kpi-card {
-                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-                padding: 16px;
-                border-radius: 12px;
-                border: 1px solid #e2e8f0;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-                position: relative;
-                overflow: hidden;
-              }
-              
-              .kpi-card::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 4px;
-                height: 100%;
-                background: #e2e8f0;
-                transition: all 0.3s ease;
-              }
-              
-              .kpi-card.success::before {
-                background: #22c55e;
-              }
-              
-              .kpi-card.warning::before {
-                background: #f59e0b;
-              }
-              
-              .kpi-card.info::before {
-                background: #3b82f6;
-              }
-              
-              .kpi-card.primary::before {
-                background: #8b5cf6;
-              }
-              
-              .kpi-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 8px;
-              }
-              
-              .kpi-label {
-                font-size: 0.875rem;
-                color: #6b7280;
-                font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0.025em;
-              }
-              
-              .kpi-icon {
-                color: #9ca3af;
-              }
-              
-              .kpi-value {
-                font-size: 1.5rem;
-                font-weight: 700;
-                color: #1f2937;
-                margin-bottom: 4px;
-                font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-              }
-              
-              .kpi-trend {
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 0.75rem;
-                color: #6b7280;
-              }
-              
-              .trend-up {
-                color: #22c55e;
-              }
-              
-              .trend-down {
-                color: #ef4444;
-              }
-              
-              .trend-neutral {
-                color: #6b7280;
-              }
-              
               .chart-container {
                 background: white;
                 border-radius: 12px;
@@ -1834,9 +1809,6 @@ function DashboardPage() {
               }
 
               @media (min-width: 768px) {
-                .kpi-grid {
-                  grid-template-columns: repeat(2, 1fr);
-                }
 
                 .forecast-items {
                   grid-template-columns: repeat(3, 1fr);
@@ -1844,9 +1816,6 @@ function DashboardPage() {
               }
 
               @media (min-width: 1024px) {
-                .kpi-grid {
-                  grid-template-columns: repeat(4, 1fr);
-                }
               }
             `}</style>
 

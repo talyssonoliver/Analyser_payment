@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SkeletonAnalysisPage } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
-import { UpdateAnalysisDialog } from '@/components/analysis/update-analysis-dialog';
+import { UpdateAnalysisDialog } from '@/components/analysis';
 import { 
   ArrowLeft, 
   Download, 

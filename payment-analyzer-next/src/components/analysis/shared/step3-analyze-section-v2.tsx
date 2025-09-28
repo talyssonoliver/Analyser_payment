@@ -7,11 +7,11 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   populateStep3Content,
   displayAnalysisResults,
   type GlobalState as ContentGeneratorState
-} from './step3-content-generator';
+} from '../legacy/step3-content-generator';
 import { ManualEntry } from '@/types/core';
 
 // Type definitions for component
@@ -63,7 +63,7 @@ import {
   cleanupStep3EventListeners,
   updateAnalysisResultsDOM,
   type EventHandlerCallbacks
-} from './step3-event-handlers';
+} from '../legacy/step3-event-handlers';
 import { weekNavigationService, type WeekInfo } from '@/lib/services/week-navigation-service';
 
 // Interface matching the original global state

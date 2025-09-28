@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 /* ===== PAYMENT ANALYZER THEME SYSTEM ===== */
 /* Matching original HTML color scheme exactly */
@@ -33,6 +33,19 @@
   --bottom-nav-height: 60px;
   --safe-area-bottom: env(safe-area-inset-bottom, 0);
   --header-height: 50px;
+  /* === Spacing Scale === */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --page-padding-inline: clamp(0.5rem, 1vw, 1rem);
+  --page-padding-block: clamp(0.5rem, 2vw, 1rem);
+  --section-gap: clamp(0.5rem, 1vw, 1rem);
   
   /* === Semantic Color Mapping === */
   --background: var(--slate-50);
@@ -69,6 +82,25 @@
   --gradient-header: linear-gradient(135deg, #ffffff 0%, var(--slate-50) 100%);
 }
 
+
+.page-shell {
+  width: min(100%, 1200px);
+  margin-inline: auto;
+  padding-inline: var(--page-padding-inline);
+  padding-block: var(--page-padding-block);
+}
+
+.page-shell--wide {
+  width: min(100%, 1400px);
+  margin-inline: auto;
+  padding-inline: var(--page-padding-inline);
+  padding-block: var(--page-padding-block);
+}
+
+.page-section {
+  display: grid;
+  gap: var(--section-gap);
+}
 /* === Theme-aware Components === */
 .theme-background {
   background: var(--gradient-background);
@@ -159,30 +191,69 @@ body {
   --foreground: var(--primary);
 }
 
-.dark:root {
-  /* Dark theme would go here if needed in the future */
+.dark {
+  /* === Dark Theme Colors === */
+  --primary: #f1f5f9;
+  --primary-light: #e2e8f0;
+  --accent: #60a5fa;
+  --accent-dark: #3b82f6;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+
+  /* === Dark Semantic Color Mapping === */
   --background: var(--slate-900);
   --foreground: var(--slate-100);
+  --muted: var(--slate-400);
+  --muted-foreground: var(--slate-300);
+  --card: #1e293b;
+  --card-foreground: var(--slate-100);
+  --border: var(--slate-700);
+  --input: var(--slate-800);
+  --ring: var(--accent);
+
+  /* === Dark Component Colors === */
+  --button-primary: var(--accent);
+  --button-primary-hover: var(--accent-dark);
+  --button-secondary: var(--slate-700);
+  --button-secondary-hover: var(--slate-600);
+  --button-danger: var(--danger);
+  --button-danger-hover: #dc2626;
+
+  /* === Dark Status Colors === */
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-error: var(--danger);
+  --status-info: var(--accent);
+
+  /* === Dark Gradient Definitions === */
+  --gradient-primary: linear-gradient(135deg, var(--slate-800) 0%, var(--slate-700) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  --gradient-success: linear-gradient(135deg, var(--success) 0%, #10b981 100%);
+  --gradient-warning: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+  --gradient-danger: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+  --gradient-background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  --gradient-header: linear-gradient(135deg, var(--slate-800) 0%, var(--slate-700) 100%);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    /* Auto dark theme detection - disabled for now to match original */
-    /* Original uses light theme only */
+  :root:not(.light):not(.dark) {
+    /* Apply dark theme variables when system prefers dark and no explicit theme is set */
+    /* This enables system theme preference support */
+    --primary: #f1f5f9;
+    --primary-light: #e2e8f0;
+    --accent: #60a5fa;
+    --accent-dark: #3b82f6;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --background: var(--slate-900);
+    --foreground: var(--slate-100);
+    --card: #1e293b;
+    --card-foreground: var(--slate-100);
+    --border: var(--slate-700);
+    --gradient-background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
   }
-}
-
-body {
-  font-family: var(--font-primary);
-  line-height: 1.6;
-  color: var(--foreground);
-  background: var(--gradient-background);
-  min-height: 100vh;
-  padding: 0;
-  margin: 0;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Ensure dark mode transitions work properly */
@@ -215,7 +286,6 @@ body {
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    color-adjust: exact !important;
   }
   
   /* Base print styles */
@@ -227,10 +297,16 @@ body {
   body {
     margin: 0;
     padding: 0;
-    background: white !important;
-    color: black !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  }
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    color: var(--foreground);
+    background: var(--gradient-background);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
   
   /* Hide non-printable elements */
   .no-print,
@@ -414,17 +490,6 @@ body {
   }
   
   /* KPI and stats styling */
-  .kpi-card,
-  .stat-card {
-    display: inline-block !important;
-    width: 48% !important;
-    margin: 0 1% 8pt 0 !important;
-    padding: 6pt !important;
-    border: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-    text-align: center !important;
-    page-break-inside: avoid !important;
-  }
   
   .kpi-value {
     font-size: 14pt !important;
@@ -634,12 +699,6 @@ body {
   }
   
   /* Prevent page breaks */
-  .kpi-card,
-  .report-header,
-  .settlement-breakdown {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
   
   /* Ensure spacing */
   .mb-2 {
@@ -656,26 +715,8 @@ body {
 }
 
 /* === Enhanced Report Styling === */
-.kpi-card {
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
-.kpi-card:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-  border-color: var(--accent);
-}
 
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  border-radius: 0 4px 4px 0;
-  transition: all 0.3s ease;
-}
 
 .report-header::after {
   content: '';

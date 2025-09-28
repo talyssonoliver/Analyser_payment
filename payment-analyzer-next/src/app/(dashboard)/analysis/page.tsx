@@ -7,17 +7,20 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAnalysisSteps } from '@/hooks/use-analysis-steps';
-import { StepNavigation } from '@/components/analysis/step-navigation';
-import { ManualEntry } from '@/components/analysis/manual-entry';
-import { WorkflowCards } from '@/components/analysis/workflow-cards';
-import { EntryCards } from '@/components/analysis/entry-cards';
-import { Step3AnalyzeSectionV2 } from '@/components/analysis/step3-analyze-section-v2';
-import { FileUpload } from '@/components/analysis/file-upload';
-import { ValidationSystem } from '@/components/analysis/validation-badge-system';
-import { ProgressOverlay, useProgressOverlay } from '@/components/analysis/progress-overlay';
+import {
+  StepNavigation,
+  ManualEntry,
+  WorkflowCards,
+  EntryCards,
+  Step3AnalyzeSectionV2,
+  FileUpload,
+  ValidationSystem,
+  ProgressOverlay,
+  useProgressOverlay,
+  FileValidationPanel,
+  InlineReportModal
+} from '@/components/analysis';
 import { RecoveryBanner } from '@/components/ui/recovery-banner';
-import { FileValidationPanel } from '@/components/analysis/file-validation-panel';
-import { InlineReportModal } from '@/components/analysis/inline-report-modal';
 import { SessionRecoveryService, RecoveryBanner as RecoveryBannerType } from '@/lib/services/session-recovery-service';
 import { FileFingerprintService } from '@/lib/services/file-fingerprint-service';
 import { Step3AnalysisService, Step3AnalysisData } from '@/lib/services/step3-analysis-service';
