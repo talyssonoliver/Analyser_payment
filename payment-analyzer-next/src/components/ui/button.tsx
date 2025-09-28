@@ -77,6 +77,7 @@ const buttonVariants = cva(
         md: 'h-10 px-4 text-sm',
         lg: 'h-12 px-6 text-base',
         xl: 'h-14 px-8 text-lg',
+        cta: 'px-5 py-3.5 text-sm font-semibold',
         icon: 'h-10 w-10 p-0',
       },
     },
@@ -90,7 +91,7 @@ const buttonVariants = cva(
 export interface ButtonProps 
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'ghost' | 'outline';
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'icon';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'cta' | 'icon';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -118,7 +119,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
       {isLoading && (
         <div className="relative flex items-center justify-center">
           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          <div className="absolute w-3 h-3 border border-current border-t-transparent rounded-full animate-spin animate-ping opacity-30" style={{ animationDelay: '0.5s' }} />
+          <div className="absolute w-3 h-3 border border-current border-t-transparent rounded-full animate-spin opacity-30" style={{ animationDelay: '0.5s' }} />
         </div>
       )}
 

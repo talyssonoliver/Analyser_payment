@@ -65,10 +65,10 @@ const navigationItems: NavigationItem[] = [
 ];
 
 export interface BottomNavigationProps {
-  currentPage?: string;
-  visible?: boolean;
-  badges?: Record<string, number>;
-  className?: string;
+  readonly currentPage?: string;
+  readonly visible?: boolean;
+  readonly badges?: Record<string, number>;
+  readonly className?: string;
 }
 
 export function BottomNavigation({
@@ -200,10 +200,10 @@ export function AnalysisNavigation({
   onStepClick,
   className,
 }: {
-  currentStep: number;
-  totalSteps: number;
-  onStepClick?: (step: number) => void;
-  className?: string;
+  readonly currentStep: number;
+  readonly totalSteps: number;
+  readonly onStepClick?: (step: number) => void;
+  readonly className?: string;
 }) {
   const steps = ['Upload', 'Validate', 'Results'];
 

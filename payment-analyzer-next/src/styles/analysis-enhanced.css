@@ -1,4 +1,4 @@
-/* Enhanced Analysis Styles - Matching Original HTML */
+﻿/* Enhanced Analysis Styles - Matching Original HTML */
 
 /* === Core Legacy Classes from Original HTML === */
 
@@ -239,65 +239,13 @@
 
 /* Upload Section Enhanced */
 .upload-section-enhanced {
+  padding: 16px;
   margin-bottom: 32px;
 }
-
-/* === End Legacy Classes === */
 
 /* Week Data Summary with gradient backgrounds */
 .week-data-summary {
   margin: 24px 0;
-}
-
-.week-data-summary .kpi-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-  border: 1px solid rgb(226, 232, 240);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
-
-.week-data-summary .kpi-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
-/* Enhanced KPI Cards */
-.kpi-card.enhanced {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgb(226, 232, 240);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.kpi-card.enhanced:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-/* Primary KPI Cards */
-.kpi-card.primary {
-  border: 1px solid rgb(59, 130, 246);
-  background: linear-gradient(135deg, #dbeafe 0%, #ffffff 100%);
-}
-
-.kpi-card.success {
-  border: 1px solid rgb(34, 197, 94);
-  background: linear-gradient(135deg, #dcfce7 0%, #ffffff 100%);
-}
-
-.kpi-card.danger {
-  border: 1px solid rgb(239, 68, 68);
-  background: linear-gradient(135deg, #fee2e2 0%, #ffffff 100%);
-}
-
-.kpi-card.warning {
-  border: 1px solid rgb(245, 158, 11);
-  background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
-}
-
-.kpi-card.info {
-  border: 1px solid rgb(156, 163, 175);
-  background: linear-gradient(135deg, #f3f4f6 0%, #ffffff 100%);
 }
 
 /* Analysis Summary Section */
@@ -392,15 +340,8 @@
     padding: 16px;
   }
   
-  .kpi-card.enhanced {
-    padding: 12px;
-  }
   
   /* KPI Grid - Mobile adjustments */
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-  }
   
   /* Weekly breakdown table - Mobile responsive */
   .weekly-breakdown-table {
@@ -438,9 +379,6 @@
 
 /* Tablet Responsive */
 @media (max-width: 768px) and (min-width: 641px) {
-  .kpi-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
   
   .payment-breakdown-grid {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -449,9 +387,6 @@
 
 /* Large Mobile (Portrait) */
 @media (max-width: 480px) {
-  .kpi-card.enhanced {
-    padding: 8px;
-  }
   
   .summary-card-enhanced {
     padding: 12px;
@@ -518,30 +453,13 @@
   }
   
   /* KPI Cards - print optimized */
-  .kpi-card.enhanced,
-  .summary-card-enhanced {
-    background: white !important;
-    box-shadow: none !important;
-    border: 1pt solid #666 !important;
-    page-break-inside: avoid;
-    margin-bottom: 6pt !important;
-  }
   
   .summary-card-enhanced::before {
     display: none !important;
   }
 
   /* KPI grid for print - max 5 per row */
-  .kpi-grid {
-    display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important;
-    gap: 6pt !important;
-    margin-bottom: 10pt !important;
-  }
 
-  .kpi-card.enhanced:nth-child(n+6) {
-    display: none !important;
-  }
 
   /* KPI values - print typography */
   .kpi-label {
@@ -1007,10 +925,6 @@
 /* Touch-friendly interactions on mobile */
 @media (max-width: 640px) {
   .summary-card-enhanced,
-  .kpi-card.enhanced {
-    min-height: 44px; /* iOS touch target minimum */
-    cursor: pointer;
-  }
   
   /* Larger tap targets for buttons */
   .analysis-actions button {
@@ -1083,7 +997,6 @@
 
 .upload-area {
   background: white;
-  border: 3px dashed var(--slate-300);
   border-radius: 16px;
   padding: 40px 20px;
   text-align: center;

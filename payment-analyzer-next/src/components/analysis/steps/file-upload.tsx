@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useCallback, useState, useRef, useEffect, ComponentType } from 'react';
+import { useCallback, useState, useRef, useEffect, ComponentType, useMemo } from 'react';
 import { 
   loadFramerMotion, 
   StaticDiv, 
@@ -14,7 +14,6 @@ import {
   type AnimatePresenceProps 
 } from '@/lib/optimization/dynamic-motion';
 import { 
-  Upload, 
   File, 
   X, 
   FileText, 
@@ -39,20 +38,18 @@ export interface UploadedFile {
 
 export interface FileUploadProps {
   readonly onFilesSelected?: (files: File[]) => void;
-  onFilesAdded?: (files: File[]) => void;
-  onFileRemoved?: (fileId: string) => void;
-  onClearAll?: () => void;
-  uploadedFiles?: UploadedFile[];
-  maxFiles?: number;
-  maxFileSize?: number; // in bytes
-  maxSizePerFile?: number; // in bytes (legacy compatibility)
-  acceptedTypes?: readonly string[];
-  disabled?: boolean;
-  isProcessing?: boolean;
-  accept?: string;
-  multiple?: boolean;
-  className?: string;
-  showProgressSimulation?: boolean;
+  readonly onFilesAdded?: (files: File[]) => void;
+  readonly onFileRemoved?: (fileId: string) => void;
+  readonly onClearAll?: () => void;
+  readonly uploadedFiles?: UploadedFile[];
+  readonly maxFiles?: number;
+  readonly maxFileSize?: number;
+  readonly maxSizePerFile?: number;
+  readonly acceptedTypes?: readonly string[];
+  readonly disabled?: boolean;
+  readonly isProcessing?: boolean;
+  readonly className?: string;
+  readonly showProgressSimulation?: boolean;
 }
 
 export function FileUpload({
@@ -71,13 +68,15 @@ export function FileUpload({
   showProgressSimulation = false,
 }: FileUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [, setDragCounter] = useState(0);
+  const [dragCounter, setDragCounter] = useState(0);
   const [internalUploadedFiles, setInternalUploadedFiles] = useState<UploadedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Use external uploaded files if provided, otherwise use internal state
   const uploadedFiles = externalUploadedFiles || internalUploadedFiles;
-  const setUploadedFiles = externalUploadedFiles ? () => {} : setInternalUploadedFiles;
+  const setUploadedFiles = useMemo(
+    () => externalUploadedFiles ? () => {} : setInternalUploadedFiles,
+    [externalUploadedFiles]
+  );
 
   // Use legacy prop if provided
   const effectiveMaxFileSize = maxSizePerFile || maxFileSize;
@@ -118,14 +117,12 @@ export function FileUpload({
   const handleDragOut = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragCounter(prev => {
-      const newCounter = prev - 1;
-      if (newCounter === 0) {
-        setIsDragOver(false);
-      }
-      return newCounter;
-    });
-  }, []);
+    const newCounter = dragCounter - 1;
+    if (newCounter === 0) {
+      setIsDragOver(false);
+    }
+    setDragCounter(newCounter);
+  }, [dragCounter]);
 
   // Detect file type based on filename (from legacy component)
   const detectFileType = useCallback((filename: string): 'runsheet' | 'invoice' | 'unknown' => {
@@ -183,7 +180,38 @@ export function FileUpload({
     return { valid, errors };
   }, [uploadedFiles, maxFiles, effectiveMaxFileSize, acceptedTypes]);
 
-  // Process files with optional progress simulation
+  const simulateFileUpload = useCallback(async (uploadedFile: UploadedFile) => {
+    for (let progress = 0; progress <= 100; progress += 10) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setUploadedFiles(prev => prev.map(f =>
+        f.id === uploadedFile.id ? { ...f, progress } : f
+      ));
+    }
+  }, [setUploadedFiles]);
+
+  const simulateFileProcessing = useCallback(async (uploadedFile: UploadedFile) => {
+    setUploadedFiles(prev => prev.map(f =>
+      f.id === uploadedFile.id ? { ...f, status: 'processing', progress: 0 } : f
+    ));
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setUploadedFiles(prev => prev.map(f =>
+      f.id === uploadedFile.id ? { ...f, status: 'success', progress: 100 } : f
+    ));
+  }, [setUploadedFiles]);
+
+  const handleFileError = useCallback((uploadedFile: UploadedFile) => {
+    setUploadedFiles(prev => prev.map(f =>
+      f.id === uploadedFile.id ? { ...f, status: 'error', error: 'Processing failed' } : f
+    ));
+  }, [setUploadedFiles]);
+
+  const markFilesAsSuccess = useCallback((newFiles: UploadedFile[]) => {
+    const newFileIds = new Set(newFiles.map(f => f.id));
+    setUploadedFiles(prev => prev.map(f =>
+      newFileIds.has(f.id) ? { ...f, status: 'success', progress: 100 } : f
+    ));
+  }, [setUploadedFiles]);
+
   const processFiles = useCallback(async (files: File[]) => {
     const newFiles: UploadedFile[] = files.map(file => ({
       file,
@@ -196,56 +224,21 @@ export function FileUpload({
     setUploadedFiles(prev => [...prev, ...newFiles]);
 
     if (showProgressSimulation) {
-      // Simulate file processing (from legacy component)
       for (const uploadedFile of newFiles) {
         try {
-          // Simulate upload progress
-          for (let progress = 0; progress <= 100; progress += 10) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            setUploadedFiles(prev => prev.map(f =>
-              f.id === uploadedFile.id
-                ? { ...f, progress }
-                : f
-            ));
-          }
-
-          // Switch to processing status
-          setUploadedFiles(prev => prev.map(f =>
-            f.id === uploadedFile.id
-              ? { ...f, status: 'processing', progress: 0 }
-              : f
-          ));
-
-          // Simulate processing
-          await new Promise(resolve => setTimeout(resolve, 1000));
-
-          // Mark as success
-          setUploadedFiles(prev => prev.map(f =>
-            f.id === uploadedFile.id
-              ? { ...f, status: 'success', progress: 100 }
-              : f
-          ));
+          await simulateFileUpload(uploadedFile);
+          await simulateFileProcessing(uploadedFile);
         } catch {
-          setUploadedFiles(prev => prev.map(f =>
-            f.id === uploadedFile.id
-              ? { ...f, status: 'error', error: 'Processing failed' }
-              : f
-          ));
+          handleFileError(uploadedFile);
         }
       }
     } else {
-      // Mark all as success immediately if no simulation
-      setUploadedFiles(prev => prev.map(f =>
-        newFiles.some(nf => nf.id === f.id)
-          ? { ...f, status: 'success', progress: 100 }
-          : f
-      ));
+      markFilesAsSuccess(newFiles);
     }
 
-    // Call both callbacks for compatibility
     onFilesSelected?.(files);
     onFilesAdded?.(files);
-  }, [detectFileType, setUploadedFiles, showProgressSimulation, onFilesSelected, onFilesAdded]);
+  }, [detectFileType, setUploadedFiles, showProgressSimulation, simulateFileUpload, simulateFileProcessing, handleFileError, markFilesAsSuccess, onFilesSelected, onFilesAdded]);
 
   const handleFiles = useCallback(async (files: FileList | File[]) => {
     if (disabled) return;
@@ -302,23 +295,6 @@ export function FileUpload({
     }
   };
 
-  // Legacy style file type icons for compatibility
-  const getFileTypeIcon = (fileType: UploadedFile['fileType']) => {
-    switch (fileType) {
-      case 'runsheet':
-        return <span className="text-blue-600">📦</span>;
-      case 'invoice':
-        return <span className="text-green-600">💰</span>;
-      default:
-        return <span className="text-gray-600">📄</span>;
-    }
-  };
-
-  // Remove file handler
-  const removeFile = useCallback((fileId: string) => {
-    setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
-    onFileRemoved?.(fileId);
-  }, [setUploadedFiles, onFileRemoved]);
 
   const getStatusIcon = (file: UploadedFile) => {
     switch (file.status) {
@@ -349,9 +325,10 @@ export function FileUpload({
     <div className={cn('space-y-4', className)}>
       {/* Upload Area */}
       <Card
+        variant="secondary"
         className={cn(
           'relative transition-all duration-200 cursor-pointer',
-          'border-2 border-dashed',
+          'border-2 border-dashed min-h-[280px]',
           isDragOver 
             ? 'border-blue-500 bg-blue-50' 
             : 'border-slate-300 hover:border-slate-400',
@@ -377,29 +354,66 @@ export function FileUpload({
         />
 
         <div className="flex flex-col items-center justify-center text-center">
+          {/* Upload Icon */}
           <motionComponents.MotionDiv
             animate={isDragOver ? { scale: 1.1 } : { scale: 1 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="mb-6"
           >
-            <Upload className="w-12 h-12 text-slate-400 mb-4" />
+            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-1">
+              <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
           </motionComponents.MotionDiv>
 
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">
-            {isDragOver ? 'Drop files here' : 'Upload PDF Files'}
+          {/* Main Title */}
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">
+            {isDragOver ? 'Drop files here' : 'Drag & Drop Files Here'}
           </h3>
 
-          <p className="text-sm text-slate-600 mb-4">
-            Drag and drop your PDF files here, or click to browse
+          {/* Subtitle with browse link */}
+          <p className="text-sm text-slate-600 mb-6">
+            or <button 
+              onClick={openFileDialog}
+              className="text-blue-600 hover:text-blue-700 underline font-medium"
+              type="button"
+            >
+              browse files
+            </button> from your device
           </p>
 
-          <div className="text-xs text-slate-500 space-y-1">
-            <div>Maximum {maxFiles} files</div>
-            <div>Up to {formatFileSize(effectiveMaxFileSize)} per file</div>
-            <div>PDF files only</div>
+          {/* Requirements */}
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-center gap-2 text-slate-600">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+              <span>PDF files only</span>
+            </div>
+            
+            <div className="flex items-center justify-center gap-2 text-slate-600">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              </svg>
+              <span>Runsheets & Invoices</span>
+            </div>
+            
+            <div className="flex items-center justify-center gap-2 text-slate-600">
+              <span className="text-lg">⚡</span>
+              <span>Max {formatFileSize(effectiveMaxFileSize)} per file</span>
+            </div>
           </div>
 
           {uploadedFiles.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-6">
               <Badge variant="info">
                 {uploadedFiles.length} / {maxFiles} files
               </Badge>
@@ -501,6 +515,8 @@ export function FileUpload({
           </div>
         </Card>
       )}
+
+
     </div>
   );
 }

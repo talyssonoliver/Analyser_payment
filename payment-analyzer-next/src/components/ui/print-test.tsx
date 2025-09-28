@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Print Test Component
  * Demonstrates A4 print optimization with sample financial data
  */
@@ -6,6 +6,15 @@
 'use client';
 
 import React from 'react';
+import { KPICard } from '@/components/ui/kpi-card';
+
+const currencyFormatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'GBP',
+  minimumFractionDigits: 2,
+});
+
+const formatCurrency = (value: number) => currencyFormatter.format(value);
 
 export function PrintTestPage() {
   const handlePrint = () => {
@@ -110,25 +119,31 @@ export function PrintTestPage() {
         </div>
 
         {/* KPI Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="kpi-card">
-            <div className="kpi-label">Expected Total</div>
-            <div className="kpi-value currency">£{sampleData.totals.expected.toFixed(2)}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Paid Amount</div>
-            <div className="kpi-value currency">£{sampleData.totals.paid.toFixed(2)}</div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Difference</div>
-            <div className={`kpi-value currency ${sampleData.totals.difference >= 0 ? 'positive' : 'negative'}`}>
-              £{sampleData.totals.difference.toFixed(2)}
-            </div>
-          </div>
-          <div className="kpi-card">
-            <div className="kpi-label">Consignments</div>
-            <div className="kpi-value">{sampleData.totals.consignments}</div>
-          </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <KPICard
+            label="Expected Total"
+            value={formatCurrency(sampleData.totals.expected)}
+            tone="info"
+          />
+          <KPICard
+            label="Paid Amount"
+            value={formatCurrency(sampleData.totals.paid)}
+            tone="success"
+          />
+          <KPICard
+            label="Difference"
+            value={formatCurrency(sampleData.totals.difference)}
+            tone={sampleData.totals.difference >= 0 ? 'success' : 'danger'}
+            description={sampleData.totals.difference >= 0 ? 'Overpaid' : 'Underpaid'}
+            trendDirection={sampleData.totals.difference > 0 ? 'up' : sampleData.totals.difference < 0 ? 'down' : 'flat'}
+            trend={Math.abs(sampleData.totals.difference).toFixed(2) + ' variance'}
+          />
+          <KPICard
+            label="Consignments"
+            value={sampleData.totals.consignments}
+            description="Total deliveries"
+            tone="primary"
+          />
         </div>
 
         {/* Analysis Table */}
@@ -198,19 +213,22 @@ export function PrintTestPage() {
         {/* Summary Section */}
         <div className="summary-section page-break-after">
           <div className="summary-title">Settlement Summary</div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="kpi-card">
-              <div className="kpi-label">Consignment Payments</div>
-              <div className="kpi-value currency">£{sampleData.dailyEntries.reduce((sum, entry) => sum + entry.basePay, 0).toFixed(2)}</div>
-            </div>
-            <div className="kpi-card">
-              <div className="kpi-label">Bonuses</div>
-              <div className="kpi-value currency">£{sampleData.dailyEntries.reduce((sum, entry) => sum + entry.bonuses.unloading + entry.bonuses.attendance + entry.bonuses.early, 0).toFixed(2)}</div>
-            </div>
-            <div className="kpi-card">
-              <div className="kpi-label">Total Expected</div>
-              <div className="kpi-value currency">£{sampleData.totals.expected.toFixed(2)}</div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <KPICard
+              label="Consignment Payments"
+              value={formatCurrency(sampleData.dailyEntries.reduce((sum, entry) => sum + entry.basePay, 0))}
+              tone="info"
+            />
+            <KPICard
+              label="Bonuses"
+              value={formatCurrency(sampleData.dailyEntries.reduce((sum, entry) => sum + entry.bonuses.unloading + entry.bonuses.attendance + entry.bonuses.early, 0))}
+              tone="success"
+            />
+            <KPICard
+              label="Total Expected"
+              value={formatCurrency(sampleData.totals.expected)}
+              tone="primary"
+            />
           </div>
         </div>
 
@@ -222,3 +240,4 @@ export function PrintTestPage() {
     </div>
   );
 }
+

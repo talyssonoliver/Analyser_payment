@@ -14,11 +14,11 @@ interface DailyEntry {
 }
 
 interface EntryCardsProps {
-  entries: DailyEntry[];
-  onEditEntry: (entryId: number) => void;
+  readonly entries: DailyEntry[];
+  readonly onEditEntry: (entryId: number) => void;
 }
 
-export function EntryCards({ entries, onEditEntry }: EntryCardsProps) {
+export function EntryCards({ entries, onEditEntry }: Readonly<EntryCardsProps>) {
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     const options: Intl.DateTimeFormatOptions = { 
@@ -48,16 +48,19 @@ export function EntryCards({ entries, onEditEntry }: EntryCardsProps) {
   return (
     <div className="manual-entries-display">
       <h3 className="entries-title text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-        <span className="text-2xl">📋</span>
+        <span className="text-2xl" aria-hidden="true">📋</span>
+        {' '}
         Your Daily Entries
       </h3>
       <div className="manual-entries-list space-y-4 max-h-64 overflow-y-auto pr-2">
         {entries.map((entry, index) => (
-          <div
+          <button
             key={entry.id}
-            className="step2-entry-card bg-gradient-to-br from-white to-slate-50 rounded-xl p-5 hover:from-slate-50 hover:to-slate-100 transition-all duration-300 cursor-pointer border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transform hover:scale-102 hover:-translate-y-1 group relative overflow-hidden"
+            type="button"
+            className="step2-entry-card bg-gradient-to-br from-white to-slate-50 rounded-xl p-5 hover:from-slate-50 hover:to-slate-100 transition-all duration-300 cursor-pointer border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/10 transform hover:scale-102 hover:-translate-y-1 group relative overflow-hidden w-full text-left"
             onClick={() => onEditEntry(entry.id)}
             style={{ animationDelay: `${index * 0.1}s` }}
+            aria-label={`Edit entry for ${formatDate(entry.date)}`}
           >
             {/* Hover gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -126,7 +129,7 @@ export function EntryCards({ entries, onEditEntry }: EntryCardsProps) {
                 </div>
               </div>
 
-              {/* Enhanced Edit Indicator */}
+              {/* Edit Indicator */}
               <div className="ml-4 flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 group-hover:bg-blue-100 text-slate-400 group-hover:text-blue-600 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
@@ -136,7 +139,7 @@ export function EntryCards({ entries, onEditEntry }: EntryCardsProps) {
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 animate-ping" />
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       

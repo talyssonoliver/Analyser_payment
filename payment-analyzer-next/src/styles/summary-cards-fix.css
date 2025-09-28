@@ -1,0 +1,85 @@
+/* Summary Cards Fix - Prevent overlap */
+
+.legacy-summary {
+  width: 100%;
+  overflow: visible;
+}
+
+.summary-title {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Fix the grid layout to prevent overflow */
+.summary-cards {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 1rem !important;
+  margin-bottom: 2rem !important;
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+/* Ensure cards don't overflow their container */
+.summary-card {
+  min-height: 140px !important;
+  padding: 1.5rem !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  word-wrap: break-word !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .summary-cards {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .summary-card {
+    min-height: 120px !important;
+    padding: 1rem !important;
+  }
+
+  .summary-card .text-2xl {
+    font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .summary-cards {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .summary-card {
+    min-height: 100px !important;
+  }
+}
+
+/* Fix text overflow in card values */
+.summary-card > div:last-child {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Ensure proper spacing */
+.summary-card h4 {
+  margin-bottom: 0.5rem !important;
+}
+
+.summary-card p {
+  margin-top: 0.5rem !important;
+  line-height: 1.2 !important;
+}
+
+/* Fix icon positioning */
+.summary-card .text-2xl:not(.font-bold) {
+  flex-shrink: 0 !important;
+}

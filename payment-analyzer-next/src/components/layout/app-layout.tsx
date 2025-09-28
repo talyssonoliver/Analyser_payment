@@ -58,11 +58,11 @@ export function AppLayout({
         {/* Main Content */}
         <main className={cn(
           'flex-1 overflow-x-hidden',
-          !isDesktop && 'pb-16', // Padding for mobile bottom nav only on mobile
+          !isDesktop && 'pb-[calc(var(--bottom-nav-height)+var(--safe-area-bottom)+1.5rem)]', // mobile bottom nav clearance
         )}>
           <div className={cn(
-            'w-full max-w-7xl mx-auto',
-            'px-1 pt-0.5 pb-3 md:px-4 md:py-6',
+            'page-shell w-full',
+            'py-2 sm:py-3 lg:py-4',
           )}>
             {children}
           </div>
@@ -109,9 +109,11 @@ export function FullWidthLayout({
       {/* Main Content - Full Width */}
       <main className={cn(
         'flex-1 overflow-x-hidden',
-        'pb-16 md:pb-0', // Space for bottom nav
+        'pb-[calc(var(--bottom-nav-height)+var(--safe-area-bottom)+1.5rem)] md:pb-10',
       )}>
-        {children}
+        <div className="w-full px-4 sm:px-6 lg:px-10 py-6 sm:py-8 lg:py-10">
+          {children}
+        </div>
       </main>
 
       {/* Bottom Navigation (Mobile Only) */}
@@ -162,8 +164,8 @@ export function CenteredLayout({
       {/* Main Content - Centered */}
       <main className={cn(
         'flex-1 flex items-center justify-center',
-        'px-4 py-8',
-        'pb-24 md:pb-8', // Extra space for bottom nav
+        'px-4 py-8 sm:px-6 sm:py-10 lg:py-12',
+        'pb-[calc(var(--bottom-nav-height)+var(--safe-area-bottom)+2rem)] md:pb-12',
       )}>
         <div className={cn(
           'w-full',

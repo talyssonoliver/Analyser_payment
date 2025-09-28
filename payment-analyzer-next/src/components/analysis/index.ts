@@ -24,21 +24,7 @@ export { EntryCards } from './shared/entry-cards';
 export { WorkflowCards } from './shared/workflow-cards';
 export { Step3AnalyzeSectionV2 } from './shared/step3-analyze-section-v2';
 
-// Legacy - Legacy/compatibility exports
-export {
-  generateStep3SummaryCards,
-  generateWeekSummary,
-  generateAnalysisActions,
-  populateStep3Content,
-  displayAnalysisResults
-} from './legacy/step3-content-generator';
-export {
-  attachStep3EventListeners,
-  toggleWeekExpansion,
-  testWeekToggle,
-  cleanupStep3EventListeners,
-  updateAnalysisResultsDOM
-} from './legacy/step3-event-handlers';
+// Legacy exports removed - replaced with pure React components in results/
 
 // Types
 export type { UploadedFile } from './steps/file-upload';

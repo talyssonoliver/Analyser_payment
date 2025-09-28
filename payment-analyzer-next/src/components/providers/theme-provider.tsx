@@ -37,18 +37,16 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const theme = preferences.display.theme;
   const originalColors = useOriginalColors();
 
-  // Get the effective theme - Payment Analyzer uses light theme primarily
+  // Get the effective theme - now supports full theme switching
   const getEffectiveTheme = useCallback((): 'light' | 'dark' => {
-    // For now, always return light to match original Payment Analyzer
-    // Future versions could support dark theme
     if (theme === 'system') {
       if (typeof window !== 'undefined') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'light';
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
       return 'light';
     }
-    // Force light theme for consistency with original
-    return 'light';
+    // Respect user's explicit theme choice
+    return theme === 'dark' ? 'dark' : 'light';
   }, [theme]);
 
   const [effectiveTheme, setEffectiveTheme] = React.useState<'light' | 'dark'>('light');
@@ -78,9 +76,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     
     // Remove existing theme classes
     root.classList.remove('light', 'dark');
-    
-    // Add current theme class (always light for original consistency)
-    root.classList.add('light');
+
+    // Add current theme class based on effective theme
+    root.classList.add(effectiveTheme);
     
     // Apply Payment Analyzer original color scheme using CSS variables
     // These match the globals.css :root variables exactly

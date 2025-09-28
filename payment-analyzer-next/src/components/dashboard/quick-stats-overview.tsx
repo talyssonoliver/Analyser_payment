@@ -122,7 +122,7 @@ export function QuickStatsOverview({
     return (
       <div className={`space-y-6 ${className}`} style={{ isolation: 'isolate', contain: 'layout' }}>
         {/* Loading skeleton for stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4">
           {Array.from({ length: 4 }, (_, i) => (
             <Card key={`stat-skeleton-${i}`}>
               <CardHeader className="pb-3">

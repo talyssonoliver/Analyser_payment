@@ -51,9 +51,7 @@ export function ThemeProvider({
       effectiveTheme = theme;
     }
     
-    // For now, always use light theme to match original
-    // The original Payment Analyzer uses light theme exclusively
-    effectiveTheme = 'light';
+    // Use the resolved theme - now supports dark mode
     
     root.classList.remove('light', 'dark');
     root.classList.add(effectiveTheme);

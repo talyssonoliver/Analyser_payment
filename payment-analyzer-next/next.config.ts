@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
     // Only the most impactful optimizations
     optimizePackageImports: [
       'recharts',
-      'framer-motion', 
+      'framer-motion',
       'date-fns',
       'lucide-react',
       '@radix-ui/react-label',

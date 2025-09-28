@@ -94,6 +94,21 @@ declare module '@supabase/supabase-js' {
   export function createClient(url: string, key: string, options?: StringKeyObject): SupabaseClient;
 }
 
+// CSS module declarations - supports CSS modules with default export
+declare module '*.module.css' {
+  const content: { [className: string]: string };
+  export default content;
+}
+
+// Support for side-effect CSS imports (no export) - specific files
+declare module '@/styles/analysis-enhanced.css';
+declare module '@/styles/step3-enhanced-v2.css';
+declare module '@/styles/legacy-step2.css';
+declare module '@/styles/step-navigation.css';
+declare module '@/styles/step3-enhanced.css';
+declare module '@/styles/summary-cards-fix.css';
+declare module '@/styles/toast-legacy.css';
+
 declare global {
   interface Window {
     pdfjsLib: import('./core').PDFJSLib;
