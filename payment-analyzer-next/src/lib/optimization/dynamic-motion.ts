@@ -54,8 +54,7 @@ export const StaticDiv: React.FC<MotionDivProps> = ({
   children,
   className,
   style,
-  onClick,
-  ...rest
+  onClick
 } = {}) => {
   // Return a regular div, ignoring all motion props
   return React.createElement('div', {

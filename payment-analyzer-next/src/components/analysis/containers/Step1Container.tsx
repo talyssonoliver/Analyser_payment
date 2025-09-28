@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { FileUpload, ManualEntry } from '@/components/analysis';
 import { RecoveryBanner } from '@/components/ui/recovery-banner';
 import { SessionRecoveryService, RecoveryBanner as RecoveryBannerType } from '@/lib/services/session-recovery-service';
@@ -9,18 +8,31 @@ import { FileFingerprintService } from '@/lib/services/file-fingerprint-service'
 import { toast } from '@/lib/utils/toast';
 import { InputMethod } from '@/hooks/use-analysis-steps';
 
+interface DailyEntry {
+  id: number;
+  date: string;
+  day: string;
+  consignments: number;
+  baseAmount: number;
+  totalPay: number;
+  pickups: number;
+  earlyArrive: number;
+  attendanceBonus: number;
+  unloadingBonus: number;
+}
+
 export interface Step1ContainerProps {
   // Core data and state
   inputMethod: InputMethod;
   uploadedFiles: File[];
-  manualEntries: any[];
+  manualEntries: DailyEntry[];
   currentStep: number;
 
   // Handlers from main page
   onInputMethodChange: (method: InputMethod) => void;
   onFilesUploaded: (files: File[]) => void;
-  onManualEntriesChanged: (entries: any[]) => void;
-  onStepComplete: (data: { files?: File[], entries?: any[] }) => void;
+  onManualEntriesChanged: (entries: DailyEntry[]) => void;
+  onStepComplete: (data: { files?: File[], entries?: DailyEntry[] }) => void;
   onError: (error: string) => void;
 
   // Additional handlers
@@ -41,7 +53,6 @@ export function Step1Container({
   onEditEntry,
   disabled = false
 }: Step1ContainerProps) {
-  const router = useRouter();
 
   // Session recovery state
   const [recoveryData, setRecoveryData] = useState<RecoveryBannerType | null>(null);
@@ -130,18 +141,6 @@ export function Step1Container({
     toast.success('Manual entry added!');
   };
 
-  // Handle editing an entry
-  const handleEditEntry = (entryId: number) => {
-    const entryToEdit = manualEntries.find(entry => entry.id === entryId);
-    if (entryToEdit) {
-      // For now, show modal with entry data - full edit implementation would require form state management
-      setShowManualEntryModal(true);
-      toast.info(`Editing entry for ${entryToEdit.date}`);
-    }
-    if (onEditEntry) {
-      onEditEntry(entryId);
-    }
-  };
 
   // Get button text based on current state
   const getButtonText = () => {

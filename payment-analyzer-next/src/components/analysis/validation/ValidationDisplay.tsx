@@ -18,11 +18,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useFileValidation } from '@/hooks/use-file-validation';
-import { useFingerprintValidation } from '@/hooks/use-fingerprint-validation';
 import {
   ValidationDisplayProps,
-  IssueType,
   combineValidationResults,
   formatFileSize
 } from './types';

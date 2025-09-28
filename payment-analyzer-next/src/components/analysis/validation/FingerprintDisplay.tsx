@@ -9,7 +9,6 @@
 import React from 'react';
 import { Info } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useFingerprintValidation } from '@/hooks/use-fingerprint-validation';
 import {
   FingerprintDisplayProps,
   getFileKey
@@ -188,8 +187,8 @@ function formatFileSize(bytes: number): string {
  */
 function getFileSummary(
   files: File[],
-  fileComparisons: Record<string, any>,
-  getFileIndicator: (file: File) => any
+  fileComparisons: Record<string, { isDuplicate?: boolean; hasChanged?: boolean; changeType?: string; previousFingerprint?: { processedAt: string; analysisId?: string; md5Hash: string; sha256Hash: string } }>,
+  getFileIndicator: (file: File) => { icon: string; text: string; variant: string; description: string }
 ): Array<{ label: string; count: number; color: string }> {
   const summary = {
     new: 0,

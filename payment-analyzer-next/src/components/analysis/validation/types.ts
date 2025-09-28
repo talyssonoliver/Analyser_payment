@@ -144,7 +144,7 @@ export function combineValidationResults(
     existingAnalysis: null
   };
 
-  const { isValid, errors, warnings, isUpdated, duplicateFiles, existingAnalysis } = mergedValidation;
+  const { isValid, errors, warnings, isUpdated, duplicateFiles } = mergedValidation;
 
   // Include fingerprint-specific issues
   const fingerprintDuplicates = fingerprintValidation?.duplicates ?? [];

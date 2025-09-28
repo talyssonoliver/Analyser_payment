@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, ComponentType, useState } from 'react';
+import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn, formatFileSize } from '@/lib/utils';
@@ -28,7 +28,7 @@ export function FileUploadArea({
   isProcessing,
 }: FileUploadAreaProps) {
   // Simple motion component - just use a regular div for now
-  const MotionDiv = ({ children, className, animate, transition, ...props }: any) => (
+  const MotionDiv = ({ children, className, ...props }: { children: React.ReactNode; className?: string; [key: string]: unknown }) => (
     <div className={className} {...props}>
       {children}
     </div>

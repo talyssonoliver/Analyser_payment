@@ -12,7 +12,6 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ValidationResult } from '@/lib/domain/services/file-validation-service';
 import { FingerprintValidation } from '@/lib/services/file-fingerprint-service';
-import { useFileValidation } from '@/hooks/use-file-validation';
 import { useFingerprintValidation } from '@/hooks/use-fingerprint-validation';
 import ValidationDisplay from './ValidationDisplay';
 import FingerprintDisplay from './FingerprintDisplay';

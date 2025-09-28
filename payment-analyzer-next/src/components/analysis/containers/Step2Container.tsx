@@ -12,7 +12,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import { BarChart, FileText, File } from 'lucide-react';
 import {
   ValidationSystem,
@@ -35,13 +35,13 @@ interface DailyEntry {
 }
 
 interface Step2ContainerProps {
-  files: File[];
-  entries: DailyEntry[];
-  onStepComplete: () => void;
-  onEditEntry?: (entryId: number) => void;
-  onAddMoreDays?: () => void;
-  onError: (error: string) => void;
-  className?: string;
+  readonly files: File[];
+  readonly entries: DailyEntry[];
+  readonly onStepComplete: () => void;
+  readonly onEditEntry?: (entryId: number) => void;
+  readonly onAddMoreDays?: () => void;
+  readonly onError: (error: string) => void;
+  readonly className?: string;
 }
 
 export function Step2Container({
