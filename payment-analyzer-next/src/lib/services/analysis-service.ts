@@ -120,16 +120,19 @@ export class AnalysisService {
 
       // Generate fingerprint for duplicate detection
       let fingerprint: string | undefined;
+      let legacyFingerprint: string | undefined;
       if (request.files?.length) {
         const fingerprintResult = await this.fingerprintService.createFingerprint(request.files);
         fingerprint = fingerprintResult.fingerprint;
-        
-        // Check for duplicate
+        legacyFingerprint = fingerprintResult.legacyFingerprint;
+
+        // Check for duplicate using both modern and legacy fingerprints
         const { data: existingAnalysis } = await analysisRepository.findAnalysisByFingerprint(
           request.userId,
-          fingerprint
+          fingerprint,
+          legacyFingerprint
         );
-        
+
         if (existingAnalysis) {
           throw new Error(`Duplicate analysis detected. Analysis from ${new Date(existingAnalysis.created_at).toLocaleDateString()} already exists.`);
         }
@@ -198,6 +201,10 @@ export class AnalysisService {
           notes: request.metadata?.notes,
           fileCount: request.files?.length || 0,
           manualEntryCount: request.manualEntries?.length || 0,
+          // Dual fingerprint storage for backward compatibility
+          modernFingerprint: fingerprint,
+          legacyFingerprint: legacyFingerprint,
+          fingerprintVersion: 3, // Version 3 = dual fingerprint system
         },
       });
 
@@ -343,8 +350,16 @@ export class AnalysisService {
     }
 
     // Handle invoice data
-    if (data.type === 'invoice' && Array.isArray(data.entries)) {
-      this.processInvoiceData(data.entries, entries, paymentRules);
+    if (data.type === 'invoice') {
+      // Process regular invoice entries
+      if (Array.isArray(data.entries)) {
+        this.processInvoiceData(data.entries, entries, paymentRules);
+      }
+
+      // Process pickup services
+      if (Array.isArray(data.pickupServices) && data.pickupServices.length > 0) {
+        this.processPickupServices(data.pickupServices, entries, paymentRules);
+      }
     }
 
     return entries;
@@ -411,6 +426,61 @@ export class AnalysisService {
       } else {
         const newEntry = this.createDailyEntryFromInvoice(date, payment.amount, paymentRules);
         entries.push(newEntry);
+      }
+    }
+  }
+
+  /**
+   * Process pickup services and update daily entries
+   */
+  private processPickupServices(pickupServices: InvoiceEntry[], entries: DailyEntry[], paymentRules: PaymentRules): void {
+    for (const pickup of pickupServices) {
+      if (!pickup.date || !pickup.amount) {
+        console.warn('Invalid pickup service found:', pickup);
+        continue;
+      }
+      const date = new Date(pickup.date);
+      if (isNaN(date.getTime())) continue;
+
+      const existingEntry = entries.find(e =>
+        e.date.toDateString() === date.toDateString()
+      );
+
+      if (existingEntry) {
+        // Update existing entry with pickup data
+        const index = entries.indexOf(existingEntry);
+        const currentPickups = existingEntry.pickups?.count || 0;
+        const currentPickupTotal = existingEntry.pickupTotal?.amount || 0;
+
+        entries[index] = new DailyEntry({
+          analysisId: existingEntry.analysisId || '',
+          date: existingEntry.date,
+          consignments: existingEntry.consignments.count,
+          rate: existingEntry.rate.amount,
+          paidAmount: existingEntry.paidAmount.amount,
+          pickups: currentPickups + 1, // Increment pickup count
+          pickupTotal: currentPickupTotal + pickup.amount, // Add pickup amount
+          unloadingBonus: existingEntry.unloadingBonus.amount,
+          attendanceBonus: existingEntry.attendanceBonus.amount,
+          earlyBonus: existingEntry.earlyBonus.amount,
+        });
+      } else {
+        // Create new entry with pickup data
+        const dayOfWeek = date.getDay();
+        const rate = paymentRules.getRateForDay(dayOfWeek);
+
+        entries.push(new DailyEntry({
+          analysisId: '',
+          date,
+          consignments: 0,
+          rate: rate.amount,
+          paidAmount: 0,
+          pickups: 1,
+          pickupTotal: pickup.amount,
+          unloadingBonus: 0,
+          attendanceBonus: 0,
+          earlyBonus: 0,
+        }));
       }
     }
   }
@@ -511,11 +581,25 @@ export class AnalysisService {
       throw new Error(entriesError?.message || 'Failed to save daily entries');
     }
 
+    // Calculate bonus breakdown totals (matching legacy system)
+    const unloadingBonusTotal = analysis.dailyEntries.reduce(
+      (sum, entry) => sum + entry.unloadingBonus.amount, 0
+    );
+    const attendanceBonusTotal = analysis.dailyEntries.reduce(
+      (sum, entry) => sum + entry.attendanceBonus.amount, 0
+    );
+    const earlyBonusTotal = analysis.dailyEntries.reduce(
+      (sum, entry) => sum + entry.earlyBonus.amount, 0
+    );
+
     // Create analysis totals
     const { error: totalsError } = await analysisRepository.createAnalysisTotals(analysisId, {
       base_total: analysis.baseTotal.amount,
       pickup_total: analysis.pickupTotal.amount,
       bonus_total: analysis.bonusTotal.amount,
+      unloading_bonus_total: unloadingBonusTotal,
+      attendance_bonus_total: attendanceBonusTotal,
+      early_bonus_total: earlyBonusTotal,
       expected_total: analysis.expectedTotal.amount,
       paid_total: analysis.paidTotal.amount,
       difference_total: analysis.differenceTotal.amount,

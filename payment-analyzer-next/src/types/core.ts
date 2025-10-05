@@ -100,6 +100,9 @@ export interface PDFJSLib {
   build: string;
   disableWorker: boolean;
   workerSrc: string;
+  GlobalWorkerOptions: {
+    workerSrc: string;
+  };
 }
 
 /**
@@ -348,6 +351,9 @@ export interface AnalysisMetadata {
   totalPagesProcessed?: number;
   consignmentPatterns?: string[];
   invoicePatterns?: string[];
+  legacyFingerprint?: string;      // Base64 + 32-bit hash fingerprint (for backward compatibility)
+  modernFingerprint?: string;      // SHA-256 fingerprint (current system)
+  fingerprintVersion?: number;     // Version: 1 = legacy, 2 = modern, 3 = dual
   processingErrors?: string[];
   settings?: {
     autoCalculate?: boolean;

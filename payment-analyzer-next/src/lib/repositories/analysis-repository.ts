@@ -87,6 +87,9 @@ export interface AnalysisTotalRecord {
   base_total: number;
   pickup_total: number;
   bonus_total: number;
+  unloading_bonus_total?: number;  // Individual bonus breakdown (matching legacy)
+  attendance_bonus_total?: number;
+  early_bonus_total?: number;
   expected_total: number;
   paid_total: number;
   difference_total: number;
@@ -309,34 +312,72 @@ export class AnalysisRepository {
           dateMap.set(dateKey, { ...entry });
           console.log(`📅 Adding new entry for date: ${dateKey}`);
         } else {
-          // Merge with existing entry for this date
+          // Duplicate entry for same date - merge intelligently
           const existing = dateMap.get(dateKey)!;
-          const merged = {
-            ...existing,
-            // Merge consignments and payments (additive)
-            consignments: (existing.consignments || 0) + (entry.consignments || 0),
-            pickups: (existing.pickups || 0) + (entry.pickups || 0),
-            pickup_total: (existing.pickup_total || 0) + (entry.pickup_total || 0),
-            paid_amount: (existing.paid_amount || 0) + (entry.paid_amount || 0),
-            // Take the maximum for rates and bonuses (they should be the same for a date)
-            rate: Math.max(existing.rate || 0, entry.rate || 0),
-            unloading_bonus: Math.max(existing.unloading_bonus || 0, entry.unloading_bonus || 0),
-            attendance_bonus: Math.max(existing.attendance_bonus || 0, entry.attendance_bonus || 0),
-            early_bonus: Math.max(existing.early_bonus || 0, entry.early_bonus || 0),
-            // Recalculate derived values
-            base_payment: 0, // Will be calculated below
-            expected_total: 0, // Will be calculated below
-            difference: 0, // Will be calculated below
-            status: existing.status === 'balanced' && entry.status === 'balanced' ? 'balanced' : 
-                   existing.status === 'balanced' || entry.status === 'balanced' ? 'balanced' : 
-                   'underpaid' as DailyEntryStatus
-          };
-          
-          // Recalculate derived values
-          merged.base_payment = merged.consignments * merged.rate;
-          merged.expected_total = merged.base_payment + merged.unloading_bonus + merged.attendance_bonus + merged.early_bonus + merged.pickup_total;
+
+          // Determine merge strategy based on data patterns
+          const existingHasConsignments = (existing.consignments || 0) > 0;
+          const newHasConsignments = (entry.consignments || 0) > 0;
+          const existingHasPayment = (existing.paid_amount || 0) > 0;
+          const newHasPayment = (entry.paid_amount || 0) > 0;
+
+          let merged;
+
+          // Strategy 1: Adding invoice to runsheet (most common)
+          if (existingHasConsignments && !newHasConsignments && newHasPayment) {
+            merged = {
+              ...existing,
+              // Keep consignments and bonuses from existing runsheet
+              // Add/update payment from invoice
+              paid_amount: entry.paid_amount || existing.paid_amount,
+              pickup_total: (existing.pickup_total || 0) + (entry.pickup_total || 0),
+              pickups: (existing.pickups || 0) + (entry.pickups || 0),
+              // Recalculate difference
+              base_payment: existing.base_payment,
+              expected_total: existing.expected_total,
+              difference: 0 // Will be calculated below
+            };
+            console.log(`📄 Adding invoice payment to runsheet for date: ${dateKey}`);
+          }
+          // Strategy 2: Adding runsheet to invoice
+          else if (!existingHasConsignments && existingHasPayment && newHasConsignments) {
+            merged = {
+              ...entry,
+              // Keep payment from existing invoice
+              paid_amount: existing.paid_amount || entry.paid_amount,
+              // Use new consignments and bonuses from runsheet
+              base_payment: entry.base_payment,
+              expected_total: entry.expected_total,
+              difference: 0 // Will be calculated below
+            };
+            console.log(`📋 Adding runsheet data to invoice for date: ${dateKey}`);
+          }
+          // Strategy 3: Both have consignments - replace with newer data
+          else if (existingHasConsignments && newHasConsignments) {
+            merged = {
+              ...entry,
+              // Keep payment if it exists in either
+              paid_amount: entry.paid_amount || existing.paid_amount,
+              pickup_total: entry.pickup_total || existing.pickup_total,
+              pickups: entry.pickups || existing.pickups
+            };
+            console.log(`🔄 Replacing runsheet data for date: ${dateKey}`);
+          }
+          // Strategy 4: Fallback - simple overwrite (matching legacy behavior)
+          // FIX: Changed from additive merge to overwrite to match legacy system
+          // Legacy behavior: Last value wins (no addition)
+          else {
+            merged = {
+              ...entry,
+              // Keep payment from either source (prefer new, fallback to existing)
+              paid_amount: entry.paid_amount || existing.paid_amount
+            };
+            console.log(`🔄 Simple overwrite (legacy behavior) for date: ${dateKey}`);
+          }
+
+          // Always recalculate difference
           merged.difference = merged.paid_amount - merged.expected_total;
-          
+
           // Update status based on difference
           if (merged.difference > 0.01) {
             merged.status = 'overpaid';
@@ -345,9 +386,8 @@ export class AnalysisRepository {
           } else {
             merged.status = 'balanced';
           }
-          
+
           dateMap.set(dateKey, merged);
-          console.log(`🔄 Merged duplicate entry for date: ${dateKey} - consignments: ${existing.consignments} + ${entry.consignments} = ${merged.consignments}, payments: ${existing.paid_amount} + ${entry.paid_amount} = ${merged.paid_amount}`);
         }
       }
 
@@ -494,6 +534,8 @@ export class AnalysisRepository {
         'getAnalysisById',
         'analyses',
         async () => {
+          console.log('🔍 AnalysisRepository - Querying for analysis ID:', analysisId);
+
           // First, try to get the main analysis record
           const { data: analyses, error: analysisError } = await this.supabase
             .from('analyses')
@@ -503,11 +545,17 @@ export class AnalysisRepository {
 
           if (analysisError) {
             console.error('getAnalysisById - Main query error:', analysisError);
-            return { data: null, error: analysisError.message };
+            return { data: null, error: `Database error: ${analysisError.message}` };
           }
 
+          console.log('🔍 AnalysisRepository - Query result:', {
+            analysisId,
+            found: analyses?.length || 0,
+            analyses: (analyses as unknown as AnalysisRecord[])?.map((a: AnalysisRecord) => ({ id: a.id, status: a.status, user_id: a.user_id }))
+          });
+
           if (!analyses || analyses.length === 0) {
-            return { data: null, error: 'Analysis not found' };
+            return { data: null, error: `Analysis with ID ${analysisId} not found in database` };
           }
 
           const analysis = (analyses as unknown as AnalysisRecord[])[0];
@@ -823,10 +871,12 @@ export class AnalysisRepository {
 
   /**
    * Enhanced findAnalysisByFingerprint with Result pattern
+   * Checks both modern and legacy fingerprints for backward compatibility
    */
   async findAnalysisByFingerprint(
     userId: string,
-    fingerprint: string
+    fingerprint: string,
+    legacyFingerprint?: string
   ): Promise<Result<AnalysisRecord | null>> {
     try {
       if (!userId?.trim() || !fingerprint?.trim()) {
@@ -839,7 +889,8 @@ export class AnalysisRepository {
         );
       }
 
-      const { data: analysis, error } = await this.supabase
+      // First, try exact match on primary fingerprint column
+      let { data: analysis, error } = await this.supabase
         .from('analyses')
         .select('*')
         .eq('user_id', userId)
@@ -850,7 +901,31 @@ export class AnalysisRepository {
         return this.handleDatabaseError(error, 'find analysis by fingerprint');
       }
 
-      return Result.success(analysis as AnalysisRecord | null);
+      // If found, return immediately
+      if (analysis) {
+        return Result.success(analysis as unknown as AnalysisRecord);
+      }
+
+      // If not found and we have a legacy fingerprint, check legacy fingerprint in metadata
+      if (legacyFingerprint) {
+        const { data: legacyAnalysis, error: legacyError } = await this.supabase
+          .from('analyses')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('fingerprint', legacyFingerprint)
+          .maybeSingle();
+
+        if (legacyError) {
+          return this.handleDatabaseError(legacyError, 'find analysis by legacy fingerprint');
+        }
+
+        if (legacyAnalysis) {
+          return Result.success(legacyAnalysis as unknown as AnalysisRecord);
+        }
+      }
+
+      // Not found in either modern or legacy
+      return Result.success(null);
 
     } catch (error) {
       return Result.failure(
@@ -862,6 +937,7 @@ export class AnalysisRepository {
           {
             userId,
             fingerprint,
+            legacyFingerprint,
             originalError: error instanceof Error ? error.message : 'Unknown error'
           }
         )

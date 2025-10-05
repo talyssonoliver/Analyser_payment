@@ -11,7 +11,8 @@ export interface FileInfo {
 }
 
 export interface FingerprintResult {
-  fingerprint: string;
+  fingerprint: string;            // Modern SHA-256 fingerprint (primary)
+  legacyFingerprint?: string;     // Legacy Base64 + 32-bit hash (for compatibility)
   components: {
     fileHashes: string[];
     combinedHash: string;
@@ -56,8 +57,12 @@ export class FileFingerprintService {
 
     const combinedHash = await this.hashString(JSON.stringify(combinedData));
 
+    // Generate legacy fingerprint for backward compatibility
+    const legacyFingerprint = this.createLegacyFingerprint(sortedFiles);
+
     return {
       fingerprint: combinedHash,
+      legacyFingerprint,
       components: {
         fileHashes,
         combinedHash,
@@ -105,6 +110,44 @@ export class FileFingerprintService {
   areSimilar(fingerprint1: string, fingerprint2: string): boolean {
     // Exact match for now - could implement fuzzy matching later
     return fingerprint1 === fingerprint2;
+  }
+
+  /**
+   * Creates legacy-compatible fingerprint using Base64 + 32-bit hash algorithm
+   * Exact replica of original system (lines 7123-7154) for backward compatibility
+   */
+  private createLegacyFingerprint(files: FileInfo[]): string {
+    // Create file info object matching legacy format
+    const fileInfo = files.map(file => ({
+      name: file.name,
+      size: file.size,
+      lastModified: file.lastModified
+    }));
+
+    // Convert to JSON string (same as legacy)
+    const jsonString = JSON.stringify(fileInfo);
+
+    // Convert to Base64 (browser btoa equivalent)
+    const base64 = typeof btoa !== 'undefined'
+      ? btoa(jsonString)
+      : Buffer.from(jsonString).toString('base64');
+
+    // Calculate 32-bit hash using exact legacy algorithm
+    let hash = 0;
+    for (let i = 0; i < jsonString.length; i++) {
+      // JavaScript uses 32-bit integers for bitwise operations
+      hash = ((hash << 5) - hash) + jsonString.charCodeAt(i);
+      // Force 32-bit integer by using bitwise OR with 0
+      hash = hash | 0;
+    }
+
+    // Combine: Base64 (alphanumeric only) + hash in base36
+    const alphanumericBase64 = base64.replace(/[^a-zA-Z0-9]/g, '');
+    const hashBase36 = Math.abs(hash).toString(36);
+    const combined = alphanumericBase64 + hashBase36;
+
+    // Truncate to 64 characters (same as legacy)
+    return combined.substring(0, 64);
   }
 
   /**
