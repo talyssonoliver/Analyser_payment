@@ -1,32 +1,59 @@
 /**
- * Simple Home Page - No Auth Dependency for Debugging
+ * Home Page - Redirects logged-in users to dashboard
  */
 
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { 
-  Upload, 
-  Zap, 
-  TrendingUp, 
-  Search, 
-  FileText, 
-  Calculator,
+import {
   ArrowRight,
-  BarChart3
-} from 'lucide-react';
+  BarChart3,
+  Calculator,
+  FileText,
+  Search,
+  TrendingUp,
+  Upload,
+  Zap,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function SimpleHomePage() {
   const router = useRouter();
-  
+  const { user, isLoading } = useAuth();
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!isLoading && user) {
+      console.log("✅ User authenticated - redirecting to dashboard");
+      router.push("/dashboard");
+    }
+  }, [user, isLoading, router]);
+
   const handleGetStarted = () => {
-    router.push('/analysis');
+    router.push("/analysis?fresh=true");
   };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render welcome page if authenticated (will redirect)
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <div className="onboarding-container px-4 py-8 max-w-4xl mx-auto">
-        
         {/* Welcome Hero Section */}
         <div className="welcome-hero text-center mb-12">
           <div className="mb-6">
@@ -45,7 +72,8 @@ export default function SimpleHomePage() {
         {/* Primary CTA Section */}
         <div className="cta-section text-center mb-16">
           <div className="cta-buttons mb-6">
-            <button 
+            <button
+              type="button"
               className="primary-cta-btn group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-3 mx-auto transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
               onClick={handleGetStarted}
             >
@@ -197,7 +225,8 @@ export default function SimpleHomePage() {
         {/* Secondary CTA */}
         <div className="cta-section text-center">
           <div className="cta-buttons">
-            <button 
+            <button
+              type="button"
               className="primary-cta-btn group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-3 mx-auto transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
               onClick={handleGetStarted}
             >
@@ -211,13 +240,13 @@ export default function SimpleHomePage() {
             </button>
           </div>
         </div>
-
       </div>
 
       {/* Sign In Link */}
       <div className="fixed bottom-6 right-6">
         <button
-          onClick={() => router.push('/login')}
+          type="button"
+          onClick={() => router.push("/login")}
           className="bg-white text-slate-700 px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:border-slate-300"
         >
           Already have an account? Sign In

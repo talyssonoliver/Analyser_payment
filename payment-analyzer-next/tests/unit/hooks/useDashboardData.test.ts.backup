@@ -1,0 +1,656 @@
+/**
+ * Unit Tests for useDashboardData Hook
+ * Tests data loading, period calculations, and metric aggregations
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { analyticsService } from '@/lib/services/analytics-service';
+import { analysisRepository } from '@/lib/repositories/analysis-repository';
+import { AnalysisStorageService } from '@/lib/services/analysis-storage-service';
+import { mockAnalyses, mockDashboardData } from '@/tests/mocks/dashboard-data';
+import { createSuccessResult } from '@/tests/mocks/result-helpers';
+
+// Mock external dependencies
+vi.mock('@/lib/services/analytics-service');
+vi.mock('@/lib/repositories/analysis-repository');
+vi.mock('@/lib/services/analysis-storage-service');
+
+describe('useDashboardData', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe('Initial State', () => {
+    it('should initialize with default empty state', () => {
+      const { result } = renderHook(() => useDashboardData());
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.data).toEqual({
+        kpis: [],
+        revenueData: [],
+        recentAnalyses: [],
+        totalRevenue: 0,
+        avgDaily: 0,
+        deliveries: 0,
+        performance: 0,
+        revenueChange: 0,
+        deliveriesChange: 0,
+        periodLabel: 'Weekly'
+      });
+      expect(result.current.analyses).toEqual([]);
+    });
+
+    it('should provide loadDashboardData function', () => {
+      const { result } = renderHook(() => useDashboardData());
+
+      expect(typeof result.current.loadDashboardData).toBe('function');
+    });
+  });
+
+  describe('Data Loading', () => {
+    it('should not load data when userId is not provided', async () => {
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({});
+
+      expect(result.current.loading).toBe(false);
+      expect(analyticsService.getAnalyticsData).not.toHaveBeenCalled();
+    });
+
+    it('should set loading state during data fetch', async () => {
+      const mockAnalyticsData = createSuccessResult({
+        kpis: mockDashboardData.kpis,
+        revenueChart: mockDashboardData.revenueData
+      });
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: undefined
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      // Start loading
+      const loadPromise = result.current.loadDashboardData({
+        userId: 'test-user-123',
+        period: '30d',
+        viewMode: 'monthly'
+      });
+
+      // Should be loading immediately after call
+      await waitFor(() => {
+        expect(result.current.loading).toBe(true);
+      });
+
+      await loadPromise;
+
+      // Should not be loading after completion
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+    });
+
+    it('should successfully load analytics data', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: {
+          kpis: mockDashboardData.kpis,
+          revenueChart: mockDashboardData.revenueData
+        }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        period: '30d'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(analyticsService.getAnalyticsData).toHaveBeenCalledWith({
+        userId: 'test-user-123',
+        period: '30d'
+      });
+      expect(result.current.data.kpis).toEqual(mockDashboardData.kpis);
+      expect(result.current.data.revenueData).toEqual(mockDashboardData.revenueData);
+    });
+
+    it('should handle analytics service errors gracefully', async () => {
+      const mockError = {
+        isSuccess: false,
+        error: { message: 'Analytics service error' }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockError);
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        period: '30d'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to load dashboard data:',
+        expect.any(Error)
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should load user analyses from repository', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123'
+      });
+
+      await waitFor(() => {
+        expect(result.current.analyses).toEqual(mockAnalyses);
+      });
+
+      expect(analysisRepository.getUserAnalyses).toHaveBeenCalledWith('test-user-123', {
+        limit: 1000,
+        orderBy: 'created_at',
+        order: 'desc'
+      });
+    });
+
+    it('should handle repository errors gracefully', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: null,
+        error: new Error('Repository error')
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Failed to load recent analyses:',
+        expect.any(Error)
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('Period Calculations', () => {
+    it('should calculate monthly period correctly', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+      const testDate = new Date('2024-01-15');
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: testDate
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data.periodLabel).toBe('January');
+    });
+
+    it('should calculate weekly period correctly', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+      const testDate = new Date('2024-01-15');
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'weekly',
+        currentMonth: testDate
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data.periodLabel).toBe('January Week');
+    });
+
+    it('should include year in period label for non-current years', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: [],
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+      const testDate = new Date('2023-01-15');
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: testDate
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data.periodLabel).toMatch(/2023/);
+    });
+  });
+
+  describe('Metric Calculations', () => {
+    it('should calculate total revenue from daily entries', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: new Date('2024-01-15')
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data.totalRevenue).toBeGreaterThan(0);
+    });
+
+    it('should calculate average daily revenue', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: new Date('2024-01-15')
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      const { totalRevenue, avgDaily } = result.current.data;
+      if (totalRevenue > 0) {
+        expect(avgDaily).toBeGreaterThan(0);
+        expect(avgDaily).toBeLessThanOrEqual(totalRevenue);
+      }
+    });
+
+    it('should calculate performance percentage', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: new Date('2024-01-15')
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data.performance).toBeGreaterThanOrEqual(0);
+      expect(result.current.data.performance).toBeLessThanOrEqual(100);
+    });
+
+    it('should handle empty data gracefully', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: [],
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data.totalRevenue).toBe(0);
+      expect(result.current.data.avgDaily).toBe(0);
+      expect(result.current.data.deliveries).toBe(0);
+      expect(result.current.data.performance).toBe(0);
+    });
+  });
+
+  describe('Forecast Generation', () => {
+    it('should generate forecast when analyses exist', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      const mockForecast = { forecast: 1500 };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analyticsService.forecastEarnings).mockResolvedValue(mockForecast);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(analyticsService.forecastEarnings).toHaveBeenCalledWith('test-user-123', 30);
+      expect(result.current.data.forecast).toBe(1500);
+    });
+
+    it('should not generate forecast when no analyses exist', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: [],
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(analyticsService.forecastEarnings).not.toHaveBeenCalled();
+      expect(result.current.data.forecast).toBeUndefined();
+    });
+
+    it('should handle forecast errors gracefully', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analyticsService.forecastEarnings).mockRejectedValue(new Error('Forecast error'));
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        'Failed to generate forecast:',
+        expect.any(Error)
+      );
+      expect(result.current.data.forecast).toBeUndefined();
+
+      consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('LocalStorage Integration', () => {
+    it('should merge localStorage analyses with database analyses', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      const mockLocalStorage = {
+        'local-123': {
+          dailyData: {
+            '2024-01-01': {
+              paidAmount: 100,
+              consignments: 50,
+              expectedTotal: 100
+            }
+          }
+        }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: [],
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue(mockLocalStorage);
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: new Date('2024-01-15')
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(AnalysisStorageService.loadAnalyses).toHaveBeenCalled();
+      expect(result.current.data.totalRevenue).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Period Comparison', () => {
+    it('should calculate revenue change percentage', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: new Date('2024-01-15')
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(typeof result.current.data.revenueChange).toBe('number');
+    });
+
+    it('should calculate deliveries change percentage', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: mockAnalyses,
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123',
+        viewMode: 'monthly',
+        currentMonth: new Date('2024-01-15')
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(typeof result.current.data.deliveriesChange).toBe('number');
+    });
+
+    it('should handle zero previous period gracefully', async () => {
+      const mockAnalyticsData = {
+        isSuccess: true,
+        data: { kpis: [], revenueChart: [] }
+      };
+
+      vi.mocked(analyticsService.getAnalyticsData).mockResolvedValue(mockAnalyticsData);
+      vi.mocked(analysisRepository.getUserAnalyses).mockResolvedValue({
+        data: [],
+        error: null
+      });
+      vi.mocked(AnalysisStorageService.loadAnalyses).mockReturnValue({});
+
+      const { result } = renderHook(() => useDashboardData());
+
+      await result.current.loadDashboardData({
+        userId: 'test-user-123'
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data.revenueChange).toBe(0);
+      expect(result.current.data.deliveriesChange).toBe(0);
+    });
+  });
+});

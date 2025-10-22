@@ -3,11 +3,11 @@
  * Represents a single day's payment analysis data
  */
 
-import { Money } from '../value-objects/money';
-import { ConsignmentCount } from '../value-objects/consignment-count';
-import { PaymentStatus } from '../../constants';
-import { format } from 'date-fns';
-import { generateUUID } from '../../utils';
+import { format } from "date-fns";
+import type { PaymentStatus } from "../../constants";
+import { generateUUID } from "../../utils";
+import { ConsignmentCount } from "../value-objects/consignment-count";
+import { Money } from "../value-objects/money";
 
 export class DailyEntry {
   private readonly _id: string;
@@ -46,53 +46,81 @@ export class DailyEntry {
     this._dayOfWeek = this._date.getDay();
     this._consignments = ConsignmentCount.from(data.consignments);
     this._rate = Money.from(data.rate);
-    this._basePayment = Money.from(data.basePayment ?? (data.consignments * data.rate));
+    this._basePayment = Money.from(data.basePayment ?? data.consignments * data.rate);
     this._pickups = ConsignmentCount.from(data.pickups ?? 0);
     this._pickupTotal = Money.from(data.pickupTotal ?? 0);
     this._unloadingBonus = Money.from(data.unloadingBonus ?? 0);
     this._attendanceBonus = Money.from(data.attendanceBonus ?? 0);
     this._earlyBonus = Money.from(data.earlyBonus ?? 0);
     this._paidAmount = Money.from(data.paidAmount);
-    
+
     // Calculate totals
     this._expectedTotal = this.calculateExpectedTotal();
     this._difference = this._paidAmount.subtract(this._expectedTotal);
   }
 
   // Getters
-  get id(): string { return this._id; }
-  get analysisId(): string { return this._analysisId; }
-  get date(): Date { return new Date(this._date); }
-  get dayOfWeek(): number { return this._dayOfWeek; }
-  get dayName(): string { 
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  get id(): string {
+    return this._id;
+  }
+  get analysisId(): string {
+    return this._analysisId;
+  }
+  get date(): Date {
+    return new Date(this._date);
+  }
+  get dayOfWeek(): number {
+    return this._dayOfWeek;
+  }
+  get dayName(): string {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     return days[this._dayOfWeek];
   }
-  get consignments(): ConsignmentCount { return this._consignments; }
-  get rate(): Money { return this._rate; }
-  get basePayment(): Money { return this._basePayment; }
-  get pickups(): ConsignmentCount { return this._pickups; }
-  get pickupTotal(): Money { return this._pickupTotal; }
-  get unloadingBonus(): Money { return this._unloadingBonus; }
-  get attendanceBonus(): Money { return this._attendanceBonus; }
-  get earlyBonus(): Money { return this._earlyBonus; }
-  get expectedTotal(): Money { return this._expectedTotal; }
-  get paidAmount(): Money { return this._paidAmount; }
-  get difference(): Money { return this._difference; }
+  get consignments(): ConsignmentCount {
+    return this._consignments;
+  }
+  get rate(): Money {
+    return this._rate;
+  }
+  get basePayment(): Money {
+    return this._basePayment;
+  }
+  get pickups(): ConsignmentCount {
+    return this._pickups;
+  }
+  get pickupTotal(): Money {
+    return this._pickupTotal;
+  }
+  get unloadingBonus(): Money {
+    return this._unloadingBonus;
+  }
+  get attendanceBonus(): Money {
+    return this._attendanceBonus;
+  }
+  get earlyBonus(): Money {
+    return this._earlyBonus;
+  }
+  get expectedTotal(): Money {
+    return this._expectedTotal;
+  }
+  get paidAmount(): Money {
+    return this._paidAmount;
+  }
+  get difference(): Money {
+    return this._difference;
+  }
 
   get totalBonus(): Money {
-    return this._unloadingBonus
-      .add(this._attendanceBonus)
-      .add(this._earlyBonus);
+    return this._unloadingBonus.add(this._attendanceBonus).add(this._earlyBonus);
   }
 
   get status(): PaymentStatus {
-    if (this._difference.isZero()) return 'balanced';
-    return this._difference.isPositive() ? 'overpaid' : 'underpaid';
+    if (this._difference.isZero()) return "balanced";
+    return this._difference.isPositive() ? "overpaid" : "underpaid";
   }
 
   get dateFormatted(): string {
-    return format(this._date, 'dd/MM/yyyy');
+    return format(this._date, "dd/MM/yyyy");
   }
 
   get isWorkingDay(): boolean {
@@ -100,9 +128,7 @@ export class DailyEntry {
   }
 
   private calculateExpectedTotal(): Money {
-    return this._basePayment
-      .add(this._pickupTotal)
-      .add(this.totalBonus);
+    return this._basePayment.add(this._pickupTotal).add(this.totalBonus);
   }
 
   updatePaidAmount(amount: number): void {

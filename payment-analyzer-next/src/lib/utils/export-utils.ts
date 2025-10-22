@@ -3,7 +3,24 @@
  * Matches the original HTML export functionality
  */
 
-import { DayCalculation, WeekCalculation, PaymentTotals } from '@/lib/services/payment-calculation-service';
+import type {
+  DayCalculation,
+  PaymentTotals,
+  WeekCalculation,
+} from "@/lib/services/payment-calculation-service";
+
+/**
+ * Determine status based on difference amount
+ */
+function getPaymentStatus(difference: number): "OK" | "Minor" | "Review" {
+  if (difference >= 0) {
+    return "OK";
+  }
+  if (Math.abs(difference) <= 5) {
+    return "Minor";
+  }
+  return "Review";
+}
 
 export interface ExportData {
   totals: PaymentTotals;
@@ -22,18 +39,18 @@ export interface ExportData {
  */
 export function exportToCSV(data: ExportData): string {
   const { days, totals, metadata } = data;
-  
-  let csv = '';
-  
+
+  let csv = "";
+
   // Header information
-  csv += `Payment Analysis Export\n`;
+  csv += "Payment Analysis Export\n";
   csv += `Generated: ${new Date(metadata.exportDate).toLocaleDateString()}\n`;
   csv += `Period: ${metadata.period}\n`;
   csv += `Analysis ID: ${metadata.analysisId}\n`;
-  csv += `\n`;
-  
+  csv += "\n";
+
   // Summary totals
-  csv += `SUMMARY TOTALS\n`;
+  csv += "SUMMARY TOTALS\n";
   csv += `Working Days,${totals.workingDays}\n`;
   csv += `Total Consignments,${totals.totalConsignments}\n`;
   csv += `Expected Total,£${totals.expectedTotal.toFixed(2)}\n`;
@@ -42,18 +59,19 @@ export function exportToCSV(data: ExportData): string {
   csv += `Base Payment,£${totals.baseTotal.toFixed(2)}\n`;
   csv += `Total Bonuses,£${totals.bonusTotal.toFixed(2)}\n`;
   csv += `Pickup Total,£${totals.pickupTotal.toFixed(2)}\n`;
-  csv += `\n`;
-  
+  csv += "\n";
+
   // Daily breakdown header
-  csv += `DAILY BREAKDOWN\n`;
-  csv += `Date,Day,Consignments,Rate,Base Payment,Unloading Bonus,Attendance Bonus,Early Bonus,Pickup Count,Pickup Total,Expected Total,Paid Amount,Difference,Status\n`;
-  
+  csv += "DAILY BREAKDOWN\n";
+  csv +=
+    "Date,Day,Consignments,Rate,Base Payment,Unloading Bonus,Attendance Bonus,Early Bonus,Pickup Count,Pickup Total,Expected Total,Paid Amount,Difference,Status\n";
+
   // Daily data
-  days.forEach(day => {
-    const status = day.difference >= 0 ? 'OK' : (Math.abs(day.difference) <= 5 ? 'Minor' : 'Review');
+  days.forEach((day) => {
+    const status = getPaymentStatus(day.difference);
     csv += `${day.date},${day.day},${day.consignments},£${day.rate.toFixed(2)},£${day.basePayment.toFixed(2)},£${day.unloadingBonus.toFixed(2)},£${day.attendanceBonus.toFixed(2)},£${day.earlyBonus.toFixed(2)},${day.pickupCount},£${day.pickupTotal.toFixed(2)},£${day.expectedTotal.toFixed(2)},£${day.paidAmount.toFixed(2)},£${day.difference.toFixed(2)},${status}\n`;
   });
-  
+
   return csv;
 }
 
@@ -61,24 +79,28 @@ export function exportToCSV(data: ExportData): string {
  * Export analysis data as JSON format
  */
 export function exportToJSON(data: ExportData): string {
-  return JSON.stringify({
-    metadata: data.metadata,
-    summary: data.totals,
-    weeklyBreakdown: data.weeks.map(week => ({
-      weekStart: week.weekStart.toISOString(),
-      totalExpected: week.totalExpected,
-      totalActual: week.totalActual,
-      workingDays: week.workingDays,
-      totalConsignments: week.totalConsignments,
-      totalDifference: week.totalDifference,
-      days: week.days.length
-    })),
-    dailyBreakdown: data.days.map(day => ({
-      ...day,
-      formattedDate: new Date(day.date).toLocaleDateString(),
-      status: day.difference >= 0 ? 'OK' : (Math.abs(day.difference) <= 5 ? 'Minor' : 'Review')
-    }))
-  }, null, 2);
+  return JSON.stringify(
+    {
+      metadata: data.metadata,
+      summary: data.totals,
+      weeklyBreakdown: data.weeks.map((week) => ({
+        weekStart: week.weekStart.toISOString(),
+        totalExpected: week.totalExpected,
+        totalActual: week.totalActual,
+        workingDays: week.workingDays,
+        totalConsignments: week.totalConsignments,
+        totalDifference: week.totalDifference,
+        days: week.days.length,
+      })),
+      dailyBreakdown: data.days.map((day) => ({
+        ...day,
+        formattedDate: new Date(day.date).toLocaleDateString(),
+        status: getPaymentStatus(day.difference),
+      })),
+    },
+    null,
+    2
+  );
 }
 
 /**
@@ -86,10 +108,10 @@ export function exportToJSON(data: ExportData): string {
  */
 export function exportToHTML(data: ExportData): string {
   const { days, totals, metadata } = data;
-  
+
   const formatCurrency = (amount: number) => `£${amount.toFixed(2)}`;
-  const formatDate = (date: string) => new Date(date).toLocaleDateString('en-GB');
-  
+  const formatDate = (date: string) => new Date(date).toLocaleDateString("en-GB");
+
   let html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -168,8 +190,8 @@ export function exportToHTML(data: ExportData): string {
         </div>
         <div class="kpi-card">
             <div class="kpi-label">Difference</div>
-            <div class="kpi-value ${totals.differenceTotal >= 0 ? 'positive' : 'negative'}">
-                ${totals.differenceTotal >= 0 ? '+' : ''}${formatCurrency(totals.differenceTotal)}
+            <div class="kpi-value ${totals.differenceTotal >= 0 ? "positive" : "negative"}">
+                ${totals.differenceTotal >= 0 ? "+" : ""}${formatCurrency(totals.differenceTotal)}
             </div>
         </div>
     </div>
@@ -192,27 +214,27 @@ export function exportToHTML(data: ExportData): string {
         </thead>
         <tbody>
   `;
-  
-  days.forEach(day => {
-    const status = day.difference >= 0 ? 'OK' : (Math.abs(day.difference) <= 5 ? 'Minor' : 'Review');
-    const diffClass = day.difference >= 0 ? 'positive' : 'negative';
-    
+
+  days.forEach((day) => {
+    const status = getPaymentStatus(day.difference);
+    const diffClass = day.difference >= 0 ? "positive" : "negative";
+
     html += `
             <tr>
                 <td>${formatDate(day.date)}</td>
                 <td>${day.day}</td>
-                <td>${day.consignments || '-'}</td>
+                <td>${day.consignments || "-"}</td>
                 <td>${formatCurrency(day.basePayment)}</td>
                 <td>${formatCurrency(day.totalBonus)}</td>
-                <td>${day.pickupTotal > 0 ? `${formatCurrency(day.pickupTotal)} (${day.pickupCount})` : '-'}</td>
+                <td>${day.pickupTotal > 0 ? `${formatCurrency(day.pickupTotal)} (${day.pickupCount})` : "-"}</td>
                 <td>${formatCurrency(day.expectedTotal)}</td>
                 <td>${formatCurrency(day.paidAmount)}</td>
-                <td class="${diffClass}">${day.difference >= 0 ? '+' : ''}${formatCurrency(day.difference)}</td>
+                <td class="${diffClass}">${day.difference >= 0 ? "+" : ""}${formatCurrency(day.difference)}</td>
                 <td>${status}</td>
             </tr>
     `;
   });
-  
+
   html += `
         </tbody>
         <tfoot>
@@ -224,8 +246,8 @@ export function exportToHTML(data: ExportData): string {
                 <td>${formatCurrency(totals.pickupTotal)}</td>
                 <td>${formatCurrency(totals.expectedTotal)}</td>
                 <td>${formatCurrency(totals.paidTotal)}</td>
-                <td class="${totals.differenceTotal >= 0 ? 'positive' : 'negative'}">
-                    ${totals.differenceTotal >= 0 ? '+' : ''}${formatCurrency(totals.differenceTotal)}
+                <td class="${totals.differenceTotal >= 0 ? "positive" : "negative"}">
+                    ${totals.differenceTotal >= 0 ? "+" : ""}${formatCurrency(totals.differenceTotal)}
                 </td>
                 <td></td>
             </tr>
@@ -238,38 +260,43 @@ export function exportToHTML(data: ExportData): string {
 </body>
 </html>
   `;
-  
+
   return html;
 }
 
 /**
  * Download file with given content and filename
  */
-export function downloadFile(content: string, filename: string, mimeType: string = 'text/plain') {
+export function downloadFile(content: string, filename: string, mimeType: string = "text/plain") {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
+
+  const link = document.createElement("a");
   link.href = url;
   link.download = filename;
-  link.style.display = 'none';
-  
+  link.style.display = "none";
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  
+
   URL.revokeObjectURL(url);
 }
 
 /**
  * Trigger print dialog for HTML content
+ * SEC-QUAL-001: XSS vulnerability fixed with DOMPurify sanitization
  */
 export function printHTML(htmlContent: string) {
-  const printWindow = window.open('', '_blank');
+  const printWindow = window.open("", "_blank");
   if (printWindow) {
-    printWindow.document.write(htmlContent);
+    // Use modern DOM manipulation instead of deprecated document.write()
+    printWindow.document.open();
+    // SECURITY FIX: Sanitize HTML to prevent XSS attacks (QUAL-001)
+    const DOMPurify = require('dompurify');
+    printWindow.document.body.innerHTML = DOMPurify.sanitize(htmlContent);
     printWindow.document.close();
-    
+
     // Wait for content to load then print
     printWindow.onload = () => {
       printWindow.print();
@@ -283,10 +310,10 @@ export function printHTML(htmlContent: string) {
  * Generate filename for export based on analysis data
  */
 export function generateExportFilename(
-  metadata: ExportData['metadata'], 
-  format: 'csv' | 'json' | 'html'
+  metadata: ExportData["metadata"],
+  format: "csv" | "json" | "html"
 ): string {
-  const date = new Date().toISOString().split('T')[0];
-  const period = metadata.period.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+  const date = new Date().toISOString().split("T")[0];
+  const period = metadata.period.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase();
   return `payment-analysis-${period}-${date}.${format}`;
 }

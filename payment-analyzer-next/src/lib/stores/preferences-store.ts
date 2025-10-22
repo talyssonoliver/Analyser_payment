@@ -3,24 +3,27 @@
  * Manages user application preferences and settings
  */
 
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { STORAGE_KEYS } from '@/lib/constants';
-import { preferencesService, type PartialPreferencesUpdate } from '@/lib/services/preferences-service';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { STORAGE_KEYS } from "@/lib/constants";
+import {
+  type PartialPreferencesUpdate,
+  preferencesService,
+} from "@/lib/services/preferences-service";
 
 // Theme options
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = "light" | "dark" | "system";
 
 // Date format options
-export type DateFormat = 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
+export type DateFormat = "DD/MM/YYYY" | "MM/DD/YYYY" | "YYYY-MM-DD";
 
 // Currency display options
-export type CurrencyFormat = 'symbol' | 'code' | 'name';
+export type CurrencyFormat = "symbol" | "code" | "name";
 
 // Number format options
-export type NumberFormat = 'standard' | 'compact';
+export type NumberFormat = "standard" | "compact";
 
 // Notification preferences
 export interface NotificationPreferences {
@@ -44,7 +47,7 @@ export interface DisplayPreferences {
 export interface AnalysisPreferences {
   autoSave: boolean;
   autoExport: boolean;
-  defaultExportFormat: 'pdf' | 'excel' | 'csv';
+  defaultExportFormat: "pdf" | "excel" | "csv";
   includeCharts: boolean;
   includeSummary: boolean;
   maxHistoryDays: number;
@@ -68,10 +71,10 @@ export interface UserPreferences {
 // Default preferences
 const DEFAULT_PREFERENCES: UserPreferences = {
   display: {
-    theme: 'system',
-    dateFormat: 'DD/MM/YYYY',
-    currencyFormat: 'symbol',
-    numberFormat: 'standard',
+    theme: "system",
+    dateFormat: "DD/MM/YYYY",
+    currencyFormat: "symbol",
+    numberFormat: "standard",
     compactMode: false,
     showAdvancedFeatures: false,
   },
@@ -84,7 +87,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   analysis: {
     autoSave: true,
     autoExport: false,
-    defaultExportFormat: 'pdf',
+    defaultExportFormat: "pdf",
     includeCharts: true,
     includeSummary: true,
     maxHistoryDays: 90,
@@ -118,7 +121,10 @@ export interface PreferencesState {
   setOnlineStatus: (online: boolean) => void;
 
   // Internal helper
-  updatePreferenceCategory: <K extends keyof UserPreferences>(category: K, newPreferences: Partial<UserPreferences[K]>) => Promise<void>;
+  updatePreferenceCategory: <K extends keyof UserPreferences>(
+    category: K,
+    newPreferences: Partial<UserPreferences[K]>
+  ) => Promise<void>;
 
   // Computed getters
   getPreference: <K extends keyof UserPreferences>(category: K) => UserPreferences[K];
@@ -132,13 +138,16 @@ export const usePreferencesStore = create<PreferencesState>()(
       preferences: DEFAULT_PREFERENCES,
       isLoading: false,
       hasUnsavedChanges: false,
-      isOnline: typeof window !== 'undefined' ? navigator.onLine : true,
+      isOnline: typeof window !== "undefined" ? navigator.onLine : true,
       lastSyncedAt: null,
 
       // Helper function to update preferences with backend sync
-      updatePreferenceCategory: async <K extends keyof UserPreferences>(category: K, newPreferences: Partial<UserPreferences[K]>) => {
+      updatePreferenceCategory: async <K extends keyof UserPreferences>(
+        category: K,
+        newPreferences: Partial<UserPreferences[K]>
+      ) => {
         const state = get();
-        
+
         // Optimistically update local state
         const updatedPreferences = {
           ...state.preferences,
@@ -160,10 +169,10 @@ export const usePreferencesStore = create<PreferencesState>()(
             const update: PartialPreferencesUpdate = {
               [category]: newPreferences,
             };
-            
+
             const result = await preferencesService.updatePreferences(update);
-            
-            if (result.success && 'data' in result && result.data) {
+
+            if (result.success && "data" in result && result.data) {
               set({
                 preferences: result.data.preferences,
                 hasUnsavedChanges: false,
@@ -171,15 +180,15 @@ export const usePreferencesStore = create<PreferencesState>()(
                 isLoading: false,
               });
             } else {
-              console.error('Failed to sync preferences:', result.error);
-              set({ 
+              console.error("Failed to sync preferences:", result.error);
+              set({
                 isLoading: false,
                 hasUnsavedChanges: true, // Keep unsaved flag since sync failed
               });
             }
           } catch (error) {
-            console.error('Preferences sync error:', error);
-            set({ 
+            console.error("Preferences sync error:", error);
+            set({
               isLoading: false,
               hasUnsavedChanges: true,
             });
@@ -189,24 +198,24 @@ export const usePreferencesStore = create<PreferencesState>()(
 
       // Actions
       updateDisplayPreferences: async (newPreferences) => {
-        await get().updatePreferenceCategory('display', newPreferences);
+        await get().updatePreferenceCategory("display", newPreferences);
       },
 
       updateNotificationPreferences: async (newPreferences) => {
-        await get().updatePreferenceCategory('notifications', newPreferences);
+        await get().updatePreferenceCategory("notifications", newPreferences);
       },
 
       updateAnalysisPreferences: async (newPreferences) => {
-        await get().updatePreferenceCategory('analysis', newPreferences);
+        await get().updatePreferenceCategory("analysis", newPreferences);
       },
 
       updatePrivacyPreferences: async (newPreferences) => {
-        await get().updatePreferenceCategory('privacy', newPreferences);
+        await get().updatePreferenceCategory("privacy", newPreferences);
       },
 
       resetToDefaults: async () => {
         const state = get();
-        
+
         set({
           preferences: DEFAULT_PREFERENCES,
           hasUnsavedChanges: true,
@@ -217,8 +226,8 @@ export const usePreferencesStore = create<PreferencesState>()(
           set({ isLoading: true });
           try {
             const result = await preferencesService.resetToDefaults();
-            
-            if (result.success && 'data' in result && result.data) {
+
+            if (result.success && "data" in result && result.data) {
               set({
                 preferences: result.data.preferences,
                 hasUnsavedChanges: false,
@@ -226,11 +235,11 @@ export const usePreferencesStore = create<PreferencesState>()(
                 isLoading: false,
               });
             } else {
-              console.error('Failed to reset preferences:', result.error);
+              console.error("Failed to reset preferences:", result.error);
               set({ isLoading: false });
             }
           } catch (error) {
-            console.error('Reset preferences error:', error);
+            console.error("Reset preferences error:", error);
             set({ isLoading: false });
           }
         }
@@ -238,26 +247,26 @@ export const usePreferencesStore = create<PreferencesState>()(
 
       savePreferences: async () => {
         const state = get();
-        
+
         if (!state.hasUnsavedChanges) {
           return; // Nothing to save
         }
 
         set({ isLoading: true });
-        
+
         try {
           if (state.isOnline) {
             // Try to sync with backend
             await get().syncWithBackend();
           } else {
             // When offline, just mark as saved locally
-            set({ 
+            set({
               hasUnsavedChanges: false,
               isLoading: false,
             });
           }
         } catch (error) {
-          console.error('Failed to save preferences:', error);
+          console.error("Failed to save preferences:", error);
           set({ isLoading: false });
           throw error;
         }
@@ -265,18 +274,18 @@ export const usePreferencesStore = create<PreferencesState>()(
 
       loadPreferences: async () => {
         const state = get();
-        
+
         set({ isLoading: true });
-        
+
         try {
           if (state.isOnline) {
             const result = await preferencesService.getPreferences().catch((error) => {
-              console.warn('Failed to fetch preferences from server:', error);
+              console.warn("Failed to fetch preferences from server:", error);
               // Return a failure result instead of throwing
               return { success: false, error: error.message };
             });
-            
-            if (result.success && 'data' in result && result.data) {
+
+            if (result.success && "data" in result && result.data) {
               set({
                 preferences: result.data.preferences,
                 hasUnsavedChanges: false,
@@ -284,11 +293,11 @@ export const usePreferencesStore = create<PreferencesState>()(
                 isLoading: false,
               });
             } else {
-              console.warn('Failed to load preferences from server, using defaults:', result.error);
+              console.warn("Failed to load preferences from server, using defaults:", result.error);
               // Use default preferences as fallback
-              set({ 
+              set({
                 preferences: DEFAULT_PREFERENCES,
-                isLoading: false 
+                isLoading: false,
               });
             }
           } else {
@@ -296,11 +305,11 @@ export const usePreferencesStore = create<PreferencesState>()(
             set({ isLoading: false });
           }
         } catch (error) {
-          console.error('Load preferences error:', error);
+          console.error("Load preferences error:", error);
           // Use default preferences as fallback
-          set({ 
+          set({
             preferences: DEFAULT_PREFERENCES,
-            isLoading: false 
+            isLoading: false,
           });
         }
       },
@@ -308,11 +317,11 @@ export const usePreferencesStore = create<PreferencesState>()(
       syncWithBackend: async () => {
         try {
           const result = await preferencesService.getPreferences().catch((error) => {
-            console.warn('Sync with backend failed:', error);
+            console.warn("Sync with backend failed:", error);
             return { success: false, error: error.message };
           });
-          
-          if (result.success && 'data' in result && result.data) {
+
+          if (result.success && "data" in result && result.data) {
             set({
               preferences: result.data.preferences,
               hasUnsavedChanges: false,
@@ -320,13 +329,13 @@ export const usePreferencesStore = create<PreferencesState>()(
             });
           }
         } catch (error) {
-          console.error('Backend sync error:', error);
+          console.error("Backend sync error:", error);
         }
       },
 
       migrateFromLocalStorage: async () => {
         const state = get();
-        
+
         try {
           // Check if we have local preferences that haven't been synced
           const localPrefs = localStorage.getItem(STORAGE_KEYS.settings);
@@ -339,8 +348,8 @@ export const usePreferencesStore = create<PreferencesState>()(
                 analysis: parsedPrefs.state.preferences.analysis,
                 privacy: parsedPrefs.state.preferences.privacy,
               });
-              
-              if (result.success && 'data' in result && result.data) {
+
+              if (result.success && "data" in result && result.data) {
                 set({
                   preferences: result.data.preferences,
                   lastSyncedAt: result.data.updatedAt || new Date().toISOString(),
@@ -349,13 +358,13 @@ export const usePreferencesStore = create<PreferencesState>()(
             }
           }
         } catch (error) {
-          console.error('Migration error:', error);
+          console.error("Migration error:", error);
         }
       },
 
       setOnlineStatus: (online) => {
         set({ isOnline: online });
-        
+
         if (online) {
           // When coming online, try to sync
           const state = get();
@@ -378,7 +387,7 @@ export const usePreferencesStore = create<PreferencesState>()(
     }),
     {
       name: STORAGE_KEYS.settings,
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         preferences: state.preferences,
         lastSyncedAt: state.lastSyncedAt,
       }),
@@ -389,7 +398,7 @@ export const usePreferencesStore = create<PreferencesState>()(
 // Hook for easy access to preferences
 export const usePreferences = () => {
   const store = usePreferencesStore();
-  
+
   return {
     // State
     preferences: store.preferences,
@@ -397,7 +406,7 @@ export const usePreferences = () => {
     hasUnsavedChanges: store.hasUnsavedChanges,
     isOnline: store.isOnline,
     lastSyncedAt: store.lastSyncedAt,
-    
+
     // Actions
     updateDisplay: store.updateDisplayPreferences,
     updateNotifications: store.updateNotificationPreferences,
@@ -409,7 +418,7 @@ export const usePreferences = () => {
     sync: store.syncWithBackend,
     migrate: store.migrateFromLocalStorage,
     setOnlineStatus: store.setOnlineStatus,
-    
+
     // Getters
     getPreference: store.getPreference,
     getAllPreferences: store.getAllPreferences,

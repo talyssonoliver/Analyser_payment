@@ -3,8 +3,8 @@
  * Manages payment calculation rules with versioning
  */
 
-import { Money } from '../value-objects/money';
-import { generateUUID } from '@/lib/utils';
+import { generateUUID } from "@/lib/utils";
+import { Money } from "../value-objects/money";
 
 export interface PaymentRulesData {
   weekdayRate: number;
@@ -15,15 +15,15 @@ export interface PaymentRulesData {
 }
 
 export class PaymentRules {
-  private _id: string;
-  private _userId: string;
-  private _version: number;
-  private _weekdayRate: Money;
-  private _saturdayRate: Money;
-  private _unloadingBonus: Money;
-  private _attendanceBonus: Money;
-  private _earlyBonus: Money;
-  private _validFrom: Date;
+  private readonly _id: string;
+  private readonly _userId: string;
+  private readonly _version: number;
+  private readonly _weekdayRate: Money;
+  private readonly _saturdayRate: Money;
+  private readonly _unloadingBonus: Money;
+  private readonly _attendanceBonus: Money;
+  private readonly _earlyBonus: Money;
+  private readonly _validFrom: Date;
   private _validUntil?: Date;
   private _isActive: boolean;
 
@@ -54,17 +54,39 @@ export class PaymentRules {
   }
 
   // Getters
-  get id(): string { return this._id; }
-  get userId(): string { return this._userId; }
-  get version(): number { return this._version; }
-  get weekdayRate(): Money { return this._weekdayRate; }
-  get saturdayRate(): Money { return this._saturdayRate; }
-  get unloadingBonus(): Money { return this._unloadingBonus; }
-  get attendanceBonus(): Money { return this._attendanceBonus; }
-  get earlyBonus(): Money { return this._earlyBonus; }
-  get validFrom(): Date { return new Date(this._validFrom); }
-  get validUntil(): Date | undefined { return this._validUntil ? new Date(this._validUntil) : undefined; }
-  get isActive(): boolean { return this._isActive; }
+  get id(): string {
+    return this._id;
+  }
+  get userId(): string {
+    return this._userId;
+  }
+  get version(): number {
+    return this._version;
+  }
+  get weekdayRate(): Money {
+    return this._weekdayRate;
+  }
+  get saturdayRate(): Money {
+    return this._saturdayRate;
+  }
+  get unloadingBonus(): Money {
+    return this._unloadingBonus;
+  }
+  get attendanceBonus(): Money {
+    return this._attendanceBonus;
+  }
+  get earlyBonus(): Money {
+    return this._earlyBonus;
+  }
+  get validFrom(): Date {
+    return new Date(this._validFrom);
+  }
+  get validUntil(): Date | undefined {
+    return this._validUntil ? new Date(this._validUntil) : undefined;
+  }
+  get isActive(): boolean {
+    return this._isActive;
+  }
 
   getRateForDay(dayOfWeek: number): Money {
     // Saturday = 6
@@ -82,19 +104,19 @@ export class PaymentRules {
 
     return {
       // Unloading bonus: All days except Sunday and Monday
-      unloading: (isSunday || isMonday) ? Money.zero() : this._unloadingBonus,
-      
+      unloading: isSunday || isMonday ? Money.zero() : this._unloadingBonus,
+
       // Attendance bonus: Weekdays only
       attendance: isWeekday ? this._attendanceBonus : Money.zero(),
-      
-      // Early bonus: Weekdays only  
+
+      // Early bonus: Weekdays only
       early: isWeekday ? this._earlyBonus : Money.zero(),
     };
   }
 
   isValidFor(date: Date): boolean {
     if (!this._isActive) return false;
-    
+
     const dateTime = date.getTime();
     const validFromTime = this._validFrom.getTime();
     const validUntilTime = this._validUntil?.getTime();

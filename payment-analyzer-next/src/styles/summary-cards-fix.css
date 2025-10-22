@@ -1,0 +1,89 @@
+/* Summary Cards Fix - Prevent overlap */
+
+/* TODO: Refactor components to not need !important overrides */
+
+@layer components {
+  .legacy-summary {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .summary-title {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Fix the grid layout to prevent overflow - Legacy components only */
+  .legacy-summary .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    overflow: visible;
+  }
+
+  /* Ensure cards don't overflow their container - Legacy components only */
+  .legacy-summary .summary-card {
+    min-height: 140px;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    width: 100%;
+    overflow: hidden;
+    overflow-wrap: break-word;
+  }
+
+  /* Responsive adjustments - Legacy components only */
+  @media (width <= 1024px) {
+    .legacy-summary .summary-cards {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+  }
+
+  @media (width <= 768px) {
+    .legacy-summary .summary-cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .legacy-summary .summary-card {
+      min-height: 120px;
+      padding: 1rem;
+    }
+
+    .legacy-summary .summary-card .text-2xl {
+      font-size: 1.5rem;
+    }
+  }
+
+  @media (width <= 640px) {
+    .legacy-summary .summary-cards {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .legacy-summary .summary-card {
+      min-height: 100px;
+    }
+  }
+
+  /* Fix text overflow in card values - Legacy components only */
+  .legacy-summary .summary-card > div:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Ensure proper spacing - Legacy components only */
+  .legacy-summary .summary-card h4 {
+    margin-bottom: 0.5rem;
+  }
+
+  .legacy-summary .summary-card p {
+    margin-top: 0.5rem;
+    line-height: 1.2;
+  }
+
+  /* Fix icon positioning - Legacy components only */
+  .legacy-summary .summary-card .text-2xl:not(.font-bold) {
+    flex-shrink: 0;
+  }
+}

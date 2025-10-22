@@ -2,28 +2,28 @@
  * Privacy Policy Page
  */
 
-'use client';
+"use client";
 
-import { ArrowLeft, Shield, Eye, Database, Lock, UserCheck, Globe, Settings } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ArrowLeft, Database, Eye, Globe, Lock, Settings, Shield, UserCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function PrivacyPage() {
   const router = useRouter();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
+            type="button"
             onClick={() => router.back()}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
           </button>
-          
+
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-teal-700 rounded-2xl mx-auto mb-6 flex items-center justify-center">
               <Shield className="w-8 h-8 text-white" />
@@ -35,7 +35,6 @@ export default function PrivacyPage() {
 
         {/* Content */}
         <div className="bg-white rounded-2xl shadow-sm p-8 space-y-8">
-          
           {/* Introduction */}
           <section>
             <div className="flex items-center gap-3 mb-4">
@@ -45,7 +44,9 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Your Privacy Matters</h2>
             </div>
             <p className="text-slate-700 leading-relaxed">
-              At Payment Analyzer Professional, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, protect, and handle your data when you use our service.
+              At Payment Analyzer Professional, we are committed to protecting your privacy and
+              ensuring the security of your personal information. This Privacy Policy explains how
+              we collect, use, protect, and handle your data when you use our service.
             </p>
           </section>
 
@@ -66,7 +67,7 @@ export default function PrivacyPage() {
                   <li>Account preferences and settings</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Usage Data</h3>
                 <ul className="list-disc list-inside space-y-1 ml-4">
@@ -164,16 +165,31 @@ export default function PrivacyPage() {
             <div className="space-y-4 text-slate-700 leading-relaxed">
               <p>You have the following rights regarding your personal data:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li><strong>Access:</strong> Request copies of your personal data</li>
-                <li><strong>Correction:</strong> Request correction of inaccurate data</li>
-                <li><strong>Deletion:</strong> Request deletion of your personal data</li>
-                <li><strong>Portability:</strong> Request transfer of your data</li>
-                <li><strong>Restriction:</strong> Request limitation of data processing</li>
-                <li><strong>Objection:</strong> Object to certain data processing activities</li>
-                <li><strong>Withdraw consent:</strong> Withdraw consent for data processing</li>
+                <li>
+                  <strong>Access:</strong> Request copies of your personal data
+                </li>
+                <li>
+                  <strong>Correction:</strong> Request correction of inaccurate data
+                </li>
+                <li>
+                  <strong>Deletion:</strong> Request deletion of your personal data
+                </li>
+                <li>
+                  <strong>Portability:</strong> Request transfer of your data
+                </li>
+                <li>
+                  <strong>Restriction:</strong> Request limitation of data processing
+                </li>
+                <li>
+                  <strong>Objection:</strong> Object to certain data processing activities
+                </li>
+                <li>
+                  <strong>Withdraw consent:</strong> Withdraw consent for data processing
+                </li>
               </ul>
               <p className="mt-4">
-                To exercise these rights, please contact us through the application&apos;s settings or support system.
+                To exercise these rights, please contact us through the application&apos;s settings
+                or support system.
               </p>
             </div>
           </section>
@@ -187,16 +203,23 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Data Sharing</h2>
             </div>
             <div className="space-y-4 text-slate-700 leading-relaxed">
-              <p>We do not sell, trade, or otherwise transfer your personal information to third parties, except in the following limited circumstances:</p>
+              <p>
+                We do not sell, trade, or otherwise transfer your personal information to third
+                parties, except in the following limited circumstances:
+              </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>With your explicit consent</li>
                 <li>To comply with legal obligations or court orders</li>
                 <li>To protect our rights, property, or safety</li>
-                <li>With trusted service providers who assist in operating our service (under strict confidentiality agreements)</li>
+                <li>
+                  With trusted service providers who assist in operating our service (under strict
+                  confidentiality agreements)
+                </li>
                 <li>In connection with a business transfer or merger (with prior notice)</li>
               </ul>
               <p className="mt-4">
-                We never share your payment analysis data or personal documents with any third parties for marketing or commercial purposes.
+                We never share your payment analysis data or personal documents with any third
+                parties for marketing or commercial purposes.
               </p>
             </div>
           </section>
@@ -218,7 +241,9 @@ export default function PrivacyPage() {
                 <li>Ensuring security and preventing fraud</li>
               </ul>
               <p className="mt-4">
-                Most cookies are essential for the service to function properly. You can control non-essential cookies through your browser settings, though this may limit some functionality.
+                Most cookies are essential for the service to function properly. You can control
+                non-essential cookies through your browser settings, though this may limit some
+                functionality.
               </p>
             </div>
           </section>
@@ -232,7 +257,10 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Children&apos;s Privacy</h2>
             </div>
             <p className="text-slate-700 leading-relaxed">
-              Our service is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us so we can delete such information.
+              Our service is not intended for children under 13 years of age. We do not knowingly
+              collect personal information from children under 13. If you are a parent or guardian
+              and believe your child has provided us with personal information, please contact us so
+              we can delete such information.
             </p>
           </section>
 
@@ -245,7 +273,10 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Changes to This Policy</h2>
             </div>
             <p className="text-slate-700 leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date. We encourage you to review this Privacy Policy periodically for any changes.
+              We may update this Privacy Policy from time to time. We will notify you of any
+              material changes by posting the new Privacy Policy on this page and updating the
+              &quot;Last updated&quot; date. We encourage you to review this Privacy Policy
+              periodically for any changes.
             </p>
           </section>
 
@@ -259,7 +290,8 @@ export default function PrivacyPage() {
             </div>
             <div className="text-slate-700 leading-relaxed space-y-4">
               <p>
-                If you have any questions about this Privacy Policy or how we handle your personal information, please contact us through:
+                If you have any questions about this Privacy Policy or how we handle your personal
+                information, please contact us through:
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4">
                 <li>The feedback system within the application</li>
@@ -267,7 +299,8 @@ export default function PrivacyPage() {
                 <li>The contact form available in the app</li>
               </ul>
               <p>
-                We are committed to resolving any privacy concerns you may have and will respond to your inquiries promptly.
+                We are committed to resolving any privacy concerns you may have and will respond to
+                your inquiries promptly.
               </p>
             </div>
           </section>

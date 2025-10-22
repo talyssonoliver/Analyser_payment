@@ -2,11 +2,11 @@
  * 404 Not Found Page
  */
 
-'use client';
+"use client";
 
-import { Home, Search, ArrowLeft, FileQuestion } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { ArrowLeft, FileQuestion, Home, Search } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
   const router = useRouter();
@@ -14,7 +14,6 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-4 py-8 text-center">
-        
         {/* 404 Icon */}
         <div className="mb-8">
           <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-3xl mx-auto mb-6 flex items-center justify-center">
@@ -37,14 +36,16 @@ export default function NotFound() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
           <button
+            type="button"
             onClick={() => router.back()}
             className="flex items-center justify-center gap-3 bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105"
           >
             <ArrowLeft className="w-5 h-5" />
             Go Back
           </button>
-          
+
           <Link
+            prefetch={false}
             href="/"
             className="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105"
           >
@@ -61,6 +62,7 @@ export default function NotFound() {
           </h2>
           <div className="grid sm:grid-cols-2 gap-3">
             <Link
+              prefetch={false}
               href="/analysis"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left"
             >
@@ -74,6 +76,7 @@ export default function NotFound() {
             </Link>
 
             <Link
+              prefetch={false}
               href="/dashboard"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left"
             >
@@ -87,6 +90,7 @@ export default function NotFound() {
             </Link>
 
             <Link
+              prefetch={false}
               href="/history"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left"
             >
@@ -100,6 +104,7 @@ export default function NotFound() {
             </Link>
 
             <Link
+              prefetch={false}
               href="/settings"
               className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left"
             >
@@ -118,6 +123,7 @@ export default function NotFound() {
         <div className="text-center">
           <p className="text-slate-500 mb-2">Still can&apos;t find what you&apos;re looking for?</p>
           <Link
+            prefetch={false}
             href="/login"
             className="text-blue-600 hover:text-blue-700 font-medium underline"
           >

@@ -2,28 +2,28 @@
  * Terms of Service Page
  */
 
-'use client';
+"use client";
 
-import { ArrowLeft, FileText, Shield, Users, AlertCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { AlertCircle, ArrowLeft, FileText, Shield, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function TermsPage() {
   const router = useRouter();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <button
+            type="button"
             onClick={() => router.back()}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back</span>
           </button>
-          
+
           <div className="text-center">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-700 rounded-2xl mx-auto mb-6 flex items-center justify-center">
               <FileText className="w-8 h-8 text-white" />
@@ -35,7 +35,6 @@ export default function TermsPage() {
 
         {/* Content */}
         <div className="bg-white rounded-2xl shadow-sm p-8 space-y-8">
-          
           {/* Introduction */}
           <section>
             <div className="flex items-center gap-3 mb-4">
@@ -45,7 +44,9 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Agreement to Terms</h2>
             </div>
             <p className="text-slate-700 leading-relaxed">
-              By accessing and using Payment Analyzer Professional (&quot;the Service&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+              By accessing and using Payment Analyzer Professional (&quot;the Service&quot;), you
+              accept and agree to be bound by the terms and provision of this agreement. If you do
+              not agree to abide by the above, please do not use this service.
             </p>
           </section>
 
@@ -59,7 +60,9 @@ export default function TermsPage() {
             </div>
             <div className="space-y-4 text-slate-700 leading-relaxed">
               <p>
-                Payment Analyzer Professional is a web-based application designed to help users analyze delivery payment data through PDF document processing and manual data entry. The Service provides:
+                Payment Analyzer Professional is a web-based application designed to help users
+                analyze delivery payment data through PDF document processing and manual data entry.
+                The Service provides:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>PDF document parsing and data extraction</li>
@@ -81,7 +84,9 @@ export default function TermsPage() {
             </div>
             <div className="space-y-4 text-slate-700 leading-relaxed">
               <p>
-                Permission is granted to temporarily use Payment Analyzer Professional for personal or commercial analysis purposes. This is the grant of a license, not a transfer of title, and under this license you may not:
+                Permission is granted to temporarily use Payment Analyzer Professional for personal
+                or commercial analysis purposes. This is the grant of a license, not a transfer of
+                title, and under this license you may not:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Modify or copy the materials</li>
@@ -102,9 +107,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Data and Privacy</h2>
             </div>
             <div className="space-y-4 text-slate-700 leading-relaxed">
-              <p>
-                Your privacy and data security are important to us. By using the Service:
-              </p>
+              <p>Your privacy and data security are important to us. By using the Service:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>You retain ownership of all data you upload or input</li>
                 <li>We implement industry-standard security measures to protect your data</li>
@@ -124,9 +127,7 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-slate-900">User Responsibilities</h2>
             </div>
             <div className="space-y-4 text-slate-700 leading-relaxed">
-              <p>
-                As a user of Payment Analyzer Professional, you agree to:
-              </p>
+              <p>As a user of Payment Analyzer Professional, you agree to:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Provide accurate and complete registration information</li>
                 <li>Maintain the security of your account credentials</li>
@@ -148,10 +149,16 @@ export default function TermsPage() {
             </div>
             <div className="space-y-4 text-slate-700 leading-relaxed">
               <p>
-                In no event shall Payment Analyzer Professional or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on the Service, even if authorized representatives have been notified orally or in writing of the possibility of such damage.
+                In no event shall Payment Analyzer Professional or its suppliers be liable for any
+                damages (including, without limitation, damages for loss of data or profit, or due
+                to business interruption) arising out of the use or inability to use the materials
+                on the Service, even if authorized representatives have been notified orally or in
+                writing of the possibility of such damage.
               </p>
               <p>
-                The Service is provided &quot;as is&quot; without any representations or warranties, express or implied. We make no representations or warranties in relation to the Service or the information and materials provided.
+                The Service is provided &quot;as is&quot; without any representations or warranties,
+                express or implied. We make no representations or warranties in relation to the
+                Service or the information and materials provided.
               </p>
             </div>
           </section>
@@ -166,7 +173,8 @@ export default function TermsPage() {
             </div>
             <div className="space-y-4 text-slate-700 leading-relaxed">
               <p>
-                We strive to maintain high availability of the Service, but cannot guarantee uninterrupted access. The Service may be temporarily unavailable due to:
+                We strive to maintain high availability of the Service, but cannot guarantee
+                uninterrupted access. The Service may be temporarily unavailable due to:
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>Scheduled maintenance and updates</li>
@@ -186,7 +194,9 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Modifications</h2>
             </div>
             <p className="text-slate-700 leading-relaxed">
-              We may revise these terms of service at any time without notice. By using the Service, you are agreeing to be bound by the then current version of these terms of service. We will make reasonable efforts to notify users of significant changes to these terms.
+              We may revise these terms of service at any time without notice. By using the Service,
+              you are agreeing to be bound by the then current version of these terms of service. We
+              will make reasonable efforts to notify users of significant changes to these terms.
             </p>
           </section>
 
@@ -199,16 +209,15 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold text-slate-900">Contact Information</h2>
             </div>
             <p className="text-slate-700 leading-relaxed">
-              If you have any questions about these Terms of Service, please contact us through the application&apos;s support channels or feedback system.
+              If you have any questions about these Terms of Service, please contact us through the
+              application&apos;s support channels or feedback system.
             </p>
           </section>
         </div>
 
         {/* Footer */}
         <div className="text-center mt-8">
-          <p className="text-slate-500">
-            Thank you for using Payment Analyzer Professional
-          </p>
+          <p className="text-slate-500">Thank you for using Payment Analyzer Professional</p>
         </div>
       </div>
     </div>

@@ -4,8 +4,8 @@
  * Replicates legacy State.setSelectedWeek() functionality
  */
 
-import type { AnalysisWithDetails } from '@/lib/repositories/analysis-repository';
-import type { InlineReportData } from './inline-report-generator';
+import type { AnalysisWithDetails } from "@/lib/repositories/analysis-repository";
+import type { InlineReportData } from "./inline-report-generator";
 
 export interface WeekInfo {
   week: number;
@@ -22,27 +22,27 @@ class WeekNavigationService {
   private state: WeekNavigationState = {
     selectedWeek: null,
     analysisId: null,
-    returnUrl: null
+    returnUrl: null,
   };
 
-  private listeners: Set<(state: WeekNavigationState) => void> = new Set();
+  private readonly listeners: Set<(state: WeekNavigationState) => void> = new Set();
 
   /**
    * Set the selected week for navigation (equivalent to legacy State.setSelectedWeek)
    */
   setSelectedWeek(weekInfo: WeekInfo, analysisId?: string): void {
-    console.log('📅 Selected week set:', weekInfo);
+    console.log("📅 Selected week set:", weekInfo);
 
     this.state = {
       ...this.state,
       selectedWeek: weekInfo,
-      analysisId: analysisId || this.state.analysisId
+      analysisId: analysisId || this.state.analysisId,
     };
 
     // Store in sessionStorage for browser navigation persistence
-    sessionStorage.setItem('selectedWeek', JSON.stringify(weekInfo));
+    sessionStorage.setItem("selectedWeek", JSON.stringify(weekInfo));
     if (analysisId) {
-      sessionStorage.setItem('weekAnalysisId', analysisId);
+      sessionStorage.setItem("weekAnalysisId", analysisId);
     }
 
     this.notifyListeners();
@@ -58,14 +58,14 @@ class WeekNavigationService {
     }
 
     // Fallback to sessionStorage for persistence
-    const stored = sessionStorage.getItem('selectedWeek');
+    const stored = sessionStorage.getItem("selectedWeek");
     if (stored) {
       try {
         const weekInfo = JSON.parse(stored);
         this.state.selectedWeek = weekInfo;
         return weekInfo;
       } catch (error) {
-        console.warn('Failed to parse stored selectedWeek:', error);
+        console.warn("Failed to parse stored selectedWeek:", error);
       }
     }
 
@@ -81,7 +81,7 @@ class WeekNavigationService {
     }
 
     // Fallback to sessionStorage
-    const stored = sessionStorage.getItem('weekAnalysisId');
+    const stored = sessionStorage.getItem("weekAnalysisId");
     if (stored) {
       this.state.analysisId = stored;
       return stored;
@@ -94,16 +94,16 @@ class WeekNavigationService {
    * Clear the selected week (equivalent to legacy State.clearSelectedWeek)
    */
   clearSelectedWeek(): void {
-    console.log('📅 Selected week cleared');
+    console.log("📅 Selected week cleared");
 
     this.state = {
       ...this.state,
       selectedWeek: null,
-      analysisId: null
+      analysisId: null,
     };
 
-    sessionStorage.removeItem('selectedWeek');
-    sessionStorage.removeItem('weekAnalysisId');
+    sessionStorage.removeItem("selectedWeek");
+    sessionStorage.removeItem("weekAnalysisId");
 
     this.notifyListeners();
   }
@@ -114,9 +114,9 @@ class WeekNavigationService {
   setReturnUrl(url: string): void {
     this.state = {
       ...this.state,
-      returnUrl: url
+      returnUrl: url,
     };
-    sessionStorage.setItem('weekReturnUrl', url);
+    sessionStorage.setItem("weekReturnUrl", url);
   }
 
   /**
@@ -127,7 +127,7 @@ class WeekNavigationService {
       return this.state.returnUrl;
     }
 
-    const stored = sessionStorage.getItem('weekReturnUrl');
+    const stored = sessionStorage.getItem("weekReturnUrl");
     if (stored) {
       this.state.returnUrl = stored;
       return stored;
@@ -159,7 +159,11 @@ class WeekNavigationService {
    * Navigate to week-specific report page
    * Replicates legacy behavior: State.setSelectedWeek() + navigate('reports')
    */
-  navigateToWeekReport(weekInfo: WeekInfo, analysisId?: string, router?: { push: (url: string) => void }): void {
+  navigateToWeekReport(
+    weekInfo: WeekInfo,
+    analysisId?: string,
+    router?: { push: (url: string) => void }
+  ): void {
     console.log(`📅 Week title clicked: Week ${weekInfo.week}, ${weekInfo.year}`);
 
     // Set the selected week state
@@ -169,24 +173,24 @@ class WeekNavigationService {
     const weekStartDate = this.getWeekStartDate(weekInfo.year, weekInfo.week);
     const weekEndDate = this.getWeekEndDate(weekInfo.year, weekInfo.week);
 
-    const startDateStr = weekStartDate.toISOString().split('T')[0]; // YYYY-MM-DD
-    const endDateStr = weekEndDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const startDateStr = weekStartDate.toISOString().split("T")[0]; // YYYY-MM-DD
+    const endDateStr = weekEndDate.toISOString().split("T")[0]; // YYYY-MM-DD
 
     // Build reports URL with week parameters
     const params = new URLSearchParams();
     if (analysisId) {
-      params.set('analysis', analysisId);
+      params.set("analysis", analysisId);
     }
-    params.set('week', `${weekInfo.week}`);
-    params.set('start', startDateStr);
-    params.set('end', endDateStr);
+    params.set("week", `${weekInfo.week}`);
+    params.set("start", startDateStr);
+    params.set("end", endDateStr);
 
     const reportsUrl = `/reports?${params.toString()}`;
 
     // Navigate to reports page (legacy: requireModule('routerModule').navigate('reports'))
-    if (router && typeof router.push === 'function') {
+    if (router && typeof router.push === "function") {
       router.push(reportsUrl);
-    } else if (typeof window !== 'undefined') {
+    } else if (typeof window !== "undefined") {
       window.location.href = reportsUrl;
     }
 
@@ -202,10 +206,10 @@ class WeekNavigationService {
     analysisData: AnalysisWithDetails
   ): Promise<InlineReportData> {
     try {
-      const { InlineReportGenerator } = await import('./inline-report-generator');
+      const { InlineReportGenerator } = await import("./inline-report-generator");
 
       if (!analysisData) {
-        console.warn('No analysis data available for week report generation');
+        console.warn("No analysis data available for week report generation");
         return InlineReportGenerator.generateEmptyReport();
       }
 
@@ -219,13 +223,13 @@ class WeekNavigationService {
       console.log(`📊 Generated inline week report for Week ${weekInfo.week}, ${weekInfo.year}:`, {
         entries: weekReport.results.length,
         totalExpected: weekReport.totals.expectedTotal,
-        period: weekReport.metadata.period
+        period: weekReport.metadata.period,
       });
 
       return weekReport;
     } catch (error) {
-      console.error('Failed to generate inline week report:', error);
-      const { InlineReportGenerator } = await import('./inline-report-generator');
+      console.error("Failed to generate inline week report:", error);
+      const { InlineReportGenerator } = await import("./inline-report-generator");
       return InlineReportGenerator.generateEmptyReport();
     }
   }
@@ -253,11 +257,11 @@ class WeekNavigationService {
    * Notify all listeners of state changes
    */
   private notifyListeners(): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener({ ...this.state });
       } catch (error) {
-        console.error('Error in week navigation listener:', error);
+        console.error("Error in week navigation listener:", error);
       }
     });
   }
@@ -274,7 +278,7 @@ class WeekNavigationService {
    */
   getWeekDisplayName(weekInfo?: WeekInfo | null): string {
     const week = weekInfo || this.state.selectedWeek;
-    if (!week) return '';
+    if (!week) return "";
     return `Week ${week.week}, ${week.year}`;
   }
 }

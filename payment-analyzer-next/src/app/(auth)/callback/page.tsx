@@ -3,16 +3,17 @@
  * Handles authentication callbacks (email confirmation, password reset, OAuth)
  */
 
-'use client';
+"use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { useToast } from '@/components/ui/toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import { useToast } from "@/components/ui/toast";
+import { createClient } from "@/lib/supabase/client";
+import { validateRedirectPath } from "@/lib/utils/redirect-validator";
 
-type CallbackState = 'loading' | 'success' | 'error';
+type CallbackState = "loading" | "success" | "error";
 
 function AuthCallbackContent() {
   const router = useRouter();
@@ -20,32 +21,32 @@ function AuthCallbackContent() {
   const { toast } = useToast();
   const supabase = createClient();
 
-  const [state, setState] = useState<CallbackState>('loading');
-  const [message, setMessage] = useState('');
+  const [state, setState] = useState<CallbackState>("loading");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const code = searchParams.get('code');
-        const error = searchParams.get('error');
-        const errorDescription = searchParams.get('error_description');
-        const type = searchParams.get('type');
+        const code = searchParams.get("code");
+        const error = searchParams.get("error");
+        const errorDescription = searchParams.get("error_description");
+        const type = searchParams.get("type");
 
         // Handle errors from the auth provider
         if (error) {
-          console.error('Auth callback error:', error, errorDescription);
-          setState('error');
-          setMessage(errorDescription || error || 'Authentication failed');
-          
+          console.error("Auth callback error:", error, errorDescription);
+          setState("error");
+          setMessage(errorDescription || error || "Authentication failed");
+
           toast({
-            title: 'Authentication Failed',
-            description: errorDescription || error || 'Something went wrong during authentication',
-            type: 'error',
+            title: "Authentication Failed",
+            description: errorDescription || error || "Something went wrong during authentication",
+            type: "error",
           });
 
           // Redirect to login after showing error
           setTimeout(() => {
-            router.push('/login');
+            router.push("/login");
           }, 3000);
           return;
         }
@@ -53,97 +54,97 @@ function AuthCallbackContent() {
         // Handle auth code exchange
         if (code) {
           const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          
+
           if (exchangeError) {
-            console.error('Code exchange error:', exchangeError);
-            setState('error');
-            setMessage(exchangeError.message || 'Failed to complete authentication');
-            
+            console.error("Code exchange error:", exchangeError);
+            setState("error");
+            setMessage(exchangeError.message || "Failed to complete authentication");
+
             toast({
-              title: 'Authentication Failed',
-              description: exchangeError.message || 'Failed to complete authentication',
-              type: 'error',
+              title: "Authentication Failed",
+              description: exchangeError.message || "Failed to complete authentication",
+              type: "error",
             });
 
             setTimeout(() => {
-              router.push('/login');
+              router.push("/login");
             }, 3000);
             return;
           }
 
           if (data.session) {
-            setState('success');
-            
+            setState("success");
+
             // Handle different callback types
             switch (type) {
-              case 'signup':
-                setMessage('Account verified successfully!');
+              case "signup":
+                setMessage("Account verified successfully!");
                 toast({
-                  title: 'Welcome!',
-                  description: 'Your account has been verified. Welcome to Payment Analyzer!',
-                  type: 'success',
+                  title: "Welcome!",
+                  description: "Your account has been verified. Welcome to Payment Analyzer!",
+                  type: "success",
                 });
                 break;
-              
-              case 'recovery':
-                setMessage('Password reset verified!');
-                router.push('/reset-password');
+
+              case "recovery":
+                setMessage("Password reset verified!");
+                router.push("/reset-password");
                 return;
-              
-              case 'invite':
-                setMessage('Invitation accepted successfully!');
+
+              case "invite":
+                setMessage("Invitation accepted successfully!");
                 toast({
-                  title: 'Welcome!',
-                  description: 'Your invitation has been accepted. Welcome to the team!',
-                  type: 'success',
+                  title: "Welcome!",
+                  description: "Your invitation has been accepted. Welcome to the team!",
+                  type: "success",
                 });
                 break;
-              
+
               default:
-                setMessage('Authentication completed successfully!');
+                setMessage("Authentication completed successfully!");
                 toast({
-                  title: 'Success!',
-                  description: 'You have been successfully authenticated.',
-                  type: 'success',
+                  title: "Success!",
+                  description: "You have been successfully authenticated.",
+                  type: "success",
                 });
             }
 
-            // Redirect to dashboard
+            // Redirect to dashboard (SEC-007: validate redirect path to prevent open redirect)
             setTimeout(() => {
-              const redirectTo = searchParams.get('redirect_to') || '/dashboard';
-              router.push(redirectTo);
+              const redirectTo = searchParams.get("redirect_to");
+              const safePath = validateRedirectPath(redirectTo);
+              router.push(safePath);
             }, 2000);
             return;
           }
         }
 
         // If we get here, something unexpected happened
-        setState('error');
-        setMessage('Invalid authentication callback');
-        
+        setState("error");
+        setMessage("Invalid authentication callback");
+
         toast({
-          title: 'Authentication Error',
-          description: 'Invalid authentication callback received',
-          type: 'error',
+          title: "Authentication Error",
+          description: "Invalid authentication callback received",
+          type: "error",
         });
 
         setTimeout(() => {
-          router.push('/login');
+          router.push("/login");
         }, 3000);
-
       } catch (error) {
-        console.error('Callback handler error:', error);
-        setState('error');
-        setMessage('An unexpected error occurred during authentication');
-        
+        console.error("Callback handler error:", error);
+        setState("error");
+        setMessage("An unexpected error occurred during authentication");
+
         toast({
-          title: 'Unexpected Error',
-          description: 'An unexpected error occurred. Please try again.',
-          type: 'error',
+          title: "Unexpected Error",
+          description: "An unexpected error occurred. Please try again.",
+          type: "error",
         });
 
         setTimeout(() => {
-          router.push('/login');
+          router.push("/login");
         }, 3000);
       }
     };
@@ -153,45 +154,45 @@ function AuthCallbackContent() {
 
   const getIcon = () => {
     switch (state) {
-      case 'loading':
+      case "loading":
         return <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />;
-      case 'success':
+      case "success":
         return <CheckCircle className="w-12 h-12 text-green-600" />;
-      case 'error':
+      case "error":
         return <XCircle className="w-12 h-12 text-red-600" />;
     }
   };
 
   const getTitle = () => {
     switch (state) {
-      case 'loading':
-        return 'Completing Authentication...';
-      case 'success':
-        return 'Authentication Successful';
-      case 'error':
-        return 'Authentication Failed';
+      case "loading":
+        return "Completing Authentication...";
+      case "success":
+        return "Authentication Successful";
+      case "error":
+        return "Authentication Failed";
     }
   };
 
   const getDescription = () => {
     switch (state) {
-      case 'loading':
-        return 'Please wait while we complete your authentication.';
-      case 'success':
-        return 'You will be redirected to your dashboard shortly.';
-      case 'error':
-        return 'You will be redirected to the login page.';
+      case "loading":
+        return "Please wait while we complete your authentication.";
+      case "success":
+        return "You will be redirected to your dashboard shortly.";
+      case "error":
+        return "You will be redirected to the login page.";
     }
   };
 
   const getMessageColorClass = () => {
     switch (state) {
-      case 'success':
-        return 'text-green-600';
-      case 'error':
-        return 'text-red-600';
+      case "success":
+        return "text-green-600";
+      case "error":
+        return "text-red-600";
       default:
-        return 'text-slate-600';
+        return "text-slate-600";
     }
   };
 
@@ -200,21 +201,13 @@ function AuthCallbackContent() {
       <div className="w-full max-w-md">
         <Card className="shadow-xl">
           <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              {getIcon()}
-            </div>
+            <div className="flex justify-center mb-4">{getIcon()}</div>
             <CardTitle className="text-2xl">{getTitle()}</CardTitle>
-            <p className="text-sm text-slate-600">
-              {getDescription()}
-            </p>
+            <p className="text-sm text-slate-600">{getDescription()}</p>
           </CardHeader>
-          
+
           <CardContent className="text-center">
-            {message && (
-              <p className={`text-sm ${getMessageColorClass()}`}>
-                {message}
-              </p>
-            )}
+            {message && <p className={`text-sm ${getMessageColorClass()}`}>{message}</p>}
           </CardContent>
         </Card>
       </div>
@@ -232,9 +225,7 @@ function LoadingFallback() {
               <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
             </div>
             <CardTitle className="text-2xl">Loading...</CardTitle>
-            <p className="text-sm text-slate-600">
-              Preparing authentication callback...
-            </p>
+            <p className="text-sm text-slate-600">Preparing authentication callback...</p>
           </CardHeader>
         </Card>
       </div>

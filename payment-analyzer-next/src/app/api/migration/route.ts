@@ -1,44 +1,54 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createServerClient } from '@/lib/supabase/server';
-import { analysisService } from '@/lib/services/analysis-service';
-import { generateUUID } from '@/lib/utils';
-import { z } from 'zod';
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { analysisService } from "@/lib/services/analysis-service";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+import { generateUUID } from "@/lib/utils";
 
 // Schema for migration data validation
 const MigrationDataSchema = z.object({
   version: z.string(), // e.g., "v8", "v9"
-  data: z.array(z.object({
-    // Legacy analysis structure
-    id: z.string().optional(),
-    period: z.object({
-      start: z.string(),
-      end: z.string(),
-    }),
-    entries: z.array(z.object({
-      date: z.string(),
-      consignments: z.number().min(0),
-      paid: z.number().min(0),
-      bonuses: z.object({
-        unloading: z.boolean().optional(),
-        attendance: z.boolean().optional(),
-        early: z.boolean().optional(),
-      }).optional(),
-      pickups: z.number().min(0).optional(),
-    })),
-    paymentRules: z.object({
-      weekdayRate: z.number().min(0),
-      saturdayRate: z.number().min(0),
-      unloadingBonus: z.number().min(0),
-      attendanceBonus: z.number().min(0),
-      earlyBonus: z.number().min(0),
-    }).optional(),
-    metadata: z.object({
-      description: z.string().optional(),
-      notes: z.string().optional(),
-      originalId: z.string().optional(),
-      importDate: z.string().optional(),
-    }).optional(),
-  })),
+  data: z.array(
+    z.object({
+      // Legacy analysis structure
+      id: z.string().optional(),
+      period: z.object({
+        start: z.string(),
+        end: z.string(),
+      }),
+      entries: z.array(
+        z.object({
+          date: z.string(),
+          consignments: z.number().min(0),
+          paid: z.number().min(0),
+          bonuses: z
+            .object({
+              unloading: z.boolean().optional(),
+              attendance: z.boolean().optional(),
+              early: z.boolean().optional(),
+            })
+            .optional(),
+          pickups: z.number().min(0).optional(),
+        })
+      ),
+      paymentRules: z
+        .object({
+          weekdayRate: z.number().min(0),
+          saturdayRate: z.number().min(0),
+          unloadingBonus: z.number().min(0),
+          attendanceBonus: z.number().min(0),
+          earlyBonus: z.number().min(0),
+        })
+        .optional(),
+      metadata: z
+        .object({
+          description: z.string().optional(),
+          notes: z.string().optional(),
+          originalId: z.string().optional(),
+          importDate: z.string().optional(),
+        })
+        .optional(),
+    })
+  ),
 });
 
 const ValidateRequestSchema = z.object({
@@ -47,12 +57,19 @@ const ValidateRequestSchema = z.object({
 });
 
 // Type definitions based on Zod schemas
-type LegacyAnalysisData = z.infer<typeof MigrationDataSchema>['data'][0];
+type LegacyAnalysisData = z.infer<typeof MigrationDataSchema>["data"][0];
 
 // Migration progress tracking (in production, use Redis)
 interface MigrationProgress {
   migrationId: string;
-  stage: 'starting' | 'validating' | 'processing' | 'importing' | 'verifying' | 'completed' | 'error';
+  stage:
+    | "starting"
+    | "validating"
+    | "processing"
+    | "importing"
+    | "verifying"
+    | "completed"
+    | "error";
   progress: number;
   message: string;
   currentItem?: number;
@@ -81,8 +98,8 @@ const migrationProgress = new Map<string, MigrationProgress>();
  * Update migration progress
  */
 async function updateMigrationProgress(
-  migrationId: string, 
-  processed: number, 
+  migrationId: string,
+  processed: number,
   total: number
 ): Promise<void> {
   const currentProgress = migrationProgress.get(migrationId);
@@ -90,7 +107,7 @@ async function updateMigrationProgress(
     migrationProgress.set(migrationId, {
       ...currentProgress,
       migrationId,
-      stage: 'processing',
+      stage: "processing",
       progress: Math.round((processed / total) * 100),
       message: `Processing analysis ${processed + 1} of ${total}`,
       processed,
@@ -134,18 +151,18 @@ async function processSingleAnalysis(
       return {
         error: {
           index,
-          error: result.error || 'Unknown error',
-          originalId: legacyAnalysis.id || 'unknown',
-        }
+          error: result.error || "Unknown error",
+          originalId: legacyAnalysis.id || "unknown",
+        },
       };
     }
   } catch (error) {
     return {
       error: {
         index,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        originalId: legacyAnalysis.id || 'unknown',
-      }
+        error: error instanceof Error ? error.message : "Unknown error",
+        originalId: legacyAnalysis.id || "unknown",
+      },
     };
   }
 }
@@ -204,7 +221,7 @@ async function setMigrationCompleted(
     migrationProgress.set(migrationId, {
       ...currentProgress,
       migrationId,
-      stage: 'completed',
+      stage: "completed",
       progress: 100,
       message: `Migration completed. ${success.length} successful, ${errors.length} failed.`,
       processed,
@@ -229,10 +246,10 @@ async function setMigrationError(migrationId: string, error: unknown): Promise<v
     migrationProgress.set(migrationId, {
       ...currentProgress,
       migrationId,
-      stage: 'error',
+      stage: "error",
       progress: 0,
-      message: 'Migration failed',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      message: "Migration failed",
+      error: error instanceof Error ? error.message : "Unknown error",
       completedAt: new Date().toISOString(),
     });
   }
@@ -242,9 +259,12 @@ async function setMigrationError(migrationId: string, error: unknown): Promise<v
  * Schedule migration cleanup
  */
 function scheduleMigrationCleanup(migrationId: string): void {
-  setTimeout(() => {
-    migrationProgress.delete(migrationId);
-  }, 30 * 60 * 1000);
+  setTimeout(
+    () => {
+      migrationProgress.delete(migrationId);
+    },
+    30 * 60 * 1000
+  );
 }
 
 /**
@@ -254,21 +274,27 @@ export async function POST(request: NextRequest) {
   try {
     // Get authenticated user
     const supabase = await createServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Parse and validate request body
     const body = await request.json();
     const validationResult = MigrationDataSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      return NextResponse.json({
-        error: 'Invalid migration data format',
-        details: validationResult.error.issues
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Invalid migration data format",
+          details: validationResult.error.issues,
+        },
+        { status: 400 }
+      );
     }
 
     const { version, data: migrationData } = validationResult.data;
@@ -278,9 +304,9 @@ export async function POST(request: NextRequest) {
 
     // Initialize progress tracking
     migrationProgress.set(migrationId, {
-      stage: 'starting',
+      stage: "starting",
       progress: 0,
-      message: 'Starting migration...',
+      message: "Starting migration...",
       total: migrationData.length,
       processed: 0,
       migrationId,
@@ -294,15 +320,14 @@ export async function POST(request: NextRequest) {
     const processMigration = async () => {
       try {
         const { processedCount, errors, success } = await processMigrationData(
-          migrationData, 
-          migrationId, 
-          version, 
+          migrationData,
+          migrationId,
+          version,
           user.id
         );
 
         await setMigrationCompleted(migrationId, success, errors, processedCount);
         scheduleMigrationCleanup(migrationId);
-
       } catch (error) {
         await setMigrationError(migrationId, error);
       }
@@ -311,18 +336,23 @@ export async function POST(request: NextRequest) {
     // Start processing
     processMigration();
 
-    return NextResponse.json({
-      success: true,
-      migrationId,
-      message: 'Migration started. Use the migrationId to check progress.',
-      total: migrationData.length,
-    }, { status: 202 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        migrationId,
+        message: "Migration started. Use the migrationId to check progress.",
+        total: migrationData.length,
+      },
+      { status: 202 }
+    );
   } catch (error) {
-    console.error('POST /api/migration/import error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error("POST /api/migration/import error:", error);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -333,21 +363,27 @@ export async function PATCH(request: NextRequest) {
   try {
     // Get authenticated user
     const supabase = await createServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Parse request body
     const body = await request.json();
     const validationResult = ValidateRequestSchema.safeParse(body);
-    
+
     if (!validationResult.success) {
-      return NextResponse.json({
-        error: 'Invalid validation request',
-        details: validationResult.error.issues
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Invalid validation request",
+          details: validationResult.error.issues,
+        },
+        { status: 400 }
+      );
     }
 
     const { version, sampleData } = validationResult.data;
@@ -359,12 +395,14 @@ export async function PATCH(request: NextRequest) {
       success: true,
       validation,
     });
-
   } catch (error) {
-    console.error('PATCH /api/migration/validate error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error("PATCH /api/migration/validate error:", error);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -375,44 +413,55 @@ export async function GET(request: NextRequest) {
   try {
     // Get authenticated user
     const supabase = await createServerClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    const migrationId = searchParams.get('migrationId');
+    const migrationId = searchParams.get("migrationId");
 
     if (!migrationId) {
-      return NextResponse.json({ 
-        error: 'migrationId is required' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "migrationId is required",
+        },
+        { status: 400 }
+      );
     }
 
     const progress = migrationProgress.get(migrationId);
 
     if (!progress) {
-      return NextResponse.json({ 
-        error: 'Migration not found or expired' 
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: "Migration not found or expired",
+        },
+        { status: 404 }
+      );
     }
 
     // Verify ownership
     if (progress.userId !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     return NextResponse.json({
       success: true,
       data: progress,
     });
-
   } catch (error) {
-    console.error('GET /api/migration/status error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error("GET /api/migration/status error:", error);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -449,16 +498,19 @@ function convertLegacyAnalysis(legacyAnalysis: LegacyAnalysisData, version: stri
 function validateRecordStructure(record: unknown, index: number): string[] {
   const issues: string[] = [];
 
-  if (typeof record !== 'object' || record === null) {
+  if (typeof record !== "object" || record === null) {
     issues.push(`Record ${index + 1}: Invalid record structure`);
     return issues;
   }
 
   const typedRecord = record as Record<string, unknown>;
 
-  if (!typedRecord.period || typeof typedRecord.period !== 'object' ||
-      !(typedRecord.period as Record<string, unknown>)?.start ||
-      !(typedRecord.period as Record<string, unknown>)?.end) {
+  if (
+    !typedRecord.period ||
+    typeof typedRecord.period !== "object" ||
+    !(typedRecord.period as Record<string, unknown>)?.start ||
+    !(typedRecord.period as Record<string, unknown>)?.end
+  ) {
     issues.push(`Record ${index + 1}: Missing period information`);
   }
 
@@ -475,7 +527,7 @@ function validateRecordStructure(record: unknown, index: number): string[] {
 function validateEntry(entry: unknown, recordIndex: number, entryIndex: number): string[] {
   const issues: string[] = [];
 
-  if (typeof entry !== 'object' || entry === null) {
+  if (typeof entry !== "object" || entry === null) {
     issues.push(`Record ${recordIndex + 1}, Entry ${entryIndex + 1}: Invalid entry structure`);
     return issues;
   }
@@ -486,11 +538,11 @@ function validateEntry(entry: unknown, recordIndex: number, entryIndex: number):
     issues.push(`Record ${recordIndex + 1}, Entry ${entryIndex + 1}: Missing date`);
   }
 
-  if (typeof typedEntry.consignments !== 'number' || typedEntry.consignments < 0) {
+  if (typeof typedEntry.consignments !== "number" || typedEntry.consignments < 0) {
     issues.push(`Record ${recordIndex + 1}, Entry ${entryIndex + 1}: Invalid consignments value`);
   }
 
-  if (typeof typedEntry.paid !== 'number' || typedEntry.paid < 0) {
+  if (typeof typedEntry.paid !== "number" || typedEntry.paid < 0) {
     issues.push(`Record ${recordIndex + 1}, Entry ${entryIndex + 1}: Invalid paid amount`);
   }
 
@@ -500,11 +552,14 @@ function validateEntry(entry: unknown, recordIndex: number, entryIndex: number):
 /**
  * Validate all entries in a record
  */
-function validateRecordEntries(record: unknown, recordIndex: number): { issues: string[]; isValid: boolean } {
+function validateRecordEntries(
+  record: unknown,
+  recordIndex: number
+): { issues: string[]; isValid: boolean } {
   const issues: string[] = [];
   let isValid = true;
 
-  if (typeof record !== 'object' || record === null) {
+  if (typeof record !== "object" || record === null) {
     issues.push(`Record ${recordIndex + 1}: Invalid record structure`);
     return { issues, isValid: false };
   }
@@ -533,7 +588,7 @@ function validateRecordEntries(record: unknown, recordIndex: number): { issues: 
 function checkRecordWarnings(record: unknown, recordIndex: number): string[] {
   const warnings: string[] = [];
 
-  if (typeof record !== 'object' || record === null) {
+  if (typeof record !== "object" || record === null) {
     return warnings; // Already handled in validation
   }
 
@@ -560,7 +615,7 @@ function validateLegacyData(data: unknown, version: string) {
 
   try {
     if (!Array.isArray(data)) {
-      issues.push('Data must be an array of analyses');
+      issues.push("Data must be an array of analyses");
       return { valid: false, issues, warnings, validRecords, totalRecords };
     }
 
@@ -568,7 +623,7 @@ function validateLegacyData(data: unknown, version: string) {
 
     for (let i = 0; i < data.length; i++) {
       const record = data[i];
-      
+
       // Validate basic record structure
       const structureIssues = validateRecordStructure(record, i);
       if (structureIssues.length > 0) {
@@ -588,9 +643,8 @@ function validateLegacyData(data: unknown, version: string) {
       const recordWarnings = checkRecordWarnings(record, i);
       warnings.push(...recordWarnings);
     }
-
   } catch (error) {
-    issues.push(`Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    issues.push(`Validation error: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 
   return {

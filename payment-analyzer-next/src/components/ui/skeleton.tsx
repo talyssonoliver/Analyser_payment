@@ -3,45 +3,42 @@
  * Reusable skeleton loading components for various UI elements
  */
 
-import React from 'react';
-import { Card, CardContent, CardHeader } from './card';
+import { Card, CardContent, CardHeader } from "./card";
 
 interface SkeletonProps {
   className?: string;
 }
 
-export function Skeleton({ className = '' }: SkeletonProps) {
+export function Skeleton({ className = "" }: Readonly<SkeletonProps>) {
   return (
     <div
       className={`animate-pulse bg-slate-200 rounded ${className}`}
-      style={{ isolation: 'isolate', contain: 'layout style' }}
-      aria-label="Loading..."
+      style={{ isolation: "isolate", contain: "layout style" }}
+      aria-hidden="true"
     />
   );
 }
 
-export function SkeletonText({ 
-  lines = 1, 
-  className = '' 
-}: { 
-  lines?: number; 
-  className?: string; 
-}) {
+export function SkeletonText({
+  lines = 1,
+  className = "",
+}: Readonly<{
+  lines?: number;
+  className?: string;
+}>) {
   return (
-    <div className={`space-y-2 ${className}`} style={{ isolation: 'isolate', contain: 'layout' }}>
-      {Array.from({ length: lines }).map((_, index) => (
+    <div className={`space-y-2 ${className}`} style={{ isolation: "isolate", contain: "layout" }}>
+      {Array.from({ length: lines }, (_, i) => `line-${i}`).map((id, index) => (
         <Skeleton
-          key={index}
-          className={`h-4 ${
-            index === lines - 1 && lines > 1 ? 'w-3/4' : 'w-full'
-          }`}
+          key={`skeleton-text-${id}`}
+          className={`h-4 ${index === lines - 1 && lines > 1 ? "w-3/4" : "w-full"}`}
         />
       ))}
     </div>
   );
 }
 
-export function SkeletonCard({ className = '' }: { className?: string }) {
+export function SkeletonCard({ className = "" }: Readonly<{ className?: string }>) {
   return (
     <Card className={className}>
       <CardContent className="p-6">
@@ -57,15 +54,15 @@ export function SkeletonCard({ className = '' }: { className?: string }) {
   );
 }
 
-export function SkeletonTable({ 
-  rows = 5, 
+export function SkeletonTable({
+  rows = 5,
   columns = 4,
-  className = '' 
-}: { 
-  rows?: number; 
+  className = "",
+}: Readonly<{
+  rows?: number;
   columns?: number;
-  className?: string; 
-}) {
+  className?: string;
+}>) {
   return (
     <Card className={className}>
       <CardHeader>
@@ -73,14 +70,13 @@ export function SkeletonTable({
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <div key={rowIndex} className="flex space-x-4">
-              {Array.from({ length: columns }).map((_, colIndex) => (
+          {Array.from({ length: rows }, (_, i) => `row-${i}`).map((rowId, _rowIndex) => (
+            <div key={`skeleton-table-row-${rowId}`} className="flex space-x-4">
+              {Array.from({ length: columns }, (_, j) => `col-${j}`).map((colId, colIndex) => (
                 <Skeleton
-                  key={colIndex}
+                  key={`skeleton-table-col-${rowId}-${colId}`}
                   className={`h-4 ${
-                    colIndex === 0 ? 'w-1/4' : 
-                    colIndex === columns - 1 ? 'w-1/6' : 'w-1/3'
+                    colIndex === 0 ? "w-1/4" : colIndex === columns - 1 ? "w-1/6" : "w-1/3"
                   }`}
                 />
               ))}
@@ -94,7 +90,10 @@ export function SkeletonTable({
 
 export function SkeletonAnalysisPage() {
   return (
-    <div className="max-w-6xl mx-auto space-y-6" style={{ isolation: 'isolate', contain: 'layout' }}>
+    <div
+      className="max-w-6xl mx-auto space-y-6"
+      style={{ isolation: "isolate", contain: "layout" }}
+    >
       {/* Header Skeleton */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -113,8 +112,8 @@ export function SkeletonAnalysisPage() {
 
       {/* Summary Cards Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <SkeletonCard key={`summary-card-${index}`} />
+        {["a", "b", "c", "d"].map((id) => (
+          <SkeletonCard key={`summary-card-${id}`} />
         ))}
       </div>
 
@@ -126,16 +125,16 @@ export function SkeletonAnalysisPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={`breakdown-left-${index}`} className="flex justify-between py-2">
+              {["a", "b", "c", "d"].map((id) => (
+                <div key={`breakdown-left-${id}`} className="flex justify-between py-2">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-16" />
                 </div>
               ))}
             </div>
             <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={`breakdown-right-${index}`} className="flex justify-between py-2">
+              {["a", "b", "c"].map((id) => (
+                <div key={`breakdown-right-${id}`} className="flex justify-between py-2">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-16" />
                 </div>

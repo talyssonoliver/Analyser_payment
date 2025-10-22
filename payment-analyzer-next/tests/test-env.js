@@ -1,11 +1,11 @@
 // Environment Test Script
 /* eslint-disable @typescript-eslint/no-require-imports */
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 console.log('🔧 Testing Environment Configuration...\n');
 
-let envVars = {};
+const envVars = {};
 
 // Check .env.local file
 const envPath = path.join(__dirname, '.env.local');

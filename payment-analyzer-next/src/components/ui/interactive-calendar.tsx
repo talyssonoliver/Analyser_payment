@@ -3,11 +3,10 @@
  * Matches the original HTML system's calendar exactly
  */
 
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface InteractiveCalendarProps {
   onDayClick?: (date: Date, hasData: boolean) => void;
@@ -15,23 +14,40 @@ interface InteractiveCalendarProps {
   className?: string;
 }
 
-export function InteractiveCalendar({ onDayClick, onAddDataClick, className = '' }: InteractiveCalendarProps) {
+export function InteractiveCalendar({
+  onDayClick,
+  onAddDataClick,
+  className = "",
+}: Readonly<InteractiveCalendarProps>) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [datesWithData, setDatesWithData] = useState<Set<number>>(new Set());
-  const [showTooltip, setShowTooltip] = useState<{ day: number; show: boolean }>({ day: 0, show: false });
+  const [showTooltip, setShowTooltip] = useState<{ day: number; show: boolean }>({
+    day: 0,
+    show: false,
+  });
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
-  const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const dayHeaders = ["S", "M", "T", "W", "T", "F", "S"];
 
   const loadMonthData = useCallback(() => {
     try {
-      const savedAnalyses = localStorage.getItem('pa:analyses:v9');
+      const savedAnalyses = localStorage.getItem("pa:analyses:v9");
       if (!savedAnalyses) {
         setDatesWithData(new Set());
         return;
@@ -42,15 +58,20 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
 
       Object.entries(analyses).forEach(([, analysis]: [string, unknown]) => {
         // Type guard for analysis
-        if (analysis && typeof analysis === 'object' && 'dailyData' in analysis) {
-          const typedAnalysis = analysis as { dailyData?: Record<string, unknown>; period?: string };
+        if (analysis && typeof analysis === "object" && "dailyData" in analysis) {
+          const typedAnalysis = analysis as {
+            dailyData?: Record<string, unknown>;
+            period?: string;
+          };
 
           if (typedAnalysis.dailyData) {
             Object.entries(typedAnalysis.dailyData).forEach(([dateKey]: [string, unknown]) => {
               const date = new Date(dateKey);
 
-              if (date.getMonth() === currentMonth.getMonth() &&
-                  date.getFullYear() === currentMonth.getFullYear()) {
+              if (
+                date.getMonth() === currentMonth.getMonth() &&
+                date.getFullYear() === currentMonth.getFullYear()
+              ) {
                 const day = date.getDate();
                 newDatesWithData.add(day);
               }
@@ -61,7 +82,7 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
 
       setDatesWithData(newDatesWithData);
     } catch (error) {
-      console.error('Error loading calendar data:', error);
+      console.error("Error loading calendar data:", error);
       setDatesWithData(new Set());
     }
   }, [currentMonth]);
@@ -71,18 +92,20 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
     loadMonthData();
   }, [loadMonthData]);
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
+  const navigateMonth = (direction: "prev" | "next") => {
     const newMonth = new Date(currentMonth);
-    if (direction === 'prev') {
+    if (direction === "prev") {
       newMonth.setMonth(newMonth.getMonth() - 1);
     } else {
       // Only navigate to next month if it's not beyond current month
       const now = new Date();
       const nextMonth = new Date(currentMonth);
       nextMonth.setMonth(nextMonth.getMonth() + 1);
-      
-      if (nextMonth.getFullYear() < now.getFullYear() || 
-          (nextMonth.getFullYear() === now.getFullYear() && nextMonth.getMonth() <= now.getMonth())) {
+
+      if (
+        nextMonth.getFullYear() < now.getFullYear() ||
+        (nextMonth.getFullYear() === now.getFullYear() && nextMonth.getMonth() <= now.getMonth())
+      ) {
         newMonth.setMonth(newMonth.getMonth() + 1);
       } else {
         return; // Don't navigate beyond current month
@@ -97,15 +120,17 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
     const now = new Date();
     const nextMonth = new Date(currentMonth);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
-    
-    return nextMonth.getFullYear() > now.getFullYear() || 
-           (nextMonth.getFullYear() === now.getFullYear() && nextMonth.getMonth() > now.getMonth());
+
+    return (
+      nextMonth.getFullYear() > now.getFullYear() ||
+      (nextMonth.getFullYear() === now.getFullYear() && nextMonth.getMonth() > now.getMonth())
+    );
   };
 
   const handleDayClick = (day: number, hasData: boolean) => {
     const clickedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     const today = new Date();
-    
+
     // Don't allow clicking on future dates
     if (clickedDate > today) {
       return;
@@ -116,21 +141,18 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
     if (hasData) {
       // Show day data or navigate to reports
       onDayClick?.(clickedDate, true);
+    } else if (showTooltip.day === day && showTooltip.show) {
+      // Second click - add data
+      onAddDataClick?.(clickedDate);
+      setShowTooltip({ day: 0, show: false });
     } else {
-      // Handle no-data day click
-      if (showTooltip.day === day && showTooltip.show) {
-        // Second click - add data
-        onAddDataClick?.(clickedDate);
-        setShowTooltip({ day: 0, show: false });
-      } else {
-        // First click - show tooltip
-        setShowTooltip({ day, show: true });
-        
-        // Auto-hide tooltip after 3 seconds
-        setTimeout(() => {
-          setShowTooltip(prev => prev.day === day ? { day: 0, show: false } : prev);
-        }, 3000);
-      }
+      // First click - show tooltip
+      setShowTooltip({ day, show: true });
+
+      // Auto-hide tooltip after 3 seconds
+      setTimeout(() => {
+        setShowTooltip((prev) => (prev.day === day ? { day: 0, show: false } : prev));
+      }, 3000);
     }
   };
 
@@ -139,11 +161,12 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
     const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
+
     const today = new Date();
     const todayDay = today.getDate();
-    const isCurrentMonth = today.getMonth() === currentMonth.getMonth() && 
-                          today.getFullYear() === currentMonth.getFullYear();
+    const isCurrentMonth =
+      today.getMonth() === currentMonth.getMonth() &&
+      today.getFullYear() === currentMonth.getFullYear();
 
     const days = [];
 
@@ -159,16 +182,17 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
       const isToday = isCurrentMonth && day === todayDay;
       const isFuture = dayDate > today;
       const isSelected = selectedDay === day;
-      
-      let dayClasses = 'calendar-day';
-      if (isToday) dayClasses += ' today';
-      if (isFuture) dayClasses += ' future';
-      if (hasData) dayClasses += ' has-data clickable';
-      if (!hasData && !isFuture) dayClasses += ' no-data';
-      if (isSelected) dayClasses += ' selected';
+
+      let dayClasses = "calendar-day";
+      if (isToday) dayClasses += " today";
+      if (isFuture) dayClasses += " future";
+      if (hasData) dayClasses += " has-data clickable";
+      if (!hasData && !isFuture) dayClasses += " no-data";
+      if (isSelected) dayClasses += " selected";
 
       days.push(
-        <div
+        <button
+          type="button"
           key={day}
           className={dayClasses}
           onClick={() => handleDayClick(day, hasData)}
@@ -176,19 +200,16 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
         >
           {day}
           {showTooltip.day === day && showTooltip.show && !hasData && (
-            <div 
-              ref={tooltipRef}
-              className="calendar-tooltip show"
-            >
-              <div style={{ fontWeight: 600, marginBottom: '4px' }}>
+            <div ref={tooltipRef} className="calendar-tooltip show">
+              <div style={{ fontWeight: 600, marginBottom: "4px" }}>
                 No data for {dayDate.toLocaleDateString()}
               </div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.8)' }}>
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)" }}>
                 Click again to add data manually
               </div>
             </div>
           )}
-        </div>
+        </button>
       );
     }
 
@@ -203,15 +224,13 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </div>
         <div className="calendar-nav">
-          <button
-            className="calendar-nav-btn"
-            onClick={() => navigateMonth('prev')}
-          >
+          <button type="button" className="calendar-nav-btn" onClick={() => navigateMonth("prev")}>
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
-            className={`calendar-nav-btn ${isNextMonthDisabled() ? 'disabled' : ''}`}
-            onClick={() => navigateMonth('next')}
+            type="button"
+            className={`calendar-nav-btn ${isNextMonthDisabled() ? "disabled" : ""}`}
+            onClick={() => navigateMonth("next")}
             disabled={isNextMonthDisabled()}
           >
             <ChevronRight className="w-4 h-4" />
@@ -222,17 +241,17 @@ export function InteractiveCalendar({ onDayClick, onAddDataClick, className = ''
       {/* Calendar Grid */}
       <div className="calendar-grid">
         {/* Day Headers */}
-        {dayHeaders.map(day => (
+        {dayHeaders.map((day) => (
           <div key={day} className="calendar-day-header">
             {day}
           </div>
         ))}
-        
+
         {/* Calendar Days */}
         {renderCalendar()}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .calendar-widget {
           background: white;
           border-radius: 12px;

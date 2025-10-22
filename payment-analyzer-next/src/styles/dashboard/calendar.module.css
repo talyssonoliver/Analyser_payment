@@ -1,0 +1,240 @@
+/* Calendar Widget Styles */
+
+.widget {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+}
+
+.navButton {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-gray-200);
+  background: white;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.25rem;
+  color: var(--color-gray-500);
+}
+
+.navButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-blue-600) 0%, var(--color-blue-500) 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgb(59 130 246 / 30%);
+}
+
+.navButton:disabled,
+.navButton.disabled {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+  color: var(--color-gray-300);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dayHeader {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-slate-500);
+  text-align: center;
+  padding: 4px;
+}
+
+.day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 6px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-gray-700);
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+}
+
+.day:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.day.hasData {
+  background: var(--color-slate-50);
+  font-weight: 600;
+}
+
+.day.today {
+  background: var(--color-blue-500);
+  color: white;
+}
+
+.day.selected {
+  background: var(--color-blue-700);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgb(59 130 246 / 30%);
+}
+
+.day.clickable:hover {
+  background: var(--color-blue-500);
+  color: white;
+  transform: scale(1.05);
+}
+
+.day.disabled {
+  color: var(--color-slate-200);
+  cursor: not-allowed;
+  visibility: hidden;
+}
+
+.day.future {
+  background: var(--color-slate-50);
+  color: var(--color-slate-300);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.day.noData {
+  position: relative;
+  cursor: pointer;
+}
+
+.day.noData:hover {
+  background: var(--color-slate-100);
+  transform: scale(1.05);
+}
+
+.addIndicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--color-blue-500);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.day.noData:hover .addIndicator {
+  opacity: 1;
+}
+
+/* Status Indicators Container */
+.statusIndicatorsContainer {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Individual Status Indicators */
+.statusIndicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+  flex-shrink: 0;
+}
+
+.statusIndicator.status-pending {
+  background: var(--color-blue-500);
+}
+
+.statusIndicator.status-received {
+  background: var(--color-green-500);
+}
+
+.statusIndicator.status-shortfall {
+  background: var(--color-red-600);
+  border: 1px solid var(--color-white);
+}
+
+/* Enhanced day styling */
+.day.status-pending,
+.day.status-received,
+.day.status-shortfall {
+  background: var(--color-slate-50);
+  border: 1px solid var(--color-slate-200);
+}
+
+/* Week highlighting in weekly mode */
+.day.inCurrentWeek {
+  background: var(--color-blue-50);
+  border: 2px solid var(--color-blue-200);
+  font-weight: 600;
+}
+
+.day.inCurrentWeek.hasData {
+  background: var(--color-blue-100);
+  border-color: var(--color-blue-300);
+}
+
+.day.inCurrentWeek.today {
+  background: var(--color-blue-500);
+  color: white;
+  border-color: var(--color-blue-600);
+}
+
+.day.inCurrentWeek:hover:not(:disabled):not(.future) {
+  background: var(--color-blue-200);
+  transform: scale(1.05);
+}
+
+/* Desktop tuning reset: keep square cells and original paddings */
+@media (width >= 1024px) {
+  .day {
+    aspect-ratio: 1;
+  }
+  .widget {
+    padding: 16px;
+    height: 100%;
+  }
+  .header {
+    margin-bottom: 16px;
+  }
+}

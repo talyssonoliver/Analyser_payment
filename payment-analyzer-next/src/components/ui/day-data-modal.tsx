@@ -3,10 +3,10 @@
  * Shows detailed information for calendar days with analysis data
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { X, Edit2 } from 'lucide-react';
+import { Edit2, X } from "lucide-react";
+import React, { useId } from "react";
 
 interface DayData {
   date: string;
@@ -22,57 +22,73 @@ interface DayData {
 }
 
 interface DayDataModalProps {
-  date: Date;
-  dayData: DayData[];
-  isOpen: boolean;
-  onClose: () => void;
-  onEditDay?: (analysisId: string, date: string) => void;
+  readonly date: Date;
+  readonly dayData: DayData[];
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onEditDay?: (analysisId: string, date: string) => void;
 }
 
-export function DayDataModal({ 
-  date, 
-  dayData, 
-  isOpen, 
-  onClose, 
-  onEditDay 
-}: DayDataModalProps) {
-  if (!isOpen) return null;
+export function DayDataModal({ date, dayData, isOpen, onClose, onEditDay }: DayDataModalProps) {
+  const dialogRef = React.useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+
+  React.useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (isOpen) {
+      dialog.showModal();
+    } else {
+      dialog.close();
+    }
+  }, [isOpen]);
 
   const formatCurrency = (amount: number) => `£${amount.toFixed(2)}`;
 
-  const getStatusColor = (status: string, difference: number) => {
-    if (difference > 0) return '#22c55e'; // green for overpaid
-    if (difference < 0) return '#ef4444'; // red for underpaid
-    return '#3b82f6'; // blue for balanced
+  const getStatusColor = (_status: string, difference: number) => {
+    if (difference > 0) return "#22c55e"; // green for overpaid
+    if (difference < 0) return "#ef4444"; // red for underpaid
+    return "#3b82f6"; // blue for balanced
   };
 
   const getStatusText = (difference: number) => {
-    if (difference > 0) return 'Overpaid';
-    if (difference < 0) return 'Underpaid';
-    return 'Balanced';
+    if (difference > 0) return "Overpaid";
+    if (difference < 0) return "Underpaid";
+    return "Balanced";
+  };
+
+  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    const dialog = dialogRef.current;
+    if (e.target === dialog) {
+      onClose();
+    }
   };
 
   return (
-    <div 
+    <dialog
+      ref={dialogRef}
       className="modal-overlay"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={handleDialogClick}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+      aria-labelledby={titleId}
     >
       <div className="modal-content">
         {/* Modal Header */}
         <div className="modal-header">
-          <h3 className="modal-title">
-            Data for {date.toLocaleDateString('en-GB', { 
-              weekday: 'long',
-              day: 'numeric', 
-              month: 'long', 
-              year: 'numeric' 
+          <h3 id={titleId} className="modal-title">
+            Data for{" "}
+            {date.toLocaleDateString("en-GB", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
             })}
           </h3>
-          <button 
-            className="modal-close-btn"
-            onClick={onClose}
-          >
-            <X className="w-5 h-5" />
+          <button className="modal-close-btn" type="button" onClick={onClose} aria-label="Close">
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -83,11 +99,13 @@ export function DayDataModal({
               <div className="card-header">
                 <div className="analysis-name">{item.analysisName}</div>
                 <button
+                  type="button"
                   className="edit-btn"
                   onClick={() => onEditDay?.(item.analysisId, item.date)}
                   title="Edit this analysis"
+                  aria-label={`Edit analysis ${item.analysisName} for ${item.date}`}
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Edit2 className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
 
@@ -104,13 +122,11 @@ export function DayDataModal({
                 </div>
                 <div className="data-item">
                   <span className="data-label">Paid:</span>
-                  <span className="data-value paid">
-                    {formatCurrency(item.data.paidAmount)}
-                  </span>
+                  <span className="data-value paid">{formatCurrency(item.data.paidAmount)}</span>
                 </div>
                 <div className="data-item">
                   <span className="data-label">Difference:</span>
-                  <span 
+                  <span
                     className="data-value difference"
                     style={{ color: getStatusColor(item.data.status, item.data.difference) }}
                   >
@@ -120,9 +136,11 @@ export function DayDataModal({
               </div>
 
               <div className="status-badge">
-                <span 
+                <span
                   className="status-indicator"
-                  style={{ backgroundColor: getStatusColor(item.data.status, item.data.difference) }}
+                  style={{
+                    backgroundColor: getStatusColor(item.data.status, item.data.difference),
+                  }}
                 />
                 {getStatusText(item.data.difference)}
               </div>
@@ -132,35 +150,32 @@ export function DayDataModal({
 
         {/* Modal Footer */}
         <div className="modal-footer">
-          <button className="close-btn" onClick={onClose}>
+          <button className="close-btn" type="button" onClick={onClose}>
             Close
           </button>
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10000;
-          backdrop-filter: blur(4px);
+          border: none;
           padding: 16px;
+          background: transparent;
+          max-width: 500px;
+          max-height: 80vh;
+        }
+
+        .modal-overlay::backdrop {
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(4px);
         }
 
         .modal-content {
           background: white;
           border-radius: 12px;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-          max-width: 500px;
           width: 100%;
-          max-height: 80vh;
+          max-height: calc(80vh - 32px);
           overflow: hidden;
           display: flex;
           flex-direction: column;
@@ -347,6 +362,6 @@ export function DayDataModal({
           }
         }
       `}</style>
-    </div>
+    </dialog>
   );
 }

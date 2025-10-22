@@ -1,0 +1,104 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Source code - bind mount do Windows (read-only para segurança)
+      - .:/app:cached
+      # node_modules em VOLUME NOMEADO (super rápido!)
+      - node_modules:/app/node_modules
+      # Cache do pnpm
+      - pnpm_store:/root/.local/share/pnpm/store
+      # Cache do TypeScript
+      - tsc_cache:/app/.tsbuildinfo
+      # Cache do Next.js (essencial!)
+      - nextjs_cache:/app/.next
+      # Cache do Vitest
+      - vitest_cache:/app/node_modules/.vitest
+      # Coverage output (use named volume instead of bind mount to prevent lock issues)
+      - coverage_output:/app/coverage
+    ports:
+      - "3000:3000" # Next.js dev server
+      - "9229:9229" # Node.js debug port
+      - "51204:51204" # Vitest UI
+    environment:
+      - NODE_ENV=development
+      # File watching no Docker (necessário para hot reload)
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      # Next.js otimizações
+      - NEXT_TELEMETRY_DISABLED=1
+      # Prevent memory issues
+      - NODE_OPTIONS=--max-old-space-size=4096
+    command: pnpm dev
+    stdin_open: true
+    tty: true
+    networks:
+      - dev-network
+
+  # Container separado para type checking (não bloqueia dev)
+  type-checker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app:cached
+      - node_modules:/app/node_modules
+      - tsc_cache:/app/.tsbuildinfo
+    environment:
+      - NODE_ENV=development
+    command: pnpm type-check
+    profiles: ["tools"]
+    networks:
+      - dev-network
+
+  # Container para testes em watch mode
+  test-watch:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app:cached
+      - node_modules:/app/node_modules
+      - vitest_cache:/app/node_modules/.vitest
+      - coverage_output:/app/coverage
+    ports:
+      - "51205:51204" # Vitest UI port alternativo
+    environment:
+      - NODE_ENV=test
+    command: pnpm test:watch
+    profiles: ["tools"]
+    networks:
+      - dev-network
+
+  # Container para rodar testes com UI
+  test-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app:cached
+      - node_modules:/app/node_modules
+      - vitest_cache:/app/node_modules/.vitest
+      - coverage_output:/app/coverage
+    ports:
+      - "51204:51204"
+    environment:
+      - NODE_ENV=test
+    command: pnpm test:ui
+    profiles: ["tools"]
+    networks:
+      - dev-network
+
+volumes:
+  node_modules: # Volume nomeado = performance nativa do Docker
+  pnpm_store: # Cache do pnpm entre rebuilds
+  tsc_cache: # Cache do TypeScript
+  nextjs_cache: # Cache do Next.js (compilação)
+  vitest_cache: # Cache do Vitest
+  coverage_output: # Coverage reports
+
+networks:
+  dev-network:
+    driver: bridge

@@ -3,10 +3,10 @@
  * Handles all payment calculations using business rules
  */
 
-import { PaymentRules } from '../entities/payment-rules';
-import { DailyEntry } from '../entities/daily-entry';
-import { Money } from '../value-objects/money';
-import { ConsignmentCount } from '../value-objects/consignment-count';
+import { DailyEntry } from "../entities/daily-entry";
+import type { PaymentRules } from "../entities/payment-rules";
+import type { ConsignmentCount } from "../value-objects/consignment-count";
+import { Money } from "../value-objects/money";
 
 export class PaymentCalculator {
   private readonly rules: PaymentRules;
@@ -55,13 +55,9 @@ export class PaymentCalculator {
     const bonuses = this.rules.getApplicableBonuses(dayOfWeek);
 
     const basePayment = rate.multiply(consignments.count);
-    const totalBonuses = bonuses.unloading
-      .add(bonuses.attendance)
-      .add(bonuses.early);
+    const totalBonuses = bonuses.unloading.add(bonuses.attendance).add(bonuses.early);
 
-    return basePayment
-      .add(totalBonuses)
-      .add(pickupTotal);
+    return basePayment.add(totalBonuses).add(pickupTotal);
   }
 
   isValidPaymentDay(date: Date): boolean {
@@ -102,7 +98,7 @@ export class PaymentCalculator {
     averageConsignmentsPerDay: number;
     averagePaymentPerDay: Money;
   } {
-    const workingEntries = entries.filter(entry => entry.isWorkingDay);
+    const workingEntries = entries.filter((entry) => entry.isWorkingDay);
     const workingDays = workingEntries.length;
 
     if (workingDays === 0) {

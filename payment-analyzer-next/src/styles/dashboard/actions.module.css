@@ -1,0 +1,81 @@
+/* Quick Actions Styles */
+
+.container {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Compact variant used in desktop control bar */
+.compact {
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.compact .primary,
+.compact .secondary {
+  flex: 0 0 auto;
+}
+
+/* Fill variant: buttons expand to occupy available row width evenly */
+.fill {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.fill .primary,
+.fill .secondary {
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+.primary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-blue-500) 0%, var(--color-blue-800) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
+  gap: 8px;
+}
+
+.primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 8px rgb(59 130 246 / 20%);
+}
+
+.secondary {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: var(--color-blue-500);
+  border: 2px solid var(--color-slate-300);
+  border-radius: 12px;
+  height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+  gap: 8px;
+}
+
+.secondary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 2%);
+}

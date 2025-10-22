@@ -3,8 +3,8 @@
  * Provides a clean interface for using the PDF processing worker
  */
 
-import type { ProcessingResult } from '../infrastructure/pdf/pdf-processor';
-import type { PDFWorkerMessage, PDFWorkerResponse } from './pdf-worker';
+import type { ProcessingResult } from "../infrastructure/pdf/pdf-processor";
+import type { PDFWorkerMessage, PDFWorkerResponse } from "./pdf-worker";
 
 export interface ProcessingProgress {
   current: number;
@@ -16,11 +16,14 @@ export interface ProcessingProgress {
 export class PDFWorkerClient {
   private worker: Worker | null = null;
   private messageId = 0;
-  private pendingRequests = new Map<string, {
-    resolve: (result: ProcessingResult) => void;
-    reject: (error: Error) => void;
-    onProgress?: (progress: ProcessingProgress) => void;
-  }>();
+  private readonly pendingRequests = new Map<
+    string,
+    {
+      resolve: (result: ProcessingResult) => void;
+      reject: (error: Error) => void;
+      onProgress?: (progress: ProcessingProgress) => void;
+    }
+  >();
 
   /**
    * Initialize the worker
@@ -32,10 +35,7 @@ export class PDFWorkerClient {
 
     // Create worker from the worker file
     // Use dynamic import for Next.js compatibility
-    this.worker = new Worker(
-      new URL('./pdf-worker.js', import.meta.url),
-      { type: 'module' }
-    );
+    this.worker = new Worker(new URL("./pdf-worker.ts", import.meta.url), { type: "module" });
 
     // Listen for worker messages
     this.worker.onmessage = (event: MessageEvent<PDFWorkerResponse>) => {
@@ -44,10 +44,10 @@ export class PDFWorkerClient {
 
     // Handle worker errors
     this.worker.onerror = (error) => {
-      console.error('PDF Worker error:', error);
+      console.error("PDF Worker error:", error);
       // Reject all pending requests
       this.pendingRequests.forEach(({ reject }) => {
-        reject(new Error('Worker error occurred'));
+        reject(new Error("Worker error occurred"));
       });
       this.pendingRequests.clear();
     };
@@ -63,7 +63,7 @@ export class PDFWorkerClient {
     await this.init();
 
     if (!this.worker) {
-      throw new Error('Worker not initialized');
+      throw new Error("Worker not initialized");
     }
 
     const id = (++this.messageId).toString();
@@ -74,11 +74,11 @@ export class PDFWorkerClient {
       // Send message to worker
       const message: PDFWorkerMessage = {
         id,
-        type: 'process-files',
+        type: "process-files",
         files,
       };
 
-      this.worker!.postMessage(message);
+      this.worker?.postMessage(message);
     });
   }
 
@@ -93,7 +93,7 @@ export class PDFWorkerClient {
 
     // Reject all pending requests
     this.pendingRequests.forEach(({ reject }) => {
-      reject(new Error('Worker terminated'));
+      reject(new Error("Worker terminated"));
     });
     this.pendingRequests.clear();
   }
@@ -106,26 +106,26 @@ export class PDFWorkerClient {
     const request = this.pendingRequests.get(id);
 
     if (!request) {
-      console.warn('Received response for unknown request:', id);
+      console.warn("Received response for unknown request:", id);
       return;
     }
 
     switch (type) {
-      case 'process-files-result':
+      case "process-files-result":
         if (response.result) {
           request.resolve(response.result);
         } else {
-          request.reject(new Error('No result received'));
+          request.reject(new Error("No result received"));
         }
         this.pendingRequests.delete(id);
         break;
 
-      case 'process-files-error':
-        request.reject(new Error(response.error || 'Processing failed'));
+      case "process-files-error":
+        request.reject(new Error(response.error || "Processing failed"));
         this.pendingRequests.delete(id);
         break;
 
-      case 'progress':
+      case "progress":
         if (request.onProgress && response.progress) {
           const { current, total, currentFile } = response.progress;
           request.onProgress({
@@ -138,24 +138,33 @@ export class PDFWorkerClient {
         break;
 
       default:
-        console.warn('Unknown response type:', type);
+        console.warn("Unknown response type:", type);
     }
   }
 
   /**
    * Check if worker is available
+   * DISABLED: Always return false to force main thread processing like legacy code
+   * This avoids Web Worker caching issues and matches legacy behavior
    */
   isAvailable(): boolean {
-    return typeof Worker !== 'undefined';
+    try {
+      // Only allow workers when explicitly enabled and on client
+      const enabled = process.env.NEXT_PUBLIC_ENABLE_PDF_WORKER;
+      const flag = enabled === "1" || enabled === "true";
+      if (!flag) return false;
+      if (typeof window === "undefined") return false; // SSR guard
+      return typeof Worker !== "undefined";
+    } catch {
+      return false;
+    }
   }
 
   /**
    * Get singleton instance
    */
   static getInstance(): PDFWorkerClient {
-    if (!PDFWorkerClient.instance) {
-      PDFWorkerClient.instance = new PDFWorkerClient();
-    }
+    PDFWorkerClient.instance ??= new PDFWorkerClient();
     return PDFWorkerClient.instance;
   }
 

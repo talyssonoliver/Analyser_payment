@@ -3,8 +3,8 @@
  * Lazy loads framer-motion only when animations are actually needed
  */
 
-import * as React from 'react';
-import { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from "react";
+import * as React from "react";
 
 // Types for motion components
 export interface MotionDivProps {
@@ -27,42 +27,42 @@ export interface MotionDivProps {
 
 export interface AnimatePresenceProps {
   children: ReactNode;
-  mode?: 'wait' | 'sync' | 'popLayout';
+  mode?: "wait" | "sync" | "popLayout";
   initial?: boolean;
 }
 
 // Lazy motion div loader
 export const loadMotionDiv = async (): Promise<ComponentType<MotionDivProps>> => {
-  const { motion } = await import('framer-motion');
+  const { motion } = await import("framer-motion");
   return motion.div as ComponentType<MotionDivProps>;
 };
 
 // Lazy AnimatePresence loader
 export const loadAnimatePresence = async (): Promise<ComponentType<AnimatePresenceProps>> => {
-  const { AnimatePresence } = await import('framer-motion');
+  const { AnimatePresence } = await import("framer-motion");
   return AnimatePresence;
 };
 
 // Combined loader for both motion and AnimatePresence
 export const loadFramerMotion = async () => {
-  const { motion, AnimatePresence } = await import('framer-motion');
+  const { motion, AnimatePresence } = await import("framer-motion");
   return { motion, AnimatePresence };
 };
 
-// Fallback components for SSR and loading states  
-export const StaticDiv = (props: MotionDivProps = {} as MotionDivProps) => {
-  // Only extract the props we want to pass to DOM, ignore everything else
-  const { children, className, style, onClick } = props;
-  
-  // Create div with only standard DOM props - ignore all motion props
-  return React.createElement('div', { 
-    className, 
-    style, 
-    onClick 
-  }, children);
+// Fallback components for SSR and loading states
+export const StaticDiv: React.FC<MotionDivProps> = ({ children, className, style, onClick }) => {
+  // Return a regular div, ignoring all motion props
+  return React.createElement(
+    "div",
+    {
+      className,
+      style,
+      onClick,
+    },
+    children
+  );
 };
 
-export const StaticPresence = (props: AnimatePresenceProps = {} as AnimatePresenceProps) => {
-  const { children } = props;
+export const StaticPresence: ComponentType<AnimatePresenceProps> = ({ children }) => {
   return React.createElement(React.Fragment, null, children);
 };

@@ -3,8 +3,8 @@
  * Lazy loads recharts only when charts are actually needed
  */
 
-import * as React from 'react';
-import { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from "react";
+import * as React from "react";
 
 // Common chart data types
 export interface ChartDataPoint {
@@ -57,7 +57,7 @@ export interface BarProps {
 }
 
 export interface LineProps {
-  type?: 'monotone' | 'linear' | 'step';
+  type?: "monotone" | "linear" | "step";
   dataKey: string;
   stroke?: string;
   strokeWidth?: number;
@@ -90,7 +90,7 @@ export interface YAxisProps {
 
 // Lazy chart loaders
 export const loadPieChart = async () => {
-  const { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } = await import('recharts');
+  const { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } = await import("recharts");
   return {
     PieChart: PieChart as ComponentType<PieChartProps>,
     Pie: Pie as ComponentType<PieProps>,
@@ -102,7 +102,8 @@ export const loadPieChart = async () => {
 };
 
 export const loadBarChart = async () => {
-  const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = await import('recharts');
+  const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } =
+    await import("recharts");
   return {
     BarChart: BarChart as ComponentType<BarChartProps>,
     Bar: Bar as ComponentType<BarProps>,
@@ -116,7 +117,8 @@ export const loadBarChart = async () => {
 };
 
 export const loadLineChart = async () => {
-  const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = await import('recharts');
+  const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } =
+    await import("recharts");
   return {
     LineChart: LineChart as ComponentType<LineChartProps>,
     Line: Line as ComponentType<LineProps>,
@@ -132,15 +134,11 @@ export const loadLineChart = async () => {
 // Fallback loading component
 export const ChartSkeleton = ({ height = 300 }: { height?: number }) => {
   return React.createElement(
-    'div',
+    "div",
     {
-      style: { height: `${height}px`, isolation: 'isolate', contain: 'layout style' },
-      className: 'flex items-center justify-center bg-slate-50 rounded-lg animate-pulse'
+      style: { height: `${height}px`, isolation: "isolate", contain: "layout style" },
+      className: "flex items-center justify-center bg-slate-50 rounded-lg animate-pulse",
     },
-    React.createElement(
-      'div',
-      { className: 'text-slate-400 text-sm' },
-      'Loading chart...'
-    )
+    React.createElement("div", { className: "text-slate-400 text-sm" }, "Loading chart...")
   );
 };

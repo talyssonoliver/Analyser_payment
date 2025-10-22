@@ -8,7 +8,7 @@ export class Money {
 
   constructor(amount: number) {
     if (!this.isValidAmount(amount)) {
-      throw new Error('Invalid money amount');
+      throw new Error("Invalid money amount");
     }
     // Round to 2 decimal places to avoid floating point issues
     this._amount = Math.round(amount * 100) / 100;
@@ -63,8 +63,6 @@ export class Money {
   }
 
   private isValidAmount(amount: number): boolean {
-    return typeof amount === 'number' && 
-           !isNaN(amount) && 
-           isFinite(amount);
+    return typeof amount === "number" && !Number.isNaN(amount) && Number.isFinite(amount);
   }
 }

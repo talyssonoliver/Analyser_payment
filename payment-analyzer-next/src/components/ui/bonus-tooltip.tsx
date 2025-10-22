@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface BonusDetail {
   name: string;
@@ -14,7 +14,7 @@ interface BonusTooltipProps {
   readonly totalAmount: number;
   readonly children: React.ReactNode;
   readonly className?: string;
-  readonly position?: 'top' | 'bottom' | 'left' | 'right';
+  readonly position?: "top" | "bottom" | "left" | "right";
   readonly disabled?: boolean;
 }
 
@@ -22,9 +22,9 @@ export function BonusTooltip({
   bonusDetails,
   totalAmount,
   children,
-  className = '',
-  position = 'top',
-  disabled = false
+  className = "",
+  position = "top",
+  disabled = false,
 }: BonusTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [actualPosition, setActualPosition] = useState(position);
@@ -33,15 +33,15 @@ export function BonusTooltip({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Only show on desktop (hover)
-  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window);
+  const isTouchDevice = typeof window !== "undefined" && "ontouchstart" in window;
 
   const showTooltip = () => {
     if (disabled || isTouchDevice) return;
-    
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     timeoutRef.current = setTimeout(() => {
       setIsVisible(true);
     }, 300); // Small delay to prevent accidental triggers
@@ -51,7 +51,7 @@ export function BonusTooltip({
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     timeoutRef.current = setTimeout(() => {
       setIsVisible(false);
     }, 150);
@@ -64,57 +64,67 @@ export function BonusTooltip({
   };
 
   // Calculate optimal position based on viewport
-  const calculateOptimalPosition = (
-    position: 'top' | 'bottom' | 'left' | 'right',
-    triggerRect: DOMRect,
-    tooltipRect: DOMRect,
-    viewportWidth: number,
-    viewportHeight: number
-  ) => {
-    switch (position) {
-      case 'top':
-        return triggerRect.top - tooltipRect.height < 10 ? 'bottom' : 'top';
-      case 'bottom':
-        return triggerRect.bottom + tooltipRect.height > viewportHeight - 10 ? 'top' : 'bottom';
-      case 'left':
-        return triggerRect.left - tooltipRect.width < 10 ? 'right' : 'left';
-      case 'right':
-        return triggerRect.right + tooltipRect.width > viewportWidth - 10 ? 'left' : 'right';
-      default:
-        return position;
-    }
-  };
+  const calculateOptimalPosition = useCallback(
+    (
+      position: "top" | "bottom" | "left" | "right",
+      triggerRect: DOMRect,
+      tooltipRect: DOMRect,
+      viewportWidth: number,
+      viewportHeight: number
+    ) => {
+      switch (position) {
+        case "top":
+          return triggerRect.top - tooltipRect.height < 10 ? "bottom" : "top";
+        case "bottom":
+          return triggerRect.bottom + tooltipRect.height > viewportHeight - 10 ? "top" : "bottom";
+        case "left":
+          return triggerRect.left - tooltipRect.width < 10 ? "right" : "left";
+        case "right":
+          return triggerRect.right + tooltipRect.width > viewportWidth - 10 ? "left" : "right";
+        default:
+          return position;
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (isVisible && triggerRef.current && tooltipRef.current) {
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      // Use RAF to batch layout reads and prevent forced reflows
+      requestAnimationFrame(() => {
+        if (!triggerRef.current || !tooltipRef.current) return;
 
-      const optimalPosition = calculateOptimalPosition(
-        position,
-        triggerRect,
-        tooltipRect,
-        viewportWidth,
-        viewportHeight
-      );
+        // Batch all layout reads together
+        const triggerRect = triggerRef.current.getBoundingClientRect();
+        const tooltipRect = tooltipRef.current.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-      setActualPosition(optimalPosition);
+        const optimalPosition = calculateOptimalPosition(
+          position,
+          triggerRect,
+          tooltipRect,
+          viewportWidth,
+          viewportHeight
+        );
+
+        // Single state update after all calculations
+        setActualPosition(optimalPosition);
+      });
     }
-  }, [isVisible, position]);
+  }, [isVisible, position, calculateOptimalPosition]);
 
   const getPositionClasses = () => {
-    const base = 'absolute z-50';
-    
+    const base = "absolute z-50";
+
     switch (actualPosition) {
-      case 'top':
+      case "top":
         return `${base} bottom-full left-1/2 transform -translate-x-1/2 mb-2`;
-      case 'bottom':
+      case "bottom":
         return `${base} top-full left-1/2 transform -translate-x-1/2 mt-2`;
-      case 'left':
+      case "left":
         return `${base} right-full top-1/2 transform -translate-y-1/2 mr-2`;
-      case 'right':
+      case "right":
         return `${base} left-full top-1/2 transform -translate-y-1/2 ml-2`;
       default:
         return `${base} bottom-full left-1/2 transform -translate-x-1/2 mb-2`;
@@ -122,16 +132,16 @@ export function BonusTooltip({
   };
 
   const getArrowClasses = () => {
-    const arrowSize = 'w-0 h-0 absolute';
-    
+    const arrowSize = "w-0 h-0 absolute";
+
     switch (actualPosition) {
-      case 'top':
+      case "top":
         return `${arrowSize} top-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800`;
-      case 'bottom':
+      case "bottom":
         return `${arrowSize} bottom-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-b-4 border-transparent border-b-slate-800`;
-      case 'left':
+      case "left":
         return `${arrowSize} left-full top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-l-4 border-transparent border-l-slate-800`;
-      case 'right':
+      case "right":
         return `${arrowSize} right-full top-1/2 transform -translate-y-1/2 border-t-4 border-b-4 border-r-4 border-transparent border-r-slate-800`;
       default:
         return `${arrowSize} top-full left-1/2 transform -translate-x-1/2 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-800`;
@@ -140,11 +150,11 @@ export function BonusTooltip({
 
   const formatCurrency = (amount: number) => `£${amount.toFixed(2)}`;
 
-  const appliedBonuses = bonusDetails.filter(bonus => bonus.isApplied && bonus.amount > 0);
-  const unappliedBonuses = bonusDetails.filter(bonus => !bonus.isApplied || bonus.amount === 0);
+  const appliedBonuses = bonusDetails.filter((bonus) => bonus.isApplied && bonus.amount > 0);
+  const unappliedBonuses = bonusDetails.filter((bonus) => !bonus.isApplied || bonus.amount === 0);
 
   return (
-    <button 
+    <button
       ref={triggerRef}
       className={`bonus-tooltip-trigger relative inline-block bg-transparent border-none p-0 m-0 cursor-help ${className}`}
       onMouseEnter={showTooltip}
@@ -155,11 +165,12 @@ export function BonusTooltip({
       onBlur={hideTooltip}
     >
       {children}
-      
+
       {isVisible && !disabled && (
         <div
           ref={tooltipRef}
           className={getPositionClasses()}
+          style={{ willChange: "transform", contain: "layout style" }}
           onMouseEnter={cancelHide}
           onMouseLeave={hideTooltip}
           role="tooltip"
@@ -173,7 +184,7 @@ export function BonusTooltip({
                 Total: {formatCurrency(totalAmount)}
               </div>
             </div>
-            
+
             {/* Applied bonuses */}
             {appliedBonuses.length > 0 && (
               <div className="p-3">
@@ -182,7 +193,10 @@ export function BonusTooltip({
                 </div>
                 <div className="space-y-2">
                   {appliedBonuses.map((bonus) => (
-                    <div key={`applied-${bonus.name}`} className="flex items-center justify-between text-sm">
+                    <div
+                      key={`applied-${bonus.name}`}
+                      className="flex items-center justify-between text-sm"
+                    >
                       <div>
                         <div className="text-white">{bonus.name}</div>
                         {bonus.description && (
@@ -197,7 +211,7 @@ export function BonusTooltip({
                 </div>
               </div>
             )}
-            
+
             {/* Unapplied bonuses */}
             {unappliedBonuses.length > 0 && (
               <div className="p-3 bg-slate-750 border-t border-slate-600">
@@ -206,7 +220,10 @@ export function BonusTooltip({
                 </div>
                 <div className="space-y-2">
                   {unappliedBonuses.map((bonus) => (
-                    <div key={`unapplied-${bonus.name}`} className="flex items-center justify-between text-sm opacity-60">
+                    <div
+                      key={`unapplied-${bonus.name}`}
+                      className="flex items-center justify-between text-sm opacity-60"
+                    >
                       <div>
                         <div className="text-slate-300">{bonus.name}</div>
                         {bonus.description && (
@@ -214,14 +231,14 @@ export function BonusTooltip({
                         )}
                       </div>
                       <div className="font-mono text-slate-400 font-medium ml-3">
-                        {bonus.amount > 0 ? formatCurrency(bonus.amount) : '—'}
+                        {bonus.amount > 0 ? formatCurrency(bonus.amount) : "—"}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-            
+
             {/* Total */}
             {appliedBonuses.length > 0 && (
               <div className="p-3 bg-slate-700 border-t border-slate-600">
@@ -233,7 +250,7 @@ export function BonusTooltip({
                 </div>
               </div>
             )}
-            
+
             {/* Arrow */}
             <div className={getArrowClasses()} />
           </div>
@@ -257,43 +274,44 @@ interface DailyBonusTooltipProps {
   readonly className?: string;
 }
 
-export function DailyBonusTooltip({ day, children, className = '' }: DailyBonusTooltipProps) {
+export function DailyBonusTooltip({ day, children, className = "" }: DailyBonusTooltipProps) {
   const getUnloadingBonusDescription = (dayName: string) => {
-    if (dayName === 'Monday') return 'Not paid on Mondays';
-    if (dayName === 'Sunday') return 'Not paid on Sundays';
-    return 'Daily unloading bonus';
+    if (dayName === "Monday") return "Not paid on Mondays";
+    if (dayName === "Sunday") return "Not paid on Sundays";
+    return "Daily unloading bonus";
   };
 
   const getWeekdayBonusDescription = (dayName: string, bonusType: string) => {
-    const isWeekend = dayName === 'Saturday' || dayName === 'Sunday';
-    return isWeekend ? 'Weekdays only' : `Daily ${bonusType.toLowerCase()} bonus`;
+    const isWeekend = dayName === "Saturday" || dayName === "Sunday";
+    return isWeekend ? "Weekdays only" : `Daily ${bonusType.toLowerCase()} bonus`;
   };
 
   const bonusDetails: BonusDetail[] = [
     {
-      name: 'Unloading Bonus',
+      name: "Unloading Bonus",
       amount: day.unloadingBonus,
       description: getUnloadingBonusDescription(day.day),
-      isApplied: day.unloadingBonus > 0
+      isApplied: day.unloadingBonus > 0,
     },
     {
-      name: 'Attendance Bonus',
-      amount: 25.00, // Standard rate
-      description: getWeekdayBonusDescription(day.day, 'attendance'),
-      isApplied: day.attendanceBonus > 0
+      name: "Attendance Bonus",
+      amount: 25.0, // Standard rate
+      description: getWeekdayBonusDescription(day.day, "attendance"),
+      isApplied: day.attendanceBonus > 0,
     },
     {
-      name: 'Early Bonus',
-      amount: 50.00, // Standard rate
-      description: getWeekdayBonusDescription(day.day, 'early arrival'),
-      isApplied: day.earlyBonus > 0
+      name: "Early Bonus",
+      amount: 50.0, // Standard rate
+      description: getWeekdayBonusDescription(day.day, "early arrival"),
+      isApplied: day.earlyBonus > 0,
     },
     {
-      name: 'Pickup Services',
+      name: "Pickup Services",
       amount: day.pickupTotal,
-      description: day.pickupCount > 0 ? `${day.pickupCount} pickup service(s)` : 'No pickup services',
-      isApplied: day.pickupTotal > 0
-    }
+      description:
+        day.pickupCount > 0 ? `${day.pickupCount} pickup service(s)` : "No pickup services",
+      isApplied: day.pickupTotal > 0,
+    },
   ];
 
   const totalBonuses = day.unloadingBonus + day.attendanceBonus + day.earlyBonus + day.pickupTotal;

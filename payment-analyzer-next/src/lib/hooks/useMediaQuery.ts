@@ -3,9 +3,9 @@
  * Provides consistent client/server media query detection to prevent hydration mismatches
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
@@ -13,8 +13,8 @@ export function useMediaQuery(query: string): boolean {
 
   useEffect(() => {
     setIsHydrated(true);
-    
-    if (typeof window === 'undefined') {
+
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -27,8 +27,8 @@ export function useMediaQuery(query: string): boolean {
 
     // Use the newer addEventListener if available, fallback to addListener
     if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handler);
-      return () => mediaQuery.removeEventListener('change', handler);
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
     } else {
       // Fallback for older browsers
       mediaQuery.addListener(handler);
@@ -41,7 +41,7 @@ export function useMediaQuery(query: string): boolean {
 }
 
 // Common breakpoint hooks
-export const useIsMobile = () => useMediaQuery('(max-width: 767px)');
-export const useIsTablet = () => useMediaQuery('(min-width: 768px) and (max-width: 1023px)');
-export const useIsDesktop = () => useMediaQuery('(min-width: 768px)');
-export const useIsLargeDesktop = () => useMediaQuery('(min-width: 1024px)');
+export const useIsMobile = () => useMediaQuery("(max-width: 767px)");
+export const useIsTablet = () => useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+export const useIsDesktop = () => useMediaQuery("(min-width: 768px)");
+export const useIsLargeDesktop = () => useMediaQuery("(min-width: 1024px)");

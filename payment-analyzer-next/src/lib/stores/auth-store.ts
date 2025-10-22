@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Session } from '@supabase/supabase-js';
-import type { AuthUser } from '@/lib/services/auth-service';
+import type { Session } from "@supabase/supabase-js";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { AuthUser } from "@/lib/services/auth-service";
 
 export interface AuthState {
   // State
@@ -31,22 +31,24 @@ export const useAuthStore = create<AuthState>()(
       session: null,
       isLoading: false, // Start with false to prevent initial loading hang
       isInitialized: false,
-      
+
       // Actions
       setUser: (user) => {
         const currentUser = get().user;
         // Only update if user actually changed - use safer comparison
-        const usersEqual = currentUser === user || 
-          (currentUser && user && 
-           currentUser.id === user.id && 
-           currentUser.email === user.email &&
-           currentUser.displayName === user.displayName);
-        
+        const usersEqual =
+          currentUser === user ||
+          (currentUser &&
+            user &&
+            currentUser.id === user.id &&
+            currentUser.email === user.email &&
+            currentUser.displayName === user.displayName);
+
         if (!usersEqual) {
           set({ user });
         }
       },
-      
+
       setSession: (session) => {
         const currentSession = get().session;
         // Only update if session actually changed
@@ -54,7 +56,7 @@ export const useAuthStore = create<AuthState>()(
           set({ session });
         }
       },
-      
+
       setLoading: (isLoading) => {
         const currentLoading = get().isLoading;
         // Only update if loading state actually changed
@@ -62,7 +64,7 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading });
         }
       },
-      
+
       setInitialized: (isInitialized) => {
         const currentInitialized = get().isInitialized;
         // Only update if initialized state actually changed
@@ -70,7 +72,7 @@ export const useAuthStore = create<AuthState>()(
           set({ isInitialized });
         }
       },
-      
+
       clearAuth: () => {
         set({
           user: null,
@@ -79,7 +81,7 @@ export const useAuthStore = create<AuthState>()(
           isInitialized: true,
         });
       },
-      
+
       // Computed
       get isAuthenticated() {
         const { user, session } = get();
@@ -87,21 +89,23 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'payment-analyzer-auth',
+      name: "payment-analyzer-auth",
       partialize: (state) => {
         try {
           return {
             // Only persist minimal user info, not the full session
-            user: state.user ? {
-              id: state.user.id,
-              email: state.user.email,
-              displayName: state.user.displayName,
-              preferences: state.user.preferences || {},
-            } : null,
+            user: state.user
+              ? {
+                  id: state.user.id,
+                  email: state.user.email,
+                  displayName: state.user.displayName,
+                  preferences: state.user.preferences || {},
+                }
+              : null,
             isInitialized: state.isInitialized,
           };
         } catch (error) {
-          console.warn('Auth store serialization error:', error);
+          console.warn("Auth store serialization error:", error);
           // Return safe defaults on serialization error
           return {
             user: null,

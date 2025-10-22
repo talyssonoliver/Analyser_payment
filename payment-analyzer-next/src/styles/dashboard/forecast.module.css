@@ -1,0 +1,66 @@
+/* Forecast Card Styles */
+
+.card {
+  background: linear-gradient(135deg, var(--color-slate-100) 0%, var(--color-slate-200) 100%);
+  border: 1px solid var(--color-slate-300);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-blue-500);
+}
+
+.badge {
+  background: var(--color-blue-500);
+  color: white;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid var(--color-slate-200);
+}
+
+.label {
+  font-size: 0.75rem;
+  color: var(--color-slate-500);
+}
+
+.value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+@media (width >= 768px) {
+  .items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

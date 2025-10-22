@@ -3,7 +3,7 @@
  * Generate individual week reports matching original HTML functionality
  */
 
-import { WeekCalculation } from '@/lib/services/payment-calculation-service';
+import type { WeekCalculation } from "@/lib/services/payment-calculation-service";
 
 export interface WeekReportData {
   weekData: WeekCalculation;
@@ -13,48 +13,38 @@ export interface WeekReportData {
   generatedAt: string;
 }
 
-export class WeekReportGenerator {
-  /**
-   * Generate individual week report
-   */
-  static generateWeekReport(weekData: WeekCalculation, analysisId?: string): WeekReportData {
-    const { week, year } = this.getISOWeekNumber(weekData.weekStart);
-    
-    return {
-      weekData,
-      weekNumber: week,
-      year,
-      analysisId: analysisId || `week-${week}-${year}`,
-      generatedAt: new Date().toISOString()
-    };
-  }
+function getISOWeekNumber(date: Date): { week: number; year: number } {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return {
+    week: Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7),
+    year: d.getUTCFullYear(),
+  };
+}
 
-  /**
-   * Get ISO week number for a date
-   */
-  private static getISOWeekNumber(date: Date): { week: number; year: number } {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return {
-      week: Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7),
-      year: d.getUTCFullYear()
-    };
-  }
+function generateWeekReport(weekData: WeekCalculation, analysisId?: string): WeekReportData {
+  const { week, year } = getISOWeekNumber(weekData.weekStart);
 
-  /**
-   * Generate week report HTML
-   */
-  static generateWeekHTML(weekReport: WeekReportData): string {
-    const { weekData, weekNumber, year } = weekReport;
-    const formatCurrency = (amount: number) => `£${amount.toFixed(2)}`;
-    const formatDate = (date: string) => new Date(date).toLocaleDateString('en-GB');
-    
-    const weekTitle = `Week ${weekNumber}, ${year} Report`;
-    const dateRange = `${formatDate(weekData.days[0]?.date || '')} - ${formatDate(weekData.days[weekData.days.length - 1]?.date || '')}`;
+  return {
+    weekData,
+    weekNumber: week,
+    year,
+    analysisId: analysisId || `week-${week}-${year}`,
+    generatedAt: new Date().toISOString(),
+  };
+}
 
-    let html = `
+function generateWeekHTML(weekReport: WeekReportData): string {
+  const { weekData, weekNumber, year } = weekReport;
+  const formatCurrency = (amount: number) => `£${amount.toFixed(2)}`;
+  const formatDate = (date: string) => new Date(date).toLocaleDateString("en-GB");
+
+  const weekTitle = `Week ${weekNumber}, ${year} Report`;
+  const dateRange = `${formatDate(weekData.days[0]?.date || "")} - ${formatDate(weekData.days[weekData.days.length - 1]?.date || "")}`;
+
+  let html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,8 +138,8 @@ export class WeekReportGenerator {
             </div>
             <div class="info-item">
                 <div class="info-label">Difference</div>
-                <div class="info-value ${weekData.totalDifference >= 0 ? 'positive' : 'negative'}">
-                    ${weekData.totalDifference >= 0 ? '+' : ''}${formatCurrency(weekData.totalDifference)}
+                <div class="info-value ${weekData.totalDifference >= 0 ? "positive" : "negative"}">
+                    ${weekData.totalDifference >= 0 ? "+" : ""}${formatCurrency(weekData.totalDifference)}
                 </div>
             </div>
         </div>
@@ -170,11 +160,11 @@ export class WeekReportGenerator {
             </div>
             <div class="summary-card">
                 <div class="card-label">Net Difference</div>
-                <div class="card-value ${weekData.totalDifference >= 0 ? 'positive' : 'negative'}">
-                    ${weekData.totalDifference >= 0 ? '+' : ''}${formatCurrency(weekData.totalDifference)}
+                <div class="card-value ${weekData.totalDifference >= 0 ? "positive" : "negative"}">
+                    ${weekData.totalDifference >= 0 ? "+" : ""}${formatCurrency(weekData.totalDifference)}
                 </div>
                 <div class="card-change">
-                    ${weekData.totalDifference >= 0 ? 'Favorable' : 'Unfavorable'}
+                    ${weekData.totalDifference >= 0 ? "Favorable" : "Unfavorable"}
                 </div>
             </div>
         </div>
@@ -202,49 +192,49 @@ export class WeekReportGenerator {
             <tbody>
 `;
 
-    // Add daily rows
-    const getStatusInfo = (difference: number) => {
-      if (difference >= 0) return { status: 'OK', statusClass: 'badge-ok' };
-      if (Math.abs(difference) <= 5) return { status: 'Minor', statusClass: 'badge-warning' };
-      return { status: 'Review', statusClass: 'badge-error' };
-    };
+  // Add daily rows
+  const getStatusInfo = (difference: number) => {
+    if (difference >= 0) return { status: "OK", statusClass: "badge-ok" };
+    if (Math.abs(difference) <= 5) return { status: "Minor", statusClass: "badge-warning" };
+    return { status: "Review", statusClass: "badge-error" };
+  };
 
-    weekData.days.forEach(day => {
-      const { status, statusClass } = getStatusInfo(day.difference);
-      
-      html += `
+  weekData.days.forEach((day) => {
+    const { status, statusClass } = getStatusInfo(day.difference);
+
+    html += `
                 <tr>
                     <td>${formatDate(day.date)}</td>
                     <td>${day.day}</td>
-                    <td class="center">${day.consignments || '-'}</td>
+                    <td class="center">${day.consignments || "-"}</td>
                     <td class="amount">${formatCurrency(day.basePayment)}</td>
-                    <td class="amount">${day.unloadingBonus > 0 ? formatCurrency(day.unloadingBonus) : '-'}</td>
-                    <td class="amount">${day.attendanceBonus > 0 ? formatCurrency(day.attendanceBonus) : '-'}</td>
-                    <td class="amount">${day.earlyBonus > 0 ? formatCurrency(day.earlyBonus) : '-'}</td>
-                    <td class="amount">${day.pickupTotal > 0 ? `${formatCurrency(day.pickupTotal)} (${day.pickupCount})` : '-'}</td>
+                    <td class="amount">${day.unloadingBonus > 0 ? formatCurrency(day.unloadingBonus) : "-"}</td>
+                    <td class="amount">${day.attendanceBonus > 0 ? formatCurrency(day.attendanceBonus) : "-"}</td>
+                    <td class="amount">${day.earlyBonus > 0 ? formatCurrency(day.earlyBonus) : "-"}</td>
+                    <td class="amount">${day.pickupTotal > 0 ? `${formatCurrency(day.pickupTotal)} (${day.pickupCount})` : "-"}</td>
                     <td class="amount">${formatCurrency(day.expectedTotal)}</td>
                     <td class="amount">${formatCurrency(day.paidAmount)}</td>
-                    <td class="amount ${day.difference >= 0 ? 'positive' : 'negative'}">
-                        ${day.difference >= 0 ? '+' : ''}${formatCurrency(day.difference)}
+                    <td class="amount ${day.difference >= 0 ? "positive" : "negative"}">
+                        ${day.difference >= 0 ? "+" : ""}${formatCurrency(day.difference)}
                     </td>
                     <td class="center">
                         <span class="status-badge ${statusClass}">${status}</span>
                     </td>
                 </tr>
       `;
-    });
+  });
 
-    // Calculate totals
-    const totals = {
-      consignments: weekData.days.reduce((sum, day) => sum + day.consignments, 0),
-      basePayment: weekData.days.reduce((sum, day) => sum + day.basePayment, 0),
-      unloadingBonus: weekData.days.reduce((sum, day) => sum + day.unloadingBonus, 0),
-      attendanceBonus: weekData.days.reduce((sum, day) => sum + day.attendanceBonus, 0),
-      earlyBonus: weekData.days.reduce((sum, day) => sum + day.earlyBonus, 0),
-      pickupTotal: weekData.days.reduce((sum, day) => sum + day.pickupTotal, 0)
-    };
+  // Calculate totals
+  const totals = {
+    consignments: weekData.days.reduce((sum, day) => sum + day.consignments, 0),
+    basePayment: weekData.days.reduce((sum, day) => sum + day.basePayment, 0),
+    unloadingBonus: weekData.days.reduce((sum, day) => sum + day.unloadingBonus, 0),
+    attendanceBonus: weekData.days.reduce((sum, day) => sum + day.attendanceBonus, 0),
+    earlyBonus: weekData.days.reduce((sum, day) => sum + day.earlyBonus, 0),
+    pickupTotal: weekData.days.reduce((sum, day) => sum + day.pickupTotal, 0),
+  };
 
-    html += `
+  html += `
             </tbody>
             <tfoot style="background: #f9fafb; font-weight: bold;">
                 <tr>
@@ -257,8 +247,8 @@ export class WeekReportGenerator {
                     <td class="amount">${formatCurrency(totals.pickupTotal)}</td>
                     <td class="amount">${formatCurrency(weekData.totalExpected)}</td>
                     <td class="amount">${formatCurrency(weekData.totalActual)}</td>
-                    <td class="amount ${weekData.totalDifference >= 0 ? 'positive' : 'negative'}">
-                        ${weekData.totalDifference >= 0 ? '+' : ''}${formatCurrency(weekData.totalDifference)}
+                    <td class="amount ${weekData.totalDifference >= 0 ? "positive" : "negative"}">
+                        ${weekData.totalDifference >= 0 ? "+" : ""}${formatCurrency(weekData.totalDifference)}
                     </td>
                     <td class="center">-</td>
                 </tr>
@@ -277,71 +267,69 @@ export class WeekReportGenerator {
 </html>
     `;
 
-    return html;
-  }
+  return html;
+}
 
-  /**
-   * Generate and download week report
-   */
-  static downloadWeekReport(weekData: WeekCalculation, analysisId?: string): void {
-    const weekReport = this.generateWeekReport(weekData, analysisId);
-    const html = this.generateWeekHTML(weekReport);
-    
-    const filename = `week-${weekReport.weekNumber}-${weekReport.year}-report.html`;
-    
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.style.display = 'none';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    URL.revokeObjectURL(url);
-  }
+function downloadWeekReport(weekData: WeekCalculation, analysisId?: string): void {
+  const weekReport = generateWeekReport(weekData, analysisId);
+  const html = generateWeekHTML(weekReport);
 
-  /**
-   * Print week report
-   */
-  static printWeekReport(weekData: WeekCalculation, analysisId?: string): void {
-    const weekReport = this.generateWeekReport(weekData, analysisId);
-    const html = this.generateWeekHTML(weekReport);
-    
-    // Create a blob and object URL for printing
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    const printWindow = window.open(url, '_blank');
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
-        // Clean up the URL after printing
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 1000);
-      };
-    }
-  }
+  const filename = `week-${weekReport.weekNumber}-${weekReport.year}-report.html`;
 
-  /**
-   * Open week report in new tab
-   */
-  static viewWeekReport(weekData: WeekCalculation, analysisId?: string): void {
-    const weekReport = this.generateWeekReport(weekData, analysisId);
-    const html = this.generateWeekHTML(weekReport);
-    
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    
-    window.open(url, '_blank');
-    
-    // Clean up URL after a delay
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 1000);
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.style.display = "none";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
+
+function printWeekReport(weekData: WeekCalculation, analysisId?: string): void {
+  const weekReport = generateWeekReport(weekData, analysisId);
+  const html = generateWeekHTML(weekReport);
+
+  // Create a blob and object URL for printing
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+
+  const printWindow = window.open(url, "_blank");
+  if (printWindow) {
+    printWindow.onload = () => {
+      printWindow.print();
+      // Clean up the URL after printing
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    };
   }
 }
+
+function viewWeekReport(weekData: WeekCalculation, analysisId?: string): void {
+  const weekReport = generateWeekReport(weekData, analysisId);
+  const html = generateWeekHTML(weekReport);
+
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+
+  window.open(url, "_blank");
+
+  // Clean up URL after a delay
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
+export const WeekReportGenerator = {
+  generateWeekReport,
+  generateWeekHTML,
+  downloadWeekReport,
+  printWeekReport,
+  viewWeekReport,
+};
