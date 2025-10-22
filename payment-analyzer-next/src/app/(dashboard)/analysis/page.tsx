@@ -56,9 +56,7 @@ export default function AnalysisPage() {
       }
 
       if (freshParam === "true") {
-        console.log(
-          "🆕 Fresh start requested (pre-render) - clearing old analysis data"
-        );
+        console.log("🆕 Fresh start requested (pre-render) - clearing old analysis data");
 
         // Clear IMMEDIATELY before any components initialize
         SessionRecoveryService.clearSession();
@@ -200,7 +198,9 @@ export default function AnalysisPage() {
      */
     const downloadFilesFromStorage = async (
       analysisFiles: Array<{ storage_path: string; original_name: string; mime_type: string }>,
-      fileStorage: { downloadFile: (path: string) => Promise<{ isSuccess: boolean; data: File | null }> }
+      fileStorage: {
+        downloadFile: (path: string) => Promise<{ isSuccess: boolean; data: File | null }>;
+      }
     ): Promise<File[]> => {
       console.log(`📥 Downloading ${analysisFiles.length} file(s) from storage...`);
 

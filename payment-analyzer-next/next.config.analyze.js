@@ -1,6 +1,6 @@
 // Bundle analyzer configuration for Next.js
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: true, // Always enable for this config
   openAnalyzer: true,
 });
@@ -12,60 +12,60 @@ const nextConfig = {
     // Remove console logs in production
     removeConsole: process.env.NODE_ENV === "production",
   },
-  
+
   // Set workspace root to silence warning
   outputFileTracingRoot: process.cwd(),
-  
+
   // Disable ESLint during build for performance testing
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+
   // Disable TypeScript errors during build for performance testing
   typescript: {
     ignoreBuildErrors: true,
   },
-  
+
   // Optimize images and other assets
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
-    formats: ['image/webp', 'image/avif'],
+    formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  
+
   // Enable compression
   compress: true,
-  
+
   // Move server externals to top level (Next.js 15)
-  serverExternalPackages: ['pdfjs-dist'],
-  
+  serverExternalPackages: ["pdfjs-dist"],
+
   // Enable stable experimental features for better performance
   experimental: {
     // Package import optimization (stable in Next.js 15) - Expanded list
     optimizePackageImports: [
-      'lucide-react', 
-      'date-fns', 
-      'recharts', 
-      '@radix-ui/react-label',
-      '@radix-ui/react-slot',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-popover',
-      '@radix-ui/react-radio-group',
-      '@tanstack/react-query',
-      'framer-motion',
-      'clsx',
-      'tailwind-merge',
-      'zod',
-      'react-hook-form',
-      '@hookform/resolvers',
-      'zustand',
-      'react-day-picker'
+      "lucide-react",
+      "date-fns",
+      "recharts",
+      "@radix-ui/react-label",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-radio-group",
+      "@tanstack/react-query",
+      "framer-motion",
+      "clsx",
+      "tailwind-merge",
+      "zod",
+      "react-hook-form",
+      "@hookform/resolvers",
+      "zustand",
+      "react-day-picker",
     ],
     // Optimize package imports and bundling (stable)
     esmExternals: true,
@@ -76,7 +76,7 @@ const nextConfig = {
     staticGenerationMaxConcurrency: 8,
     staticGenerationMinPagesPerWorker: 25,
   },
-  
+
   // Simplified webpack configuration for PDF.js support
   webpack: (config, { isServer }) => {
     // PDF.js configuration - client-side only
@@ -88,16 +88,16 @@ const nextConfig = {
         crypto: false,
       };
     }
-    
+
     // Worker file handling
     config.module.rules.push({
       test: /\.worker\.(js|ts)$/,
-      type: 'asset/resource',
+      type: "asset/resource",
       generator: {
-        filename: 'static/worker/[hash][ext][query]',
+        filename: "static/worker/[hash][ext][query]",
       },
     });
-    
+
     return config;
   },
 };

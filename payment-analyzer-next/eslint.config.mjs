@@ -39,7 +39,14 @@ const eslintConfig = [
   },
   // Allow 'any' types in test files for mocking and testing flexibility
   {
-    files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx", "**/tests/**/*.ts", "**/tests/**/*.tsx"],
+    files: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "**/tests/**/*.ts",
+      "**/tests/**/*.tsx",
+    ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
     },

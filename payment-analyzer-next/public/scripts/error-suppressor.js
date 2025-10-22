@@ -1,8 +1,8 @@
 // Suppress noisy browser extension errors
-(function () {
+(() => {
   window.addEventListener(
     "unhandledrejection",
-    function (event) {
+    (event) => {
       if (!event.reason) return;
       const error = event.reason;
       const message = typeof error === "object" && error.message ? error.message : String(error);
@@ -19,12 +19,12 @@
         return;
       }
     },
-    true,
+    true
   );
 
   window.addEventListener(
     "error",
-    function (event) {
+    (event) => {
       const message = event.message || "";
       const filename = event.filename || "";
       const isExtensionError =
@@ -39,9 +39,8 @@
         return;
       }
     },
-    true,
+    true
   );
 
   console.log("[ErrorSuppressor] Browser extension error suppressor initialized");
 })();
-

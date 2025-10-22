@@ -6,7 +6,7 @@
 
 export const securityHeaders = {
   // Content Security Policy
-  'Content-Security-Policy': [
+  "Content-Security-Policy": [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval
     "style-src 'self' 'unsafe-inline'",
@@ -15,23 +15,23 @@ export const securityHeaders = {
     "connect-src 'self' https://*.supabase.co",
     "frame-ancestors 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
-  ].join('; '),
+    "form-action 'self'",
+  ].join("; "),
 
   // HTTP Strict Transport Security
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
 
   // Prevent clickjacking
-  'X-Frame-Options': 'DENY',
+  "X-Frame-Options": "DENY",
 
   // Prevent MIME sniffing
-  'X-Content-Type-Options': 'nosniff',
+  "X-Content-Type-Options": "nosniff",
 
   // Referrer policy
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  "Referrer-Policy": "strict-origin-when-cross-origin",
 
   // Permissions policy
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
 
 export const applySecurityHeaders = (headers: Headers): void => {

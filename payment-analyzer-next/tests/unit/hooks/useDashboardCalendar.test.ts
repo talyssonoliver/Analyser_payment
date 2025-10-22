@@ -230,7 +230,9 @@ describe("useDashboardCalendar", () => {
         ],
       };
 
-      const { result } = renderHook(() => useDashboardCalendar({ recentAnalyses: [analysisWithZero] }));
+      const { result } = renderHook(() =>
+        useDashboardCalendar({ recentAnalyses: [analysisWithZero] })
+      );
 
       const testDate = new Date("2024-01-15");
 
@@ -512,7 +514,9 @@ describe("useDashboardCalendar", () => {
         daily_entries: null as unknown as (typeof mockAnalyses)[0]["daily_entries"],
       };
 
-      const { result } = renderHook(() => useDashboardCalendar({ recentAnalyses: [errorAnalysis] }));
+      const { result } = renderHook(() =>
+        useDashboardCalendar({ recentAnalyses: [errorAnalysis] })
+      );
 
       const testDate = new Date("2024-01-01");
 
@@ -601,7 +605,9 @@ describe("useDashboardCalendar", () => {
 
   describe("Callback Memoization", () => {
     it("should maintain callback references across rerenders", () => {
-      const { result, rerender } = renderHook(() => useDashboardCalendar({ recentAnalyses: mockAnalyses }));
+      const { result, rerender } = renderHook(() =>
+        useDashboardCalendar({ recentAnalyses: mockAnalyses })
+      );
 
       const firstRenderCallbacks = {
         navigateMonth: result.current.navigateMonth,

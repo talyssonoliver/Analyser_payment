@@ -3,8 +3,6 @@
  * Comprehensive tests for file validation with update detection and duplicate detection
  */
 
- 
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   type FileValidationOptions,

@@ -1,5 +1,5 @@
 // Initialize storage interceptor early to prevent extension conflicts
-(function () {
+(() => {
   if (typeof window === "undefined" || window.__storageInterceptorInitialized) return;
 
   window.__storageInterceptorInitialized = true;
@@ -62,7 +62,11 @@
   // Helper: Validate and set item to storage
   function setStorageItem(originalSetItem, key, value, storageType) {
     if (typeof value !== "string") {
-      console.error(`[Storage] Attempted to store non-string ${storageType} value for key:`, key, typeof value);
+      console.error(
+        `[Storage] Attempted to store non-string ${storageType} value for key:`,
+        key,
+        typeof value
+      );
       return;
     }
     if (isCorruptedValue(value)) {
@@ -78,7 +82,7 @@
 
   // Override localStorage.setItem
   const originalSetItem = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function (key, value) {
+  localStorage.setItem = (key, value) => {
     try {
       setStorageItem(originalSetItem, key, value, "local");
     } catch (error) {
@@ -88,7 +92,7 @@
 
   // Override sessionStorage.setItem
   const originalSessionSetItem = sessionStorage.setItem.bind(sessionStorage);
-  sessionStorage.setItem = function (key, value) {
+  sessionStorage.setItem = (key, value) => {
     try {
       setStorageItem(originalSessionSetItem, key, value, "session");
     } catch (error) {
@@ -111,7 +115,7 @@
 
   // Override localStorage.getItem
   const originalGetItem = localStorage.getItem.bind(localStorage);
-  localStorage.getItem = function (key) {
+  localStorage.getItem = (key) => {
     try {
       return getStorageItem(originalGetItem, localStorage, key, "local");
     } catch (error) {
@@ -122,7 +126,7 @@
 
   // Override sessionStorage.getItem
   const originalSessionGetItem = sessionStorage.getItem.bind(sessionStorage);
-  sessionStorage.getItem = function (key) {
+  sessionStorage.getItem = (key) => {
     try {
       return getStorageItem(originalSessionGetItem, sessionStorage, key, "session");
     } catch (error) {
@@ -158,7 +162,7 @@
 
   // Override addEventListener for storage events
   const originalAddEventListener = window.addEventListener.bind(window);
-  window.addEventListener = function (type, listener, options) {
+  window.addEventListener = (type, listener, options) => {
     if (type === "storage") {
       const wrappedListener = function (event) {
         if (isCorruptedStorageEvent(event)) {
@@ -177,13 +181,13 @@
   // Add global storage event handler
   originalAddEventListener(
     "storage",
-    function (event) {
+    (event) => {
       if (isCorruptedStorageEvent(event)) {
         console.warn("[Storage] Detected corrupted storage event, cleaning:", event.key);
         removeCorruptedEventKey(event);
       }
     },
-    true,
+    true
   );
 
   console.log("[Storage] Enhanced interceptor initialized successfully");

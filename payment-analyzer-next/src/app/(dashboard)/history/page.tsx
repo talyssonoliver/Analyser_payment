@@ -643,12 +643,8 @@ export default function HistoryPage() {
       };
 
       analyses.forEach((analysis) => {
-        const analysisUpdatedAt = analysis.updated_at
-          ? new Date(analysis.updated_at).getTime()
-          : 0;
-        const analysisCreatedAt = analysis.created_at
-          ? new Date(analysis.created_at).getTime()
-          : 0;
+        const analysisUpdatedAt = analysis.updated_at ? new Date(analysis.updated_at).getTime() : 0;
+        const analysisCreatedAt = analysis.created_at ? new Date(analysis.created_at).getTime() : 0;
 
         if (analysis.daily_entries && analysis.daily_entries.length > 0) {
           analysis.daily_entries.forEach((dayEntry) => {

@@ -1,7 +1,7 @@
-import { createServerClient } from '@supabase/ssr';
-import { type NextRequest, NextResponse } from 'next/server';
-import { applySecurityHeaders } from '@/lib/config/security-headers.config';
-import { validateOrigin } from '@/lib/config/cors.config';
+import { createServerClient } from "@supabase/ssr";
+import { type NextRequest, NextResponse } from "next/server";
+import { validateOrigin } from "@/lib/config/cors.config";
+import { applySecurityHeaders } from "@/lib/config/security-headers.config";
 
 export async function middleware(request: NextRequest) {
   const supabaseResponse = NextResponse.next({
@@ -50,30 +50,30 @@ export async function middleware(request: NextRequest) {
 
   // Public routes that don't require authentication
   const publicRoutes = [
-    '/',
-    '/login',
-    '/signup',
-    '/reset-password',
-    '/auth/callback',
-    '/auth/auth-code-error',
+    "/",
+    "/login",
+    "/signup",
+    "/reset-password",
+    "/auth/callback",
+    "/auth/auth-code-error",
   ];
 
-  const isPublicRoute = publicRoutes.some(route => 
-    pathname === route || pathname.startsWith(route + '/')
+  const isPublicRoute = publicRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
   );
 
   // If user is not authenticated and trying to access protected route
   if (!user && !isPublicRoute) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/login';
-    redirectUrl.searchParams.set('redirectTo', pathname);
+    redirectUrl.pathname = "/login";
+    redirectUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
   // If user is authenticated and trying to access auth pages
-  if (user && (pathname === '/login' || pathname === '/signup' || pathname === '/reset-password')) {
+  if (user && (pathname === "/login" || pathname === "/signup" || pathname === "/reset-password")) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/dashboard';
+    redirectUrl.pathname = "/dashboard";
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -81,7 +81,7 @@ export async function middleware(request: NextRequest) {
   applySecurityHeaders(supabaseResponse.headers);
 
   // Validate CORS origin (SEC-005)
-  const origin = request.headers.get('origin');
+  const origin = request.headers.get("origin");
   if (origin && !validateOrigin(origin)) {
     // Log suspicious request
     console.warn(`Blocked request from invalid origin: ${origin}`);
@@ -89,26 +89,29 @@ export async function middleware(request: NextRequest) {
 
   // Add security and performance headers
   const url = request.nextUrl.pathname;
-  
+
   // Define regex patterns for cache control
   const staticAssetPattern = /\.(ico|png|jpg|jpeg|svg|gif|webp|woff|woff2|ttf|eot)$/;
   const htmlPattern = /\.(html|htm)$/;
-  
+
   // Cache static assets aggressively
   if (staticAssetPattern.test(url)) {
-    supabaseResponse.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    supabaseResponse.headers.set("Cache-Control", "public, max-age=31536000, immutable");
   }
   // Cache HTML pages with shorter TTL and revalidation
   else if (htmlPattern.test(url)) {
-    supabaseResponse.headers.set('Cache-Control', 'public, max-age=3600, must-revalidate');
+    supabaseResponse.headers.set("Cache-Control", "public, max-age=3600, must-revalidate");
   }
   // Cache API responses with shorter TTL and stale-while-revalidate
-  else if (url.startsWith('/api/')) {
-    supabaseResponse.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+  else if (url.startsWith("/api/")) {
+    supabaseResponse.headers.set(
+      "Cache-Control",
+      "public, s-maxage=60, stale-while-revalidate=300"
+    );
   }
   // Default cache for other pages
   else {
-    supabaseResponse.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+    supabaseResponse.headers.set("Cache-Control", "public, max-age=0, must-revalidate");
   }
 
   return supabaseResponse;
@@ -116,14 +119,14 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/analysis/:path*',
-    '/history/:path*',
-    '/settings/:path*',
-    '/reports/:path*',
-    '/login',
-    '/signup',
-    '/reset-password',
-    '/auth/callback',
+    "/dashboard/:path*",
+    "/analysis/:path*",
+    "/history/:path*",
+    "/settings/:path*",
+    "/reports/:path*",
+    "/login",
+    "/signup",
+    "/reset-password",
+    "/auth/callback",
   ],
 };

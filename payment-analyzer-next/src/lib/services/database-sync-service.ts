@@ -31,15 +31,15 @@ export class DatabaseSyncService {
   ): Promise<T> {
     let lastError: Error | null = null;
 
-    for (let attempt = 0; attempt < this.MAX_RETRIES; attempt++) {
+    for (let attempt = 0; attempt < DatabaseSyncService.MAX_RETRIES; attempt++) {
       try {
         onProgress?.({
           attempt: attempt + 1,
-          maxAttempts: this.MAX_RETRIES,
+          maxAttempts: DatabaseSyncService.MAX_RETRIES,
           message:
             attempt === 0
               ? "Saving to database..."
-              : `Retrying save (attempt ${attempt + 1}/${this.MAX_RETRIES})...`,
+              : `Retrying save (attempt ${attempt + 1}/${DatabaseSyncService.MAX_RETRIES})...`,
         });
 
         const result = await saveFunction();
@@ -49,13 +49,13 @@ export class DatabaseSyncService {
       } catch (error) {
         lastError = error as Error;
         console.warn(
-          `⚠️ Save attempt ${attempt + 1}/${this.MAX_RETRIES} failed:`,
+          `⚠️ Save attempt ${attempt + 1}/${DatabaseSyncService.MAX_RETRIES} failed:`,
           error instanceof Error ? error.message : error
         );
 
         // If this wasn't the last attempt, wait and retry
-        if (attempt < this.MAX_RETRIES - 1) {
-          const delay = this.RETRY_DELAYS[attempt];
+        if (attempt < DatabaseSyncService.MAX_RETRIES - 1) {
+          const delay = DatabaseSyncService.RETRY_DELAYS[attempt];
           console.log(`⏳ Waiting ${delay}ms before retry...`);
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
@@ -63,7 +63,7 @@ export class DatabaseSyncService {
     }
 
     // All retries failed
-    const errorMessage = `Failed to save after ${this.MAX_RETRIES} attempts: ${lastError?.message || "Unknown error"}`;
+    const errorMessage = `Failed to save after ${DatabaseSyncService.MAX_RETRIES} attempts: ${lastError?.message || "Unknown error"}`;
     console.error(`❌ ${errorMessage}`);
     throw new Error(errorMessage);
   }
@@ -104,7 +104,7 @@ export class DatabaseSyncService {
    * Get count of pending saves (convenience method)
    */
   static getPendingSaveCount(): number {
-    return this.getPendingSaves().length;
+    return DatabaseSyncService.getPendingSaves().length;
   }
 
   /**
@@ -147,7 +147,9 @@ export class DatabaseSyncService {
       }
 
       // Save to database with retry
-      const dbAnalysisId = await this.saveWithRetry(() => saveFunction(analysis, userId));
+      const dbAnalysisId = await DatabaseSyncService.saveWithRetry(() =>
+        saveFunction(analysis, userId)
+      );
 
       // Update localStorage with DB ID
       const updatedAnalysis = {
@@ -197,7 +199,7 @@ export class DatabaseSyncService {
     saveFunction: (analysis: unknown, userId: string) => Promise<string>,
     onProgress?: (current: number, total: number, analysisId: string) => void
   ): Promise<SyncResults> {
-    const pending = this.getPendingSaves();
+    const pending = DatabaseSyncService.getPendingSaves();
     const results: SyncResults = {
       synced: 0,
       failed: 0,
@@ -210,7 +212,7 @@ export class DatabaseSyncService {
       const analysisId = pending[i];
       onProgress?.(i + 1, pending.length, analysisId);
 
-      const result = await this.syncSingleAnalysis(analysisId, userId, saveFunction);
+      const result = await DatabaseSyncService.syncSingleAnalysis(analysisId, userId, saveFunction);
 
       if (result.success) {
         results.synced++;
@@ -265,7 +267,7 @@ export class DatabaseSyncService {
     try {
       const analyses = AnalysisStorageService.loadAnalyses();
       const total = Object.keys(analyses).length;
-      const pending = this.getPendingSaves();
+      const pending = DatabaseSyncService.getPendingSaves();
       const synced = total - pending.length;
 
       return {

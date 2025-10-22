@@ -31,7 +31,11 @@ export function QuickActions({
 
   return (
     <div className={containerClass}>
-      <button type="button" className={styles.primary} onClick={() => onNavigate("/analysis?fresh=true")}>
+      <button
+        type="button"
+        className={styles.primary}
+        onClick={() => onNavigate("/analysis?fresh=true")}
+      >
         <span>
           <svg
             aria-hidden="true"

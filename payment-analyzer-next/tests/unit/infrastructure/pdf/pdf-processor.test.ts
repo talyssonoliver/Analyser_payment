@@ -20,8 +20,6 @@
  * - Edge cases and boundary conditions
  */
 
- 
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { InvoiceData } from "@/lib/infrastructure/pdf/invoice-parser";
 import { PDFProcessor, type ProcessingResult } from "@/lib/infrastructure/pdf/pdf-processor";

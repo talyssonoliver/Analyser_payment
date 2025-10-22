@@ -345,10 +345,7 @@
     "phase_6_repository": {
       "timeline": "Complete within 1 week",
       "estimated_effort": "3-4 hours",
-      "issues": [
-        "REPO-001: Commit uncommitted changes",
-        "REPO-002: Organize documentation"
-      ],
+      "issues": ["REPO-001: Commit uncommitted changes", "REPO-002: Organize documentation"],
       "success_criteria": "Clean git status, documentation organized in docs/"
     }
   },
@@ -381,10 +378,7 @@
       "cc6_7_infrastructure_and_software": {
         "status": "PARTIAL",
         "grade": "B-",
-        "issues": [
-          "Missing CSP and HSTS headers",
-          "1 CVE in dependencies"
-        ],
+        "issues": ["Missing CSP and HSTS headers", "1 CVE in dependencies"],
         "requirements_met": 5,
         "requirements_total": 6,
         "recommendation": "Add security headers, update vulnerable dependencies"
@@ -392,10 +386,7 @@
       "cc7_1_system_operations": {
         "status": "PARTIAL",
         "grade": "B",
-        "issues": [
-          "31 outdated packages",
-          "No documented patch management process"
-        ],
+        "issues": ["31 outdated packages", "No documented patch management process"],
         "requirements_met": 4,
         "requirements_total": 5,
         "recommendation": "Update dependencies, document update process"
@@ -403,10 +394,7 @@
       "cc8_1_change_management": {
         "status": "PARTIAL",
         "grade": "B-",
-        "issues": [
-          "417 uncommitted changes",
-          "Large files (>1000 lines) difficult to review"
-        ],
+        "issues": ["417 uncommitted changes", "Large files (>1000 lines) difficult to review"],
         "requirements_met": 3,
         "requirements_total": 5,
         "recommendation": "Create atomic commits, split large files"

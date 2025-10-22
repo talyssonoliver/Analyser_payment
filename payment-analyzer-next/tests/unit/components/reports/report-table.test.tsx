@@ -595,7 +595,8 @@ describe("ReportTable", () => {
       );
 
       // Use container query to find the edit button by title attribute
-      const editButton = container.querySelector('button["title"="Edit day data"]') ||
+      const editButton =
+        container.querySelector('button["title"="Edit day data"]') ||
         container.querySelector('button[title="Edit day data"]');
       expect(editButton).toBeInTheDocument();
       fireEvent.click(editButton as Element);
@@ -611,7 +612,8 @@ describe("ReportTable", () => {
       );
 
       // Use container query to find the edit button by title attribute
-      const editButton = container.querySelector('button["title"="Edit day data"]') ||
+      const editButton =
+        container.querySelector('button["title"="Edit day data"]') ||
         container.querySelector('button[title="Edit day data"]');
       expect(editButton).toBeInTheDocument();
       fireEvent.click(editButton as Element);

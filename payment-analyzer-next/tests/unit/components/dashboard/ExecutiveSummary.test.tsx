@@ -8,7 +8,7 @@ import { ExecutiveSummary } from "@/components/dashboard/ExecutiveSummary";
 import { render, screen } from "@/tests/utils/test-utils";
 
 // Helper to find percentage text that may be split across elements
- 
+
 const _findPercentageText = (percentage: string) => {
   return screen.getByText((_content, element) => {
     const text = element?.textContent || "";

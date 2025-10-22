@@ -292,19 +292,19 @@ export async function printHTML(htmlContent: string) {
   if (printWindow) {
     // Use modern DOM manipulation instead of deprecated document.write()
     printWindow.document.open();
-    
+
     try {
       // SECURITY FIX: Sanitize HTML to prevent XSS attacks (QUAL-001)
       // Dynamic import for client-side only usage
-      const DOMPurifyModule = await import('isomorphic-dompurify');
+      const DOMPurifyModule = await import("isomorphic-dompurify");
       const DOMPurify = DOMPurifyModule.default || DOMPurifyModule;
       printWindow.document.body.innerHTML = DOMPurify.sanitize(htmlContent);
     } catch (error) {
-      console.error('Failed to load DOMPurify:', error);
+      console.error("Failed to load DOMPurify:", error);
       // Fallback: use unsanitized HTML (not recommended for production)
       printWindow.document.body.innerHTML = htmlContent;
     }
-    
+
     printWindow.document.close();
 
     // Wait for content to load then print

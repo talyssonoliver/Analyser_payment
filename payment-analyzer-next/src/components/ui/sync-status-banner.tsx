@@ -116,8 +116,8 @@ export function SyncStatusBanner({ onSyncComplete }: Readonly<SyncStatusBannerPr
                 {pendingCount} {pendingCount === 1 ? "analysis" : "analyses"} not synced to database
               </h3>
               <p className="text-sm text-yellow-700 mt-1">
-                Your data is saved locally but won&apos;t be available on other devices. Data may be lost
-                if browser cache is cleared.
+                Your data is saved locally but won&apos;t be available on other devices. Data may be
+                lost if browser cache is cleared.
               </p>
               {syncProgress && (
                 <p className="text-xs text-yellow-600 mt-2">
@@ -146,8 +146,8 @@ export function SyncStatusBanner({ onSyncComplete }: Readonly<SyncStatusBannerPr
 
       {/* Help text */}
       <div className="mt-3 text-xs text-yellow-600 border-t border-yellow-200 pt-3">
-        <strong>Why is this happening?</strong> Previous versions saved data locally first. To ensure
-        your data is backed up, please re-upload your files or sync now.
+        <strong>Why is this happening?</strong> Previous versions saved data locally first. To
+        ensure your data is backed up, please re-upload your files or sync now.
       </div>
     </div>
   );

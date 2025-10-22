@@ -12,11 +12,26 @@ All project documentation has been unified and moved to:
 
 ---
 
+## 🐳 Docker-First Development (October 2025)
+
+**Windows users:** Traditional `pnpm install` no longer supported. Use Docker exclusively.
+
+**Why?**
+- Windows permission errors (EACCES) resolved
+- Mixed binary conflicts eliminated
+- Consistent environment for all developers
+- Faster type checking (<10s vs 60s+)
+
+**📖 Complete Guide:** [docs/DOCKER_DEVELOPMENT_WORKFLOW.md](./payment-analyzer-next/docs/DOCKER_DEVELOPMENT_WORKFLOW.md)
+
+---
+
 ## Quick Links for Gemini Users
 
 | Topic | New Location |
 |-------|--------------|
 | **Getting Started** | [docs/GETTING_STARTED.md](./payment-analyzer-next/docs/GETTING_STARTED.md) |
+| **Docker Workflow** ⭐ | [docs/DOCKER_DEVELOPMENT_WORKFLOW.md](./payment-analyzer-next/docs/DOCKER_DEVELOPMENT_WORKFLOW.md) |
 | **Architecture Overview** | [docs/ARCHITECTURE.md](./payment-analyzer-next/docs/ARCHITECTURE.md) |
 | **Development Conventions** | [docs/CONVENTIONS.md](./payment-analyzer-next/docs/CONVENTIONS.md) |
 | **Testing Infrastructure** | [docs/TESTING.md](./payment-analyzer-next/docs/TESTING.md) |
@@ -25,18 +40,21 @@ All project documentation has been unified and moved to:
 
 ## Build & Run Commands
 
-```bash
+```powershell
 cd payment-analyzer-next
 
-# Development (Docker - Recommended)
-pnpm docker:build        # First-time setup
-pnpm docker:dev          # Start development
-pnpm docker:type-check   # Type checking
+# Development (Docker - REQUIRED for Windows)
+pnpm docker:build        # First-time setup (2-5 min)
+pnpm docker:dev          # Start development (keep terminal open)
 
-# Traditional
-pnpm install             # Install dependencies
-pnpm dev                 # Start development
-pnpm build               # Production build
+# Development tasks (in NEW terminal):
+docker-compose -f docker-compose.dev.yml exec app pnpm lint
+docker-compose -f docker-compose.dev.yml exec app pnpm type-check
+docker-compose -f docker-compose.dev.yml exec app pnpm test
+
+# ❌ DON'T USE on Windows:
+# pnpm install    # FAILS - permission errors
+# pnpm dev        # SLOW - corrupted node_modules
 ```
 
 **Complete command reference:** [docs/DEV_GUIDE.md](./payment-analyzer-next/docs/DEV_GUIDE.md)

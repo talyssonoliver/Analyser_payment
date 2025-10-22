@@ -8,19 +8,19 @@
  * For production, use the HTML generator or install Sharp.
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const ICONS_DIR = path.join(__dirname, '../public/icons');
-const SVG_PATH = path.join(ICONS_DIR, 'icon.svg');
+const ICONS_DIR = path.join(__dirname, "../public/icons");
+const SVG_PATH = path.join(ICONS_DIR, "icon.svg");
 const SIZES = [72, 96, 128, 144, 152, 192, 384, 512];
 
-console.log('📱 Creating Placeholder Icon Files\n');
+console.log("📱 Creating Placeholder Icon Files\n");
 
 // Read the SVG content
-const svgContent = fs.readFileSync(SVG_PATH, 'utf8');
+const svgContent = fs.readFileSync(SVG_PATH, "utf8");
 
-console.log('Creating placeholder references...\n');
+console.log("Creating placeholder references...\n");
 
 // Create a README file explaining the icons
 const readmeContent = `# PWA Icons
@@ -51,7 +51,7 @@ node ../scripts/generate-icons.js
 ### Option 4: Use ImageMagick
 \`\`\`bash
 cd public/icons
-${SIZES.map(size => `convert icon.svg -resize ${size}x${size} icon-${size}x${size}.png`).join('\n')}
+${SIZES.map((size) => `convert icon.svg -resize ${size}x${size} icon-${size}x${size}.png`).join("\n")}
 convert icon.svg -resize 180x180 apple-touch-icon.png
 \`\`\`
 
@@ -77,8 +77,8 @@ convert icon.svg -resize 180x180 apple-touch-icon.png
 - Service worker is only active in production builds
 `;
 
-fs.writeFileSync(path.join(ICONS_DIR, 'README.md'), readmeContent);
-console.log('✅ Created README.md with instructions');
+fs.writeFileSync(path.join(ICONS_DIR, "README.md"), readmeContent);
+console.log("✅ Created README.md with instructions");
 
 // Create a placeholder index.html to remind developers
 const indexContent = `<!DOCTYPE html>
@@ -94,15 +94,15 @@ const indexContent = `<!DOCTYPE html>
 </html>
 `;
 
-fs.writeFileSync(path.join(ICONS_DIR, 'index.html'), indexContent);
-console.log('✅ Created index.html redirect');
+fs.writeFileSync(path.join(ICONS_DIR, "index.html"), indexContent);
+console.log("✅ Created index.html redirect");
 
-console.log('\n📋 Next Steps:');
-console.log('   1. Open: public/icons/generate-icons.html in browser');
-console.log('   2. Download all generated icons');
-console.log('   3. Save them to: public/icons/');
-console.log('   4. Run: pnpm build to verify\n');
+console.log("\n📋 Next Steps:");
+console.log("   1. Open: public/icons/generate-icons.html in browser");
+console.log("   2. Download all generated icons");
+console.log("   3. Save them to: public/icons/");
+console.log("   4. Run: pnpm build to verify\n");
 
-console.log('💡 For automated generation, install Sharp:');
-console.log('   pnpm add -D sharp');
-console.log('   node scripts/generate-icons.js\n');
+console.log("💡 For automated generation, install Sharp:");
+console.log("   pnpm add -D sharp");
+console.log("   node scripts/generate-icons.js\n");

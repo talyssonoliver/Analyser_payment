@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { DailyEntry } from "@/lib/domain/entities/daily-entry";
-import { analysisService } from "@/lib/services/analysis-service";
 import { type AuthContext, withAuth } from "@/lib/middleware/auth";
+import { analysisService } from "@/lib/services/analysis-service";
 
 // Function to convert DailyEntry domain objects to CSV
 function convertDailyEntriesToCSV(entries: readonly DailyEntry[]): string {

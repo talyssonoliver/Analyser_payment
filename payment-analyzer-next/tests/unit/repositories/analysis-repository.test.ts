@@ -4,8 +4,6 @@
  * Following Result pattern and proper mock verification
  */
 
- 
-
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { AnalysisRepository } from "@/lib/repositories/analysis-repository";
 import { ErrorCodes } from "@/lib/utils/errors";
@@ -1048,13 +1046,11 @@ describe("AnalysisRepository", () => {
             .mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: [], error: null }) }),
         })
         .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockReturnValue({
-              eq: vi
-                .fn()
-                .mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }),
-            }),
+          select: vi.fn().mockReturnValue({
+            eq: vi
+              .fn()
+              .mockReturnValue({ order: vi.fn().mockResolvedValue({ data: [], error: null }) }),
+          }),
         });
 
       const result = await repository.getAnalysisById(analysisId);
@@ -1094,21 +1090,17 @@ describe("AnalysisRepository", () => {
       (mockSupabaseClient.from as Mock)
         .mockReturnValueOnce({ select: vi.fn().mockReturnValue(mockQueryBuilder) })
         .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockReturnValue({
-              eq: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue(emptyMock) }),
-            }),
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue(emptyMock) }),
+          }),
         })
         .mockReturnValueOnce({
           select: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue(emptyMock) }),
         })
         .mockReturnValueOnce({
-          select: vi
-            .fn()
-            .mockReturnValue({
-              eq: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue(emptyMock) }),
-            }),
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({ order: vi.fn().mockResolvedValue(emptyMock) }),
+          }),
         });
 
       const result = await repository.getAnalysisById(analysisId);

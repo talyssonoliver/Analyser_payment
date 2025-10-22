@@ -582,30 +582,30 @@ export function Step3Container({
       };
     });
     return dailyData;
-  }, []);
+  }, [calculateDayStatus]);
 
   // Helper: Create storage data object
-  const createStorageData = useCallback((
-    analysisData: Step3AnalysisData,
-    dailyData: Record<string, unknown>
-  ) => {
-    return {
-      id: analysisData.id,
-      totals: analysisData.totals,
-      weeks: analysisData.weeks,
-      days: analysisData.days,
-      dailyData,
-      metadata: analysisData.metadata,
-      summary: {
-        totalExpected: analysisData.totals.expectedTotal,
-        totalActual: analysisData.totals.paidTotal,
-        totalConsignments: analysisData.totals.totalConsignments,
-        workingDays: analysisData.totals.workingDays,
-        difference: analysisData.totals.differenceTotal,
-      },
-      createdAt: new Date().toISOString(),
-    };
-  }, []);
+  const createStorageData = useCallback(
+    (analysisData: Step3AnalysisData, dailyData: Record<string, unknown>) => {
+      return {
+        id: analysisData.id,
+        totals: analysisData.totals,
+        weeks: analysisData.weeks,
+        days: analysisData.days,
+        dailyData,
+        metadata: analysisData.metadata,
+        summary: {
+          totalExpected: analysisData.totals.expectedTotal,
+          totalActual: analysisData.totals.paidTotal,
+          totalConsignments: analysisData.totals.totalConsignments,
+          workingDays: analysisData.totals.workingDays,
+          difference: analysisData.totals.differenceTotal,
+        },
+        createdAt: new Date().toISOString(),
+      };
+    },
+    []
+  );
 
   /**
    * Clean up old localStorage entry after successful DB save

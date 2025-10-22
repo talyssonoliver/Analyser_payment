@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { type AuthContext, type RouteContext, withAuth } from "@/lib/middleware/auth";
 import { type AnalysisFile, analysisService } from "@/lib/services/analysis-service";
-import { withAuth, type AuthContext, type RouteContext } from "@/lib/middleware/auth";
 
 // Request schemas for validation
 const CreateAnalysisSchema = z.object({
@@ -55,136 +55,140 @@ const GetAnalysesSchema = z.object({
 /**
  * GET /api/analysis - Get user analyses with pagination and filtering
  */
-export const GET = withAuth(async (request: NextRequest, _context: RouteContext, auth: AuthContext) => {
-  try {
-    // Parse query parameters
-    const { searchParams } = new URL(request.url);
-    const queryParams = Object.fromEntries(searchParams);
+export const GET = withAuth(
+  async (request: NextRequest, _context: RouteContext, auth: AuthContext) => {
+    try {
+      // Parse query parameters
+      const { searchParams } = new URL(request.url);
+      const queryParams = Object.fromEntries(searchParams);
 
-    const validationResult = GetAnalysesSchema.safeParse(queryParams);
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid query parameters",
-          details: validationResult.error.issues,
-        },
-        { status: 400 }
-      );
-    }
+      const validationResult = GetAnalysesSchema.safeParse(queryParams);
+      if (!validationResult.success) {
+        return NextResponse.json(
+          {
+            error: "Invalid query parameters",
+            details: validationResult.error.issues,
+          },
+          { status: 400 }
+        );
+      }
 
-    const { limit = 20, offset = 0, search, status } = validationResult.data;
+      const { limit = 20, offset = 0, search, status } = validationResult.data;
 
-    // Get analyses from service
-    const { data: analyses, error } = await analysisService.getUserAnalyses(auth.user.id, {
-      limit,
-      offset,
-      search,
-      status,
-    });
-
-    if (error) {
-      return NextResponse.json({ error }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: analyses,
-      pagination: {
+      // Get analyses from service
+      const { data: analyses, error } = await analysisService.getUserAnalyses(auth.user.id, {
         limit,
         offset,
-        total: analyses?.length || 0,
-      },
-    });
-  } catch (error) {
-    console.error("GET /api/analysis error:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-      },
-      { status: 500 }
-    );
+        search,
+        status,
+      });
+
+      if (error) {
+        return NextResponse.json({ error }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: analyses,
+        pagination: {
+          limit,
+          offset,
+          total: analyses?.length || 0,
+        },
+      });
+    } catch (error) {
+      console.error("GET /api/analysis error:", error);
+      return NextResponse.json(
+        {
+          error: "Internal server error",
+        },
+        { status: 500 }
+      );
+    }
   }
-});
+);
 
 /**
  * POST /api/analysis - Create new analysis
  */
-export const POST = withAuth(async (request: NextRequest, _context: RouteContext, auth: AuthContext) => {
-  try {
-    // Parse and validate request body
-    const body = await request.json();
-    const validationResult = CreateAnalysisSchema.safeParse(body);
+export const POST = withAuth(
+  async (request: NextRequest, _context: RouteContext, auth: AuthContext) => {
+    try {
+      // Parse and validate request body
+      const body = await request.json();
+      const validationResult = CreateAnalysisSchema.safeParse(body);
 
-    if (!validationResult.success) {
+      if (!validationResult.success) {
+        return NextResponse.json(
+          {
+            error: "Invalid request data",
+            details: validationResult.error.issues,
+          },
+          { status: 400 }
+        );
+      }
+
+      const { files, manualEntries, paymentRules, metadata } = validationResult.data;
+
+      // Validate that either files or manual entries are provided
+      if (!files?.length && !manualEntries?.length) {
+        return NextResponse.json(
+          {
+            error: "Analysis requires either files or manual entries",
+          },
+          { status: 400 }
+        );
+      }
+
+      // Convert files if provided (this would handle file upload in a real implementation)
+      const analysisFiles: AnalysisFile[] = [];
+      if (files?.length) {
+        // In a real implementation, this would handle multipart/form-data file uploads
+        // For now, we'll return an error indicating file upload needs to be handled separately
+        return NextResponse.json(
+          {
+            error: "File uploads must be handled via /api/analysis/upload endpoint",
+          },
+          { status: 400 }
+        );
+      }
+
+      // Create analysis using service
+      const result = await analysisService.createAnalysis({
+        userId: auth.user.id,
+        files: analysisFiles,
+        manualEntries,
+        paymentRules,
+        metadata,
+      });
+
+      if (!result.success) {
+        return NextResponse.json(
+          {
+            error: result.error,
+          },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
         {
-          error: "Invalid request data",
-          details: validationResult.error.issues,
+          success: true,
+          data: {
+            analysisId: result.analysisId,
+            analysis: result.analysis,
+          },
         },
-        { status: 400 }
+        { status: 201 }
       );
-    }
-
-    const { files, manualEntries, paymentRules, metadata } = validationResult.data;
-
-    // Validate that either files or manual entries are provided
-    if (!files?.length && !manualEntries?.length) {
+    } catch (error) {
+      console.error("POST /api/analysis error:", error);
       return NextResponse.json(
         {
-          error: "Analysis requires either files or manual entries",
+          error: "Internal server error",
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
-
-    // Convert files if provided (this would handle file upload in a real implementation)
-    const analysisFiles: AnalysisFile[] = [];
-    if (files?.length) {
-      // In a real implementation, this would handle multipart/form-data file uploads
-      // For now, we'll return an error indicating file upload needs to be handled separately
-      return NextResponse.json(
-        {
-          error: "File uploads must be handled via /api/analysis/upload endpoint",
-        },
-        { status: 400 }
-      );
-    }
-
-    // Create analysis using service
-    const result = await analysisService.createAnalysis({
-      userId: auth.user.id,
-      files: analysisFiles,
-      manualEntries,
-      paymentRules,
-      metadata,
-    });
-
-    if (!result.success) {
-      return NextResponse.json(
-        {
-          error: result.error,
-        },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          analysisId: result.analysisId,
-          analysis: result.analysis,
-        },
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("POST /api/analysis error:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-      },
-      { status: 500 }
-    );
   }
-});
+);
