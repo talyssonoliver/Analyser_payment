@@ -3,44 +3,47 @@
  * Password reset request and new password form
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
-import { Button, Input, CardHeader, CardTitle } from '@/components/ui';
-import { useToast } from '@/components/ui/toast';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useId, useState } from "react";
+import { Button, CardHeader, CardTitle, Input } from "@/components/ui";
+import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { resetPassword, updatePassword, isLoading } = useAuth();
   const { toast } = useToast();
+  const emailId = useId();
+  const passwordId = useId();
+  const confirmPasswordId = useId();
 
-  const [mode, setMode] = useState<'request' | 'update'>('request');
+  const [mode, setMode] = useState<"request" | "update">("request");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [requestForm, setRequestForm] = useState({
-    email: '',
+    email: "",
   });
 
   const [updateForm, setUpdateForm] = useState({
-    password: '',
-    confirmPassword: '',
+    password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Check if we have reset tokens in URL (coming from email link)
   useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    
+    const accessToken = searchParams.get("access_token");
+    const refreshToken = searchParams.get("refresh_token");
+
     if (accessToken && refreshToken) {
-      setMode('update');
+      setMode("update");
     }
   }, [searchParams]);
 
@@ -48,9 +51,9 @@ function ResetPasswordContent() {
     const newErrors: Record<string, string> = {};
 
     if (!requestForm.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requestForm.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = "Please enter a valid email";
     }
 
     setErrors(newErrors);
@@ -61,17 +64,17 @@ function ResetPasswordContent() {
     const newErrors: Record<string, string> = {};
 
     if (!updateForm.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (updateForm.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(updateForm.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+      newErrors.password = "Password must contain uppercase, lowercase, and number";
     }
 
     if (!updateForm.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (updateForm.password !== updateForm.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -80,68 +83,68 @@ function ResetPasswordContent() {
 
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateRequestForm()) {
       return;
     }
 
     const { error } = await resetPassword(requestForm.email);
-    
+
     if (error) {
       toast({
-        title: 'Reset Request Failed',
+        title: "Reset Request Failed",
         description: error,
-        type: 'error',
+        type: "error",
       });
     } else {
       toast({
-        title: 'Reset Link Sent',
-        description: 'Check your email for password reset instructions.',
-        type: 'success',
+        title: "Reset Link Sent",
+        description: "Check your email for password reset instructions.",
+        type: "success",
       });
     }
   };
 
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateUpdateForm()) {
       return;
     }
 
     const { error } = await updatePassword(updateForm.password, updateForm.confirmPassword);
-    
+
     if (error) {
       toast({
-        title: 'Password Update Failed',
+        title: "Password Update Failed",
         description: error,
-        type: 'error',
+        type: "error",
       });
     } else {
       toast({
-        title: 'Password Updated',
-        description: 'Your password has been successfully updated.',
-        type: 'success',
+        title: "Password Updated",
+        description: "Your password has been successfully updated.",
+        type: "success",
       });
-      router.push('/login');
+      router.push("/login");
     }
   };
 
   const handleRequestChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRequestForm(prev => ({ ...prev, [field]: e.target.value }));
+    setRequestForm((prev) => ({ ...prev, [field]: e.target.value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   const handleUpdateChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUpdateForm(prev => ({ ...prev, [field]: e.target.value }));
+    setUpdateForm((prev) => ({ ...prev, [field]: e.target.value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  if (mode === 'request') {
+  if (mode === "request") {
     return (
       <>
         <CardHeader className="text-center">
@@ -154,42 +157,36 @@ function ResetPasswordContent() {
         <form onSubmit={handleRequestSubmit} className="space-y-4">
           {/* Email Input */}
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-slate-700">
+            <label htmlFor={emailId} className="text-sm font-medium text-slate-700">
               Email
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               <Input
-                id="email"
+                id={emailId}
                 type="email"
                 placeholder="Enter your email"
                 value={requestForm.email}
-                onChange={handleRequestChange('email')}
-                className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                onChange={handleRequestChange("email")}
+                className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
                 disabled={isLoading}
                 autoComplete="email"
                 autoFocus
               />
             </div>
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email}</p>
-            )}
+            {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
           </div>
 
           {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-            isLoading={isLoading}
-          >
+          <Button type="submit" className="w-full" disabled={isLoading} isLoading={isLoading}>
             <Mail className="w-4 h-4 mr-2" />
-            {isLoading ? 'Sending...' : 'Send Reset Link'}
+            {isLoading ? "Sending..." : "Send Reset Link"}
           </Button>
 
           {/* Back to Login */}
           <div className="text-center">
             <Link
+              prefetch={false}
               href="/login"
               className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
             >
@@ -206,26 +203,24 @@ function ResetPasswordContent() {
     <>
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Set New Password</CardTitle>
-        <p className="text-sm text-slate-600">
-          Enter your new password below
-        </p>
+        <p className="text-sm text-slate-600">Enter your new password below</p>
       </CardHeader>
 
       <form onSubmit={handleUpdateSubmit} className="space-y-4">
         {/* Password Input */}
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-slate-700">
+          <label htmlFor={passwordId} className="text-sm font-medium text-slate-700">
             New Password
           </label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
             <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
+              id={passwordId}
+              type={showPassword ? "text" : "password"}
               placeholder="Enter new password"
               value={updateForm.password}
-              onChange={handleUpdateChange('password')}
-              className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
+              onChange={handleUpdateChange("password")}
+              className={`pl-10 pr-10 ${errors.password ? "border-red-500" : ""}`}
               disabled={isLoading}
               autoComplete="new-password"
               autoFocus
@@ -239,25 +234,23 @@ function ResetPasswordContent() {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.password && (
-            <p className="text-sm text-red-500">{errors.password}</p>
-          )}
+          {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
         </div>
 
         {/* Confirm Password Input */}
         <div className="space-y-2">
-          <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700">
+          <label htmlFor={confirmPasswordId} className="text-sm font-medium text-slate-700">
             Confirm New Password
           </label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
             <Input
-              id="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
+              id={confirmPasswordId}
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm new password"
               value={updateForm.confirmPassword}
-              onChange={handleUpdateChange('confirmPassword')}
-              className={`pl-10 pr-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+              onChange={handleUpdateChange("confirmPassword")}
+              className={`pl-10 pr-10 ${errors.confirmPassword ? "border-red-500" : ""}`}
               disabled={isLoading}
               autoComplete="new-password"
             />
@@ -276,14 +269,9 @@ function ResetPasswordContent() {
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isLoading}
-          isLoading={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading} isLoading={isLoading}>
           <Lock className="w-4 h-4 mr-2" />
-          {isLoading ? 'Updating...' : 'Update Password'}
+          {isLoading ? "Updating..." : "Update Password"}
         </Button>
       </form>
     </>
@@ -297,9 +285,7 @@ function LoadingFallback() {
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
       </div>
       <CardTitle className="text-2xl">Loading...</CardTitle>
-      <p className="text-sm text-slate-600">
-        Preparing password reset form...
-      </p>
+      <p className="text-sm text-slate-600">Preparing password reset form...</p>
     </CardHeader>
   );
 }

@@ -3,14 +3,14 @@
  * Tests the fix for Strategy 4 (additive → overwrite)
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-describe('Analysis Repository - Merge Strategy Fix', () => {
-  describe('Strategy 4: Simple Overwrite (Legacy Behavior)', () => {
-    it('should overwrite consignments instead of adding them', () => {
+describe("Analysis Repository - Merge Strategy Fix", () => {
+  describe("Strategy 4: Simple Overwrite (Legacy Behavior)", () => {
+    it("should overwrite consignments instead of adding them", () => {
       // Simulate the merge logic
       const existing = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 50,
         paid_amount: 100,
         rate: 2.0,
@@ -20,7 +20,7 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
       };
 
       const entry = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 55, // Corrected value
         paid_amount: 110,
         rate: 2.0,
@@ -39,9 +39,9 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
       expect(merged.paid_amount).toBe(110);
     });
 
-    it('should preserve payment from either source', () => {
+    it("should preserve payment from either source", () => {
       const existing = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 50,
         paid_amount: 100,
         rate: 2.0,
@@ -51,7 +51,7 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
       };
 
       const entry = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 55,
         paid_amount: 0, // No payment in new entry
         rate: 2.0,
@@ -69,25 +69,25 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
       expect(merged.consignments).toBe(55); // From new entry
     });
 
-    it('should match legacy system behavior', () => {
+    it("should match legacy system behavior", () => {
       // Legacy: results.runsheets[date] = { consignments }; (simple overwrite)
 
       const runsheetData: Record<string, { consignments: number }> = {};
 
       // First upload
-      runsheetData['2024-01-01'] = { consignments: 50 };
+      runsheetData["2024-01-01"] = { consignments: 50 };
 
       // Second upload (correction)
-      runsheetData['2024-01-01'] = { consignments: 55 };
+      runsheetData["2024-01-01"] = { consignments: 55 };
 
-      expect(runsheetData['2024-01-01'].consignments).toBe(55); // Last wins
+      expect(runsheetData["2024-01-01"].consignments).toBe(55); // Last wins
     });
   });
 
-  describe('Strategy 1: Adding Invoice to Runsheet', () => {
-    it('should keep consignments from runsheet and add payment from invoice', () => {
+  describe("Strategy 1: Adding Invoice to Runsheet", () => {
+    it("should keep consignments from runsheet and add payment from invoice", () => {
       const existing = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 50,
         paid_amount: 0,
         rate: 2.0,
@@ -101,7 +101,7 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
       };
 
       const entry = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 0,
         paid_amount: 205, // Invoice payment
         pickup_total: 15,
@@ -110,7 +110,7 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
 
       // Strategy 1: Adding invoice to runsheet
       const existingHasConsignments = existing.consignments > 0;
-      const newHasConsignments = entry.consignments === 0;
+      const newHasConsignments = entry.consignments > 0;
       const newHasPayment = entry.paid_amount > 0;
 
       const shouldUseStrategy1 = existingHasConsignments && !newHasConsignments && newHasPayment;
@@ -132,17 +132,17 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
     });
   });
 
-  describe('Strategy 2: Adding Runsheet to Invoice', () => {
-    it('should keep payment from invoice and use consignments from runsheet', () => {
+  describe("Strategy 2: Adding Runsheet to Invoice", () => {
+    it("should keep payment from invoice and use consignments from runsheet", () => {
       const existing = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 0,
         paid_amount: 205,
         rate: 2.0,
       };
 
       const entry = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 50,
         paid_amount: 0,
         rate: 2.0,
@@ -150,11 +150,12 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
         expected_total: 205,
       };
 
-      const existingHasConsignments = existing.consignments === 0;
+      const existingHasConsignments = existing.consignments > 0;
       const existingHasPayment = existing.paid_amount > 0;
       const newHasConsignments = entry.consignments > 0;
 
-      const shouldUseStrategy2 = !existingHasConsignments && existingHasPayment && newHasConsignments;
+      const shouldUseStrategy2 =
+        !existingHasConsignments && existingHasPayment && newHasConsignments;
 
       expect(shouldUseStrategy2).toBe(true);
 
@@ -170,10 +171,10 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
     });
   });
 
-  describe('Strategy 3: Both Have Consignments', () => {
-    it('should replace with newer data when both have consignments', () => {
+  describe("Strategy 3: Both Have Consignments", () => {
+    it("should replace with newer data when both have consignments", () => {
       const existing = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 50,
         paid_amount: 100,
         pickup_total: 0,
@@ -181,7 +182,7 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
       };
 
       const entry = {
-        date: '2024-01-01',
+        date: "2024-01-01",
         consignments: 55, // Corrected
         paid_amount: 110,
         pickup_total: 10,
@@ -206,8 +207,8 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
     });
   });
 
-  describe('Difference Recalculation', () => {
-    it('should always recalculate difference after merge', () => {
+  describe("Difference Recalculation", () => {
+    it("should always recalculate difference after merge", () => {
       const merged = {
         paid_amount: 205,
         expected_total: 200,
@@ -219,22 +220,22 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
       expect(merged.difference).toBe(5);
     });
 
-    it('should update status based on difference', () => {
+    it("should update status based on difference", () => {
       const testCases = [
-        { difference: 5, expectedStatus: 'overpaid' },
-        { difference: -5, expectedStatus: 'underpaid' },
-        { difference: 0.005, expectedStatus: 'balanced' }, // Within tolerance
+        { difference: 5, expectedStatus: "overpaid" },
+        { difference: -5, expectedStatus: "underpaid" },
+        { difference: 0.005, expectedStatus: "balanced" }, // Within tolerance
       ];
 
       testCases.forEach(({ difference, expectedStatus }) => {
         let status;
 
         if (difference > 0.01) {
-          status = 'overpaid';
+          status = "overpaid";
         } else if (difference < -0.01) {
-          status = 'underpaid';
+          status = "underpaid";
         } else {
-          status = 'balanced';
+          status = "balanced";
         }
 
         expect(status).toBe(expectedStatus);
@@ -242,8 +243,8 @@ describe('Analysis Repository - Merge Strategy Fix', () => {
     });
   });
 
-  describe('Regression Tests', () => {
-    it('should NOT double-count consignments (bug fix verification)', () => {
+  describe("Regression Tests", () => {
+    it("should NOT double-count consignments (bug fix verification)", () => {
       // This was the bug in Strategy 4
       const existing = { consignments: 50, paid_amount: 100 };
       const entry = { consignments: 55, paid_amount: 110 };

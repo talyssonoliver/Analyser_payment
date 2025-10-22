@@ -4,25 +4,20 @@
  * Extracted from file-validation-panel.tsx (lines 223-417)
  */
 
-'use client';
+"use client";
 
-import React from 'react';
 import {
   AlertTriangle,
   CheckCircle,
-  XCircle,
-  Info,
-  FileText as FileError,
   Clock,
-  RefreshCw
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  ValidationDisplayProps,
-  combineValidationResults,
-  formatFileSize
-} from './types';
+  FileText as FileError,
+  Info,
+  RefreshCw,
+  XCircle,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { combineValidationResults, formatFileSize, type ValidationDisplayProps } from "./types";
 
 /**
  * ValidationDisplay component for showing validation results
@@ -33,10 +28,10 @@ export function ValidationDisplay({
   fingerprintValidation,
   onRetryValidation,
   onFixIssue,
-  className = ''
-}: ValidationDisplayProps) {
+  className = "",
+}: Readonly<ValidationDisplayProps>) {
   // Combine validation results for unified display
-  const combined = combineValidationResults(validationResult, fingerprintValidation);
+  const combined = combineValidationResults(validationResult, fingerprintValidation ?? null);
   const { errors, warnings, duplicates, status, hasFingerprintIssues } = combined;
 
   const getStatusIcon = () => {
@@ -56,12 +51,8 @@ export function ValidationDisplay({
         <div className="flex items-center gap-2">
           {getStatusIcon()}
           <div>
-            <h3 className={`font-semibold text-${statusColor}-900`}>
-              {status.text}
-            </h3>
-            <p className={`text-sm text-${statusColor}-700 mt-1`}>
-              File validation completed
-            </p>
+            <h3 className={`font-semibold text-${statusColor}-900`}>{status.text}</h3>
+            <p className={`text-sm text-${statusColor}-700 mt-1`}>File validation completed</p>
           </div>
         </div>
         {onRetryValidation && (
@@ -82,14 +73,12 @@ export function ValidationDisplay({
         <div className="error-list mb-4">
           <div className="flex items-center gap-2 mb-2">
             <XCircle className="w-4 h-4 text-red-600" />
-            <span className="font-medium text-red-900">
-              Errors ({errors.length})
-            </span>
+            <span className="font-medium text-red-900">Errors ({errors.length})</span>
           </div>
           <div className="space-y-2">
-            {errors.map((error, index) => (
+            {errors.map((error) => (
               <div
-                key={index}
+                key={`error-${error}`}
                 className="bg-red-100 border border-red-200 rounded-lg p-3"
               >
                 <div className="flex items-start justify-between">
@@ -98,7 +87,7 @@ export function ValidationDisplay({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onFixIssue('error', error)}
+                      onClick={() => onFixIssue("error", error)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-200 ml-2"
                     >
                       Fix
@@ -116,14 +105,12 @@ export function ValidationDisplay({
         <div className="warning-list mb-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <span className="font-medium text-amber-900">
-              Warnings ({warnings.length})
-            </span>
+            <span className="font-medium text-amber-900">Warnings ({warnings.length})</span>
           </div>
           <div className="space-y-2">
-            {warnings.map((warning, index) => (
+            {warnings.map((warning) => (
               <div
-                key={index}
+                key={`warning-${warning}`}
                 className="bg-amber-100 border border-amber-200 rounded-lg p-3"
               >
                 <div className="flex items-start justify-between">
@@ -132,7 +119,7 @@ export function ValidationDisplay({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onFixIssue('warning', warning)}
+                      onClick={() => onFixIssue("warning", warning)}
                       className="text-amber-600 hover:text-amber-700 hover:bg-amber-200 ml-2"
                     >
                       Review
@@ -150,9 +137,7 @@ export function ValidationDisplay({
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-blue-600" />
-            <span className="font-medium text-blue-900">
-              File Updates Detected
-            </span>
+            <span className="font-medium text-blue-900">File Updates Detected</span>
             <Badge variant="info" className="text-xs">
               Action Required
             </Badge>
@@ -170,7 +155,7 @@ export function ValidationDisplay({
               {onFixIssue && (
                 <Button
                   size="sm"
-                  onClick={() => onFixIssue('update', { isUpdated: true })}
+                  onClick={() => onFixIssue("update", { isUpdated: true })}
                   className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
                 >
                   <RefreshCw className="w-3 h-3 mr-1" />
@@ -192,20 +177,20 @@ export function ValidationDisplay({
             </span>
           </div>
           <div className="space-y-2">
-            {duplicates.map((file, index) => {
+            {duplicates.map((file) => {
               // Find corresponding fingerprint duplicate info
-              const fingerprintDup = fingerprintValidation?.duplicates?.find(d => d.current.name === file.name);
+              const fingerprintDup = fingerprintValidation?.duplicates?.find(
+                (d) => d.current.name === file.name
+              );
               return (
                 <div
-                  key={index}
+                  key={`duplicate-${file.name}-${file.size}-${file.lastModified}`}
                   className="duplicate-badge bg-orange-100 border border-orange-200 rounded-lg p-3"
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm text-orange-800 font-medium">
-                          {file.name}
-                        </span>
+                        <span className="text-sm text-orange-800 font-medium">{file.name}</span>
                         {fingerprintDup && (
                           <Badge variant="secondary" className="text-xs">
                             {fingerprintDup.type}
@@ -213,11 +198,13 @@ export function ValidationDisplay({
                         )}
                       </div>
                       <p className="text-xs text-orange-600">
-                        {formatFileSize(file.size)} • Modified {new Date(file.lastModified).toLocaleDateString()}
+                        {formatFileSize(file.size)} • Modified{" "}
+                        {new Date(file.lastModified).toLocaleDateString()}
                       </p>
                       {fingerprintDup?.existing && (
                         <p className="text-xs text-orange-500 mt-1">
-                          Previously processed: {new Date(fingerprintDup.existing.processedAt).toLocaleString()}
+                          Previously processed:{" "}
+                          {new Date(fingerprintDup.existing.processedAt).toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -225,7 +212,7 @@ export function ValidationDisplay({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onFixIssue('duplicate', file)}
+                        onClick={() => onFixIssue("duplicate", file)}
                         className="text-orange-600 hover:text-orange-700 hover:bg-orange-200 ml-2"
                       >
                         Remove
@@ -244,9 +231,7 @@ export function ValidationDisplay({
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Info className="w-4 h-4 text-indigo-600" />
-            <span className="font-medium text-indigo-900">
-              Existing Analysis Found
-            </span>
+            <span className="font-medium text-indigo-900">Existing Analysis Found</span>
           </div>
           <div className="bg-indigo-100 border border-indigo-200 rounded-lg p-3">
             <div className="flex items-start justify-between">
@@ -262,7 +247,9 @@ export function ValidationDisplay({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onFixIssue('existing', { analysisId: validationResult.existingAnalysis })}
+                  onClick={() =>
+                    onFixIssue("existing", { analysisId: validationResult.existingAnalysis })
+                  }
                   className="border-indigo-300 text-indigo-700 hover:bg-indigo-100 ml-2"
                 >
                   View Analysis
@@ -274,14 +261,17 @@ export function ValidationDisplay({
       )}
 
       {/* Success State */}
-      {status.isValid && warnings.length === 0 && !validationResult?.isUpdated && !hasFingerprintIssues && (
-        <div className="flex items-center gap-2 text-green-800">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm font-medium">
-            All files passed validation and fingerprint analysis successfully
-          </span>
-        </div>
-      )}
+      {status.isValid &&
+        warnings.length === 0 &&
+        !validationResult?.isUpdated &&
+        !hasFingerprintIssues && (
+          <div className="flex items-center gap-2 text-green-800">
+            <CheckCircle className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              All files passed validation and fingerprint analysis successfully
+            </span>
+          </div>
+        )}
     </div>
   );
 }

@@ -1,0 +1,112 @@
+/**
+ * Report Settlement Breakdown Styles
+ * Unified styling for settlement summary displays
+ */
+
+.settlementContainer {
+  background: linear-gradient(135deg, var(--color-slate-50) 0%, var(--color-slate-200) 100%);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  border: 1px solid var(--color-slate-200);
+}
+
+.settlementTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin-bottom: 1.25rem;
+}
+
+.settlementGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.settlementItem {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.settlementItem:hover {
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+  transform: translateY(-1px);
+}
+
+.settlementItemTotal {
+  background: var(--color-slate-900);
+  color: white;
+}
+
+.settlementItemTotal:hover {
+  box-shadow: 0 2px 8px rgb(15 23 42 / 30%);
+}
+
+.settlementLabel {
+  font-size: 0.875rem;
+  color: var(--color-slate-600);
+  font-weight: 500;
+}
+
+.settlementItemTotal .settlementLabel {
+  color: white;
+  font-weight: 700;
+}
+
+.settlementValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  font-family: var(--font-mono, "SF Mono", "Monaco", "Cascadia Code", monospace);
+}
+
+.settlementItemTotal .settlementValue {
+  color: white;
+}
+
+/* Compact variant */
+.settlementContainer.compact {
+  padding: 1rem;
+}
+
+.settlementContainer.compact .settlementTitle {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.settlementContainer.compact .settlementItem {
+  padding: 0.75rem;
+}
+
+.settlementContainer.compact .settlementLabel {
+  font-size: 0.8125rem;
+}
+
+.settlementContainer.compact .settlementValue {
+  font-size: 0.9375rem;
+}
+
+/* Responsive */
+@media (width <= 640px) {
+  .settlementContainer {
+    padding: 1rem;
+  }
+
+  .settlementItem {
+    padding: 0.875rem;
+  }
+
+  .settlementLabel {
+    font-size: 0.8125rem;
+  }
+
+  .settlementValue {
+    font-size: 0.9375rem;
+  }
+}

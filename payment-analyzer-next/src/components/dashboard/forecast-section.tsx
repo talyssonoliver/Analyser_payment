@@ -3,9 +3,8 @@
  * Dashboard forecast card with predictions and actions
  */
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { BarChart3, FileText } from 'lucide-react';
+import { BarChart3, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface ForecastSectionProps {
   nextWeekExpected: number;
@@ -20,7 +19,7 @@ export function ForecastSection({
   monthEndProjection,
   suggestedDailyTarget,
   onUploadClick,
-  onReportsClick
+  onReportsClick,
 }: ForecastSectionProps) {
   return (
     <div className="bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300 rounded-xl p-4">
@@ -37,15 +36,21 @@ export function ForecastSection({
       <div className="flex flex-col gap-1.5">
         <div className="flex justify-between items-center py-1.5 px-2 bg-white rounded">
           <span className="text-xs text-slate-600">Next Week Expected</span>
-          <span className="text-sm font-semibold text-slate-900">£{nextWeekExpected.toFixed(2)}</span>
+          <span className="text-sm font-semibold text-slate-900">
+            £{nextWeekExpected.toFixed(2)}
+          </span>
         </div>
         <div className="flex justify-between items-center py-1.5 px-2 bg-white rounded">
           <span className="text-xs text-slate-600">Month End Projection</span>
-          <span className="text-sm font-semibold text-slate-900">£{monthEndProjection.toFixed(2)}</span>
+          <span className="text-sm font-semibold text-slate-900">
+            £{monthEndProjection.toFixed(2)}
+          </span>
         </div>
         <div className="flex justify-between items-center py-1.5 px-2 bg-white rounded">
           <span className="text-xs text-slate-600">Suggested Daily Target</span>
-          <span className="text-sm font-semibold text-slate-900">£{suggestedDailyTarget.toFixed(2)}</span>
+          <span className="text-sm font-semibold text-slate-900">
+            £{suggestedDailyTarget.toFixed(2)}
+          </span>
         </div>
       </div>
 

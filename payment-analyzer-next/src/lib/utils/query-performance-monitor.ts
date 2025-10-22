@@ -26,23 +26,19 @@ class QueryPerformanceMonitor {
   /**
    * Wrap Supabase queries with performance monitoring
    */
-  async trackQuery<T>(
-    queryName: string,
-    table: string,
-    queryFn: () => Promise<T>
-  ): Promise<T> {
+  async trackQuery<T>(queryName: string, table: string, queryFn: () => Promise<T>): Promise<T> {
     const startTime = performance.now();
-    
+
     try {
       const result = await queryFn();
       const duration = performance.now() - startTime;
-      
+
       // Log slow queries
       if (duration > this.SLOW_QUERY_THRESHOLD) {
         console.warn(`Slow query detected: ${queryName} on ${table} took ${duration.toFixed(2)}ms`);
         this.logMetric(queryName, duration, table);
       }
-      
+
       return result;
     } catch (error) {
       const duration = performance.now() - startTime;
@@ -56,7 +52,7 @@ class QueryPerformanceMonitor {
       query,
       duration,
       table,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Keep only recent metrics
@@ -73,31 +69,37 @@ class QueryPerformanceMonitor {
     averageDuration: number;
     recommendations: string[];
   } {
-    const slowQueries = this.metrics.filter(m => m.duration > this.SLOW_QUERY_THRESHOLD);
-    const avgDuration = this.metrics.reduce((sum, m) => sum + m.duration, 0) / this.metrics.length || 0;
+    const slowQueries = this.metrics.filter((m) => m.duration > this.SLOW_QUERY_THRESHOLD);
+    const avgDuration =
+      this.metrics.reduce((sum, m) => sum + m.duration, 0) / this.metrics.length || 0;
 
     const recommendations: string[] = [];
-    
+
     // Analysis of slow query patterns
-    const tableFrequency = slowQueries.reduce((acc, m) => {
-      acc[m.table] = (acc[m.table] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const tableFrequency = slowQueries.reduce(
+      (acc, m) => {
+        acc[m.table] = (acc[m.table] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     Object.entries(tableFrequency).forEach(([table, count]) => {
       if (count > 3) {
-        recommendations.push(`Consider optimizing queries on ${table} table (${count} slow queries detected)`);
+        recommendations.push(
+          `Consider optimizing queries on ${table} table (${count} slow queries detected)`
+        );
       }
     });
 
     if (avgDuration > 500) {
-      recommendations.push('Average query time is high - consider index optimization');
+      recommendations.push("Average query time is high - consider index optimization");
     }
 
     return {
       slowQueries,
       averageDuration: avgDuration,
-      recommendations
+      recommendations,
     };
   }
 }

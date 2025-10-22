@@ -4,19 +4,18 @@
  * Refactored from 489 lines to use ValidationDisplay, FingerprintDisplay, and ValidationActions
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { RefreshCw } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { ValidationResult } from '@/lib/domain/services/file-validation-service';
-import { FingerprintValidation } from '@/lib/services/file-fingerprint-service';
-import { useFingerprintValidation } from '@/hooks/use-fingerprint-validation';
-import ValidationDisplay from './ValidationDisplay';
-import FingerprintDisplay from './FingerprintDisplay';
-import ValidationActions from './ValidationActions';
-import { IssueType, combineValidationResults } from './types';
+import { RefreshCw } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useFingerprintValidation } from "@/hooks/use-fingerprint-validation";
+import type { ValidationResult } from "@/lib/domain/services/file-validation-service";
+import type { FingerprintValidation } from "@/lib/services/file-fingerprint-service";
+import FingerprintDisplay from "./FingerprintDisplay";
+import { combineValidationResults, type IssueType } from "./types";
+import ValidationActions from "./ValidationActions";
+import ValidationDisplay from "./ValidationDisplay";
 
 export interface FileValidationPanelProps {
   validationResult: ValidationResult | null;
@@ -39,23 +38,23 @@ export function FileValidationPanel({
   isValidating = false,
   onRetryValidation,
   onFixIssue,
-  className = '',
+  className = "",
   files = [],
   showFingerprintDetails = false,
-  onFingerprintValidationComplete
-}: FileValidationPanelProps) {
+  onFingerprintValidationComplete,
+}: Readonly<FileValidationPanelProps>) {
   // Use fingerprint validation hook for state management
   const {
     fingerprintValidation,
     fingerprintLoading,
     fileComparisons,
     getFileIndicator,
-    hasFingerprintIssues
+    hasFingerprintIssues,
   } = useFingerprintValidation({
     files,
     autoValidate: true,
     onValidationComplete: onFingerprintValidationComplete,
-    showDetails: showFingerprintDetails
+    showDetails: showFingerprintDetails,
   });
 
   // Combine validation results for status determination
@@ -70,7 +69,7 @@ export function FileValidationPanel({
             <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
             <div>
               <h3 className="font-semibold text-blue-900">
-                {isValidating ? 'Validating Files...' : 'Analyzing File Fingerprints...'}
+                {isValidating ? "Validating Files..." : "Analyzing File Fingerprints..."}
               </h3>
               <p className="text-sm text-blue-700 mt-1">
                 Checking file integrity, updates, and duplicates
@@ -114,7 +113,9 @@ export function FileValidationPanel({
         <ValidationActions
           onRetryValidation={onRetryValidation}
           hasErrors={!combined.status.isValid}
-          hasWarnings={combined.warnings.length > 0 || validationResult?.isUpdated || hasFingerprintIssues}
+          hasWarnings={
+            combined.warnings.length > 0 || validationResult?.isUpdated || hasFingerprintIssues
+          }
           isValidating={isValidating || fingerprintLoading}
           className="mt-4"
         />

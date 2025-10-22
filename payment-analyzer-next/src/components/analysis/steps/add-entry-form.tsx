@@ -1,22 +1,19 @@
-
 /**
  * Add Entry Form Component (Refactored)
  * Form for adding new manual entries, using react-hook-form and zod.
  */
 
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { motion } from 'framer-motion';
-import { format } from 'date-fns';
-import { Save, X, Calculator, Loader2 } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { motion } from "framer-motion";
+import { Calculator, Loader2, Save, X } from "lucide-react";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -25,15 +22,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { cn, formatCurrency, getDayName } from '@/lib/utils';
-import { calculateExpectedPayment } from '@/lib/utils/payment-utils';
-import { PaymentRules } from '@/lib/domain/entities';
-import { createManualEntrySchema, ManualEntryFormValues } from '@/lib/domain/schemas/manual-entry-schema';
-import type { ManualEntryData } from './manual-entry';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import type { PaymentRules } from "@/lib/domain/entities";
+import {
+  createManualEntrySchema,
+  type ManualEntryFormValues,
+} from "@/lib/domain/schemas/manual-entry-schema";
+import { cn, formatCurrency, getDayName } from "@/lib/utils";
+import { calculateExpectedPayment } from "@/lib/utils/payment-utils";
+import type { ManualEntryData } from "./manual-entry";
 
 interface AddEntryFormProps {
-  readonly onAdd: (entry: Omit<ManualEntryData, 'id' | 'expectedAmount' | 'difference'>) => void;
+  readonly onAdd: (entry: Omit<ManualEntryData, "id" | "expectedAmount" | "difference">) => void;
   readonly onCancel: () => void;
   readonly existingDates: Date[];
   readonly paymentRules?: PaymentRules;
@@ -54,7 +55,7 @@ export function AddEntryForm({
   const form = useForm<ManualEntryFormValues>({
     resolver: zodResolver(manualEntrySchema),
     defaultValues: {
-      date: format(initialDate, 'yyyy-MM-dd'),
+      date: format(initialDate, "yyyy-MM-dd"),
       consignments: 0,
       paidAmount: 0,
     },
@@ -74,7 +75,7 @@ export function AddEntryForm({
 
     const calculation = calculateExpectedPayment(selectedDate, consignmentCount, paymentRules);
     const difference = paidAmountValue - calculation.expectedAmount;
-    
+
     return {
       rate: calculation.basePayment / (consignmentCount || 1),
       basePayment: calculation.basePayment,
@@ -96,7 +97,7 @@ export function AddEntryForm({
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
+      animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.2 }}
     >
@@ -104,11 +105,7 @@ export function AddEntryForm({
         <CardContent className="space-y-4 pt-6">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold text-slate-900">Add New Entry</h4>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onCancel}
-            >
+            <Button variant="ghost" size="sm" onClick={onCancel}>
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -126,7 +123,7 @@ export function AddEntryForm({
                         <Input type="date" {...field} />
                       </FormControl>
                       <FormDescription>
-                        {isSunday ? 'Warning: Sunday is typically non-working.' : ''}
+                        {isSunday ? "Warning: Sunday is typically non-working." : ""}
                       </FormDescription>
                       <FormMessage />
                       {watchedValues.date && (
@@ -182,66 +179,66 @@ export function AddEntryForm({
                       <h5 className="font-medium text-blue-900">Calculation Preview</h5>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <div className="text-slate-600">Base Pay</div>
-                          <div className="font-semibold">
-                            {watchedValues.consignments || 0} × £{preview.rate.toFixed(2)} = {formatCurrency(preview.basePayment)}
-                          </div>
+                      <div>
+                        <div className="text-slate-600">Base Pay</div>
+                        <div className="font-semibold">
+                          {watchedValues.consignments || 0} × £{preview.rate.toFixed(2)} ={" "}
+                          {formatCurrency(preview.basePayment)}
                         </div>
-    
-                        <div>
-                          <div className="text-slate-600">Bonuses</div>
-                          <div className="space-y-1">
-                            {preview.bonuses.unloading > 0 && (
-                              <div className="text-xs">Unloading: {formatCurrency(preview.bonuses.unloading)}</div>
-                            )}
-                            {preview.bonuses.attendance > 0 && (
-                              <div className="text-xs">Attendance: {formatCurrency(preview.bonuses.attendance)}</div>
-                            )}
-                            {preview.bonuses.early > 0 && (
-                              <div className="text-xs">Early: {formatCurrency(preview.bonuses.early)}</div>
-                            )}
-                          </div>
-                          <div className="font-semibold">
-                            {formatCurrency(preview.totalBonuses)}
-                          </div>
+                      </div>
+
+                      <div>
+                        <div className="text-slate-600">Bonuses</div>
+                        <div className="space-y-1">
+                          {preview.bonuses.unloading > 0 && (
+                            <div className="text-xs">
+                              Unloading: {formatCurrency(preview.bonuses.unloading)}
+                            </div>
+                          )}
+                          {preview.bonuses.attendance > 0 && (
+                            <div className="text-xs">
+                              Attendance: {formatCurrency(preview.bonuses.attendance)}
+                            </div>
+                          )}
+                          {preview.bonuses.early > 0 && (
+                            <div className="text-xs">
+                              Early: {formatCurrency(preview.bonuses.early)}
+                            </div>
+                          )}
                         </div>
-    
-                        <div>
-                          <div className="text-slate-600">Expected</div>
-                          <div className="font-semibold text-blue-700">
-                            {formatCurrency(preview.expectedAmount)}
-                          </div>
+                        <div className="font-semibold">{formatCurrency(preview.totalBonuses)}</div>
+                      </div>
+
+                      <div>
+                        <div className="text-slate-600">Expected</div>
+                        <div className="font-semibold text-blue-700">
+                          {formatCurrency(preview.expectedAmount)}
                         </div>
-    
-                        <div>
-                          <div className="text-slate-600">Difference</div>
-                          <div className={cn(
-                            'font-semibold',
-                            preview.difference >= 0 ? 'text-green-600' : 'text-red-600'
-                          )}>
-                            {preview.difference >= 0 ? '+' : ''}{formatCurrency(preview.difference)}
-                          </div>
+                      </div>
+
+                      <div>
+                        <div className="text-slate-600">Difference</div>
+                        <div
+                          className={cn(
+                            "font-semibold",
+                            preview.difference >= 0 ? "text-green-600" : "text-red-600"
+                          )}
+                        >
+                          {preview.difference >= 0 ? "+" : ""}
+                          {formatCurrency(preview.difference)}
                         </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               )}
 
               <div className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCancel}
-                  disabled={isSubmitting}
-                >
+                <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
                   Cancel
                 </Button>
-                
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                >
+
+                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (

@@ -3,28 +3,37 @@
  * Handles common PDF parsing functionality using pdf.js
  */
 
-import type { 
-  PDFJSLib, 
-  ParsedPDFData, 
+import type {
+  ParsedPDFData,
+  PDFJSLib,
   PDFParseResult,
-  PDFTextContentItem
-} from '../../../types/core';
+  PDFTextContentItem,
+} from "../../../types/core";
 
 const getPDFJS = (): PDFJSLib => {
-  if (typeof window === 'undefined') {
-    throw new Error('PDF processing only available on client side');
-  }
-  
-  if (window.pdfjsLib) {
+  // Support both main thread (window) and Web Worker (self) contexts
+  // Main thread: window.pdfjsLib (loaded via <script> in layout.tsx)
+  // Web Worker: self.pdfjsLib (loaded via importScripts in pdf-worker.ts)
+
+  if (typeof window !== "undefined" && window.pdfjsLib) {
+    console.log("✅ Using PDF.js from window context (main thread)");
     return window.pdfjsLib;
   }
-  
-  throw new Error('PDF.js not loaded. Please ensure PDF.js is included in your HTML.');
+
+  if (typeof self !== "undefined" && (self as unknown as WorkerGlobalScope).pdfjsLib) {
+    console.log("✅ Using PDF.js from self context (Web Worker)");
+    return (self as unknown as WorkerGlobalScope).pdfjsLib;
+  }
+
+  throw new Error(
+    "PDF.js not loaded. Please ensure PDF.js is available in global scope. " +
+      "Main thread: window.pdfjsLib | Web Worker: self.pdfjsLib"
+  );
 };
 
 export abstract class PDFParserBase<T = Record<string, unknown>> {
   protected abstract fileTypeIdentifiers: string[];
-  
+
   /**
    * Parse PDF file and extract specific data
    */
@@ -32,13 +41,13 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
     try {
       // First, parse the PDF to get raw text
       const rawData = await this.parsePDFToText(file);
-      
+
       // Then, extract specific data based on parser type
       const extractedData = await this.extractData(rawData, file.name);
-      
+
       // Validate the extracted data
       const validation = await this.validateData(extractedData);
-      
+
       return {
         success: validation.isValid,
         data: validation.isValid ? extractedData : undefined,
@@ -49,8 +58,8 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        rawData: { text: '', pages: [] },
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+        rawData: { text: "", pages: [] },
       };
     }
   }
@@ -60,18 +69,18 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
    */
   canParse(fileName: string, content?: string): boolean {
     const lowerName = fileName.toLowerCase();
-    
+
     // Check file name patterns
-    const nameMatches = this.fileTypeIdentifiers.some(identifier => 
+    const nameMatches = this.fileTypeIdentifiers.some((identifier) =>
       lowerName.includes(identifier.toLowerCase())
     );
-    
+
     // If content is provided, check content patterns
     if (content) {
       const contentMatches = this.checkContentPatterns(content);
       return nameMatches || contentMatches;
     }
-    
+
     return nameMatches;
   }
 
@@ -80,24 +89,24 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
    */
   protected async parsePDFToText(file: File): Promise<ParsedPDFData> {
     const pdfjsLib = getPDFJS();
-    
+
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-    
-    const pages: ParsedPDFData['pages'] = [];
-    let fullText = '';
-    
+
+    const pages: ParsedPDFData["pages"] = [];
+    let fullText = "";
+
     // Extract text from each page - exact same logic as original
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
-      const pageText = textContent.items.map((item: PDFTextContentItem) => item.str).join(' ') + '\n';
-      
+      const pageText = `${textContent.items.map((item: PDFTextContentItem) => item.str).join(" ")}\n`;
+
       pages.push({
         pageNumber: i,
         text: pageText,
       });
-      
+
       fullText += pageText;
     }
 
@@ -132,12 +141,12 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
    */
   protected extractDates(text: string): Date[] {
     const dates: Date[] = [];
-    
+
     // Common date patterns
     const datePatterns = [
       // DD/MM/YYYY or DD/MM/YY
       /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/g,
-      // DD-MM-YYYY or DD-MM-YY  
+      // DD-MM-YYYY or DD-MM-YY
       /(\d{1,2})-(\d{1,2})-(\d{2,4})/g,
       // Date: DD/MM/YYYY format (common in runsheets)
       /Date:\s*(\d{1,2}\/\d{1,2}\/\d{4})/gi,
@@ -156,15 +165,16 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
    */
   private extractDatesFromPattern(text: string, pattern: RegExp): Date[] {
     const dates: Date[] = [];
-    let match;
-    
-    while ((match = pattern.exec(text)) !== null) {
+    let match = pattern.exec(text);
+
+    while (match !== null) {
       const date = this.parseMatchToDate(match);
       if (date) {
         dates.push(date);
       }
+      match = pattern.exec(text);
     }
-    
+
     return dates;
   }
 
@@ -175,7 +185,7 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
     try {
       const { day, month, year } = this.extractDateComponents(match);
       const date = new Date(year, month, day);
-      
+
       return this.isValidDate(date, year, month, day) ? date : null;
     } catch {
       return null;
@@ -185,28 +195,32 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
   /**
    * Extract day, month, year from regex match
    */
-  private extractDateComponents(match: RegExpExecArray): { day: number; month: number; year: number } {
-    if (match[0].toLowerCase().includes('date:')) {
+  private extractDateComponents(match: RegExpExecArray): {
+    day: number;
+    month: number;
+    year: number;
+  } {
+    if (match[0].toLowerCase().includes("date:")) {
       // Handle "Date: DD/MM/YYYY" format
       const datePart = match[1];
-      const parts = datePart.split('/');
+      const parts = datePart.split("/");
       return {
-        day: parseInt(parts[0]),
-        month: parseInt(parts[1]) - 1, // Month is 0-indexed
-        year: parseInt(parts[2])
+        day: parseInt(parts[0], 10),
+        month: parseInt(parts[1], 10) - 1, // Month is 0-indexed
+        year: parseInt(parts[2], 10),
       };
     } else {
-      let year = parseInt(match[3]);
-      
+      let year = parseInt(match[3], 10);
+
       // Handle 2-digit years
       if (year < 100) {
         year += year <= 30 ? 2000 : 1900;
       }
-      
+
       return {
-        day: parseInt(match[1]),
-        month: parseInt(match[2]) - 1, // Month is 0-indexed
-        year
+        day: parseInt(match[1], 10),
+        month: parseInt(match[2], 10) - 1, // Month is 0-indexed
+        year,
       };
     }
   }
@@ -215,19 +229,15 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
    * Validate that the date object represents the intended date
    */
   private isValidDate(date: Date, year: number, month: number, day: number): boolean {
-    return date.getFullYear() === year && 
-           date.getMonth() === month && 
-           date.getDate() === day;
+    return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day;
   }
 
   /**
    * Remove duplicate dates and sort chronologically
    */
   private removeDuplicatesAndSort(dates: Date[]): Date[] {
-    const uniqueDates = Array.from(
-      new Map(dates.map(date => [date.getTime(), date])).values()
-    );
-    
+    const uniqueDates = Array.from(new Map(dates.map((date) => [date.getTime(), date])).values());
+
     return uniqueDates.sort((a, b) => a.getTime() - b.getTime());
   }
 
@@ -236,18 +246,19 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
    */
   protected extractAmounts(text: string): number[] {
     const amounts: number[] = [];
-    
+
     // Pattern for £X.XX or £X,XXX.XX
     const amountPattern = /£(\d{1,3}(?:,\d{3})*\.?\d{0,2})/g;
-    
-    let match;
-    while ((match = amountPattern.exec(text)) !== null) {
+
+    let match = amountPattern.exec(text);
+    while (match !== null) {
       const amount = this.parseAmount(match[1]);
       if (amount !== null) {
         amounts.push(amount);
       }
+      match = amountPattern.exec(text);
     }
-    
+
     return amounts.sort((a, b) => a - b);
   }
 
@@ -257,10 +268,10 @@ export abstract class PDFParserBase<T = Record<string, unknown>> {
   private parseAmount(amountStr: string): number | null {
     try {
       // Remove commas and convert to number
-      const cleanAmount = amountStr.replace(/,/g, '');
+      const cleanAmount = amountStr.replace(/,/g, "");
       const amount = parseFloat(cleanAmount);
-      
-      return (!isNaN(amount) && amount >= 0) ? amount : null;
+
+      return !Number.isNaN(amount) && amount >= 0 ? amount : null;
     } catch {
       return null;
     }

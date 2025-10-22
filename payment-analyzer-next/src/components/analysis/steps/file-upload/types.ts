@@ -2,7 +2,7 @@
  * Shared types for file upload components
  */
 
-import { type UploadedFile } from '@/hooks/use-file-upload';
+import type { UploadedFile } from "@/hooks/use-file-upload";
 
 // Re-export UploadedFile for convenience
 export type { UploadedFile };
@@ -22,6 +22,7 @@ export interface FileUploadProps {
   readonly className?: string;
   readonly showProgressSimulation?: boolean;
   readonly hideMethodToggle?: boolean;
+  readonly hideFileList?: boolean;
 }
 
 export interface FileUploadAreaProps {
@@ -53,5 +54,5 @@ export interface FileListProps {
 export const FILE_UPLOAD_CONSTANTS = {
   DEFAULT_MAX_FILES: 50,
   DEFAULT_MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
-  DEFAULT_ACCEPTED_TYPES: ['application/pdf', '.pdf'] as const,
+  DEFAULT_ACCEPTED_TYPES: ["application/pdf", ".pdf"] as const,
 } as const;

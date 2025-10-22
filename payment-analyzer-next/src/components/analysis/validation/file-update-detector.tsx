@@ -3,13 +3,12 @@
  * Shows file update notifications and allows users to handle updates
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { AlertTriangle, RefreshCw, X, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, Info, RefreshCw, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export interface FileUpdateInfo {
   fileName: string;
@@ -20,11 +19,11 @@ export interface FileUpdateInfo {
 }
 
 export interface FileUpdateDetectorProps {
-  updates: FileUpdateInfo[];
-  onUpdateFile?: (fileName: string, analysisId: string) => void;
-  onIgnoreUpdates?: () => void;
-  onDismiss?: () => void;
-  className?: string;
+  readonly updates: FileUpdateInfo[];
+  readonly onUpdateFile?: (fileName: string, analysisId: string) => void;
+  readonly onIgnoreUpdates?: () => void;
+  readonly onDismiss?: () => void;
+  readonly className?: string;
 }
 
 export function FileUpdateDetector({
@@ -32,17 +31,17 @@ export function FileUpdateDetector({
   onUpdateFile,
   onIgnoreUpdates,
   onDismiss,
-  className = ''
+  className = "",
 }: FileUpdateDetectorProps) {
   if (updates.length === 0) return null;
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString('en-GB', {
-      day: '2-digit',
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(timestamp).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -54,11 +53,10 @@ export function FileUpdateDetector({
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-600" />
             <div>
-              <h3 className="font-semibold text-amber-900">
-                File Updates Detected
-              </h3>
+              <h3 className="font-semibold text-amber-900">File Updates Detected</h3>
               <p className="text-sm text-amber-700 mt-1">
-                {updates.length} file{updates.length > 1 ? 's have' : ' has'} been updated since last analysis
+                {updates.length} file{updates.length > 1 ? "s have" : " has"} been updated since
+                last analysis
               </p>
             </div>
           </div>
@@ -77,31 +75,25 @@ export function FileUpdateDetector({
         {/* File List */}
         <div className="space-y-2 mb-4">
           {updates.map((update, index) => (
-            <div 
+            <div
               key={`${update.fileName}-${index}`}
               className="flex items-center justify-between bg-white rounded-lg p-3 border border-amber-200"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-gray-900">
-                    {update.fileName}
-                  </span>
+                  <span className="font-medium text-gray-900">{update.fileName}</span>
                   <Badge variant="secondary" className="text-xs">
                     {update.analysisName}
                   </Badge>
                 </div>
                 <div className="text-xs text-gray-600">
                   <div className="flex items-center gap-4">
-                    <span>
-                      Previous: {formatDate(update.lastModified)}
-                    </span>
-                    <span>
-                      Current: {formatDate(update.currentModified)}
-                    </span>
+                    <span>Previous: {formatDate(update.lastModified)}</span>
+                    <span>Current: {formatDate(update.currentModified)}</span>
                   </div>
                 </div>
               </div>
-              
+
               {onUpdateFile && (
                 <Button
                   variant="outline"
@@ -123,7 +115,7 @@ export function FileUpdateDetector({
             <Info className="w-3 h-3" />
             <span>Updates may contain new payment data</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {onIgnoreUpdates && (
               <Button
@@ -135,13 +127,13 @@ export function FileUpdateDetector({
                 Ignore Updates
               </Button>
             )}
-            
+
             {onUpdateFile && (
               <Button
                 size="sm"
                 onClick={() => {
                   // Update all files
-                  updates.forEach(update => {
+                  updates.forEach((update) => {
                     onUpdateFile(update.fileName, update.analysisId);
                   });
                 }}

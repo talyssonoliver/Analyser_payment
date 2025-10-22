@@ -3,18 +3,21 @@
  * Common types and interfaces used across validation sub-components
  */
 
-import { ValidationResult } from '@/lib/domain/services/file-validation-service';
-import { FingerprintValidation, FileComparison } from '@/lib/services/file-fingerprint-service';
+import type { ValidationResult } from "@/lib/domain/services/file-validation-service";
+import type {
+  FileComparison,
+  FingerprintValidation,
+} from "@/lib/services/file-fingerprint-service";
 
 /**
  * Issue type for handling different types of validation problems
  */
-export type IssueType = 'error' | 'warning' | 'duplicate' | 'update' | 'existing';
+export type IssueType = "error" | "warning" | "duplicate" | "update" | "existing";
 
 /**
  * File indicator variant for status badges
  */
-export type FileIndicatorVariant = 'secondary' | 'error' | 'warning' | 'success' | 'default';
+export type FileIndicatorVariant = "secondary" | "error" | "warning" | "success" | "default";
 
 /**
  * File indicator interface for displaying file status
@@ -91,7 +94,7 @@ export interface ValidationActionsProps extends BaseValidationProps {
 /**
  * Status color type for UI theming
  */
-export type StatusColor = 'red' | 'amber' | 'green' | 'blue' | 'indigo' | 'orange' | 'slate';
+export type StatusColor = "red" | "amber" | "green" | "blue" | "indigo" | "orange" | "slate";
 
 /**
  * Validation status interface
@@ -120,7 +123,7 @@ export interface CombinedValidationResult {
   /** Combined warnings array */
   warnings: string[];
   /** Combined duplicates array */
-  duplicates: File[];
+  duplicates: (File | { name: string; size: number; lastModified: number; hash?: string })[];
   /** Whether there are fingerprint issues */
   hasFingerprintIssues: boolean;
   /** Overall validation status */
@@ -141,15 +144,16 @@ export function combineValidationResults(
     warnings: fingerprintValidation?.warnings ?? [],
     isUpdated: false,
     duplicateFiles: [],
-    existingAnalysis: null
+    existingAnalysis: null,
   };
 
   const { isValid, errors, warnings, isUpdated, duplicateFiles } = mergedValidation;
 
   // Include fingerprint-specific issues
   const fingerprintDuplicates = fingerprintValidation?.duplicates ?? [];
-  const allDuplicates = [...(duplicateFiles || []), ...fingerprintDuplicates.map(d => d.current)];
-  const hasFingerprintIssues = fingerprintDuplicates.length > 0 || (fingerprintValidation?.warnings?.length || 0) > 0;
+  const allDuplicates = [...(duplicateFiles || []), ...fingerprintDuplicates.map((d) => d.current)];
+  const hasFingerprintIssues =
+    fingerprintDuplicates.length > 0 || (fingerprintValidation?.warnings?.length || 0) > 0;
   const combinedWarnings = [...warnings, ...(fingerprintValidation?.warnings || [])];
 
   // Determine status
@@ -157,14 +161,14 @@ export function combineValidationResults(
   let text: string;
 
   if (!isValid) {
-    color = 'red';
-    text = 'Validation Failed';
+    color = "red";
+    text = "Validation Failed";
   } else if (combinedWarnings.length > 0 || isUpdated || hasFingerprintIssues) {
-    color = 'amber';
-    text = 'Validation Passed with Warnings';
+    color = "amber";
+    text = "Validation Passed with Warnings";
   } else {
-    color = 'green';
-    text = 'Validation Passed';
+    color = "green";
+    text = "Validation Passed";
   }
 
   return {
@@ -178,8 +182,8 @@ export function combineValidationResults(
       isValid,
       color,
       text,
-      icon: null // Will be set by components
-    }
+      icon: null, // Will be set by components
+    },
   };
 }
 
@@ -187,11 +191,11 @@ export function combineValidationResults(
  * Format file size for display
  */
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 /**

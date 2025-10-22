@@ -3,19 +3,19 @@
  * Tests the enhancement to store individual bonus totals
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from "vitest";
 
-describe('Bonus Breakdown Storage', () => {
-  describe('Individual Bonus Calculation', () => {
-    it('should calculate unloading bonus total from daily entries', () => {
+describe("Bonus Breakdown Storage", () => {
+  describe("Individual Bonus Calculation", () => {
+    it("should calculate unloading bonus total from daily entries", () => {
       const dailyEntries = [
-        { date: '2024-01-01', unloadingBonus: { amount: 30 } },
-        { date: '2024-01-02', unloadingBonus: { amount: 30 } },
-        { date: '2024-01-03', unloadingBonus: { amount: 30 } },
-        { date: '2024-01-04', unloadingBonus: { amount: 30 } },
-        { date: '2024-01-05', unloadingBonus: { amount: 30 } },
-        { date: '2024-01-06', unloadingBonus: { amount: 30 } }, // Saturday
-        { date: '2024-01-07', unloadingBonus: { amount: 0 } }, // Sunday - no unloading
+        { date: "2024-01-01", unloadingBonus: { amount: 30 } },
+        { date: "2024-01-02", unloadingBonus: { amount: 30 } },
+        { date: "2024-01-03", unloadingBonus: { amount: 30 } },
+        { date: "2024-01-04", unloadingBonus: { amount: 30 } },
+        { date: "2024-01-05", unloadingBonus: { amount: 30 } },
+        { date: "2024-01-06", unloadingBonus: { amount: 30 } }, // Saturday
+        { date: "2024-01-07", unloadingBonus: { amount: 0 } }, // Sunday - no unloading
       ];
 
       const unloadingBonusTotal = dailyEntries.reduce(
@@ -26,15 +26,15 @@ describe('Bonus Breakdown Storage', () => {
       expect(unloadingBonusTotal).toBe(180); // 6 days × £30
     });
 
-    it('should calculate attendance bonus total from daily entries', () => {
+    it("should calculate attendance bonus total from daily entries", () => {
       const dailyEntries = [
-        { date: '2024-01-01', attendanceBonus: { amount: 25 } }, // Monday
-        { date: '2024-01-02', attendanceBonus: { amount: 25 } },
-        { date: '2024-01-03', attendanceBonus: { amount: 25 } },
-        { date: '2024-01-04', attendanceBonus: { amount: 25 } },
-        { date: '2024-01-05', attendanceBonus: { amount: 25 } }, // Friday
-        { date: '2024-01-06', attendanceBonus: { amount: 0 } }, // Saturday - weekday only
-        { date: '2024-01-07', attendanceBonus: { amount: 0 } }, // Sunday - weekday only
+        { date: "2024-01-01", attendanceBonus: { amount: 25 } }, // Monday
+        { date: "2024-01-02", attendanceBonus: { amount: 25 } },
+        { date: "2024-01-03", attendanceBonus: { amount: 25 } },
+        { date: "2024-01-04", attendanceBonus: { amount: 25 } },
+        { date: "2024-01-05", attendanceBonus: { amount: 25 } }, // Friday
+        { date: "2024-01-06", attendanceBonus: { amount: 0 } }, // Saturday - weekday only
+        { date: "2024-01-07", attendanceBonus: { amount: 0 } }, // Sunday - weekday only
       ];
 
       const attendanceBonusTotal = dailyEntries.reduce(
@@ -45,34 +45,31 @@ describe('Bonus Breakdown Storage', () => {
       expect(attendanceBonusTotal).toBe(125); // 5 weekdays × £25
     });
 
-    it('should calculate early bonus total from daily entries', () => {
+    it("should calculate early bonus total from daily entries", () => {
       const dailyEntries = [
-        { date: '2024-01-01', earlyBonus: { amount: 50 } }, // Monday
-        { date: '2024-01-02', earlyBonus: { amount: 50 } },
-        { date: '2024-01-03', earlyBonus: { amount: 50 } },
-        { date: '2024-01-04', earlyBonus: { amount: 0 } }, // Not early
-        { date: '2024-01-05', earlyBonus: { amount: 50 } }, // Friday
-        { date: '2024-01-06', earlyBonus: { amount: 0 } }, // Saturday - weekday only
+        { date: "2024-01-01", earlyBonus: { amount: 50 } }, // Monday
+        { date: "2024-01-02", earlyBonus: { amount: 50 } },
+        { date: "2024-01-03", earlyBonus: { amount: 50 } },
+        { date: "2024-01-04", earlyBonus: { amount: 0 } }, // Not early
+        { date: "2024-01-05", earlyBonus: { amount: 50 } }, // Friday
+        { date: "2024-01-06", earlyBonus: { amount: 0 } }, // Saturday - weekday only
       ];
 
-      const earlyBonusTotal = dailyEntries.reduce(
-        (sum, entry) => sum + entry.earlyBonus.amount,
-        0
-      );
+      const earlyBonusTotal = dailyEntries.reduce((sum, entry) => sum + entry.earlyBonus.amount, 0);
 
       expect(earlyBonusTotal).toBe(200); // 4 early days × £50
     });
 
-    it('should calculate combined bonus total', () => {
+    it("should calculate combined bonus total", () => {
       const dailyEntries = [
         {
-          date: '2024-01-01',
+          date: "2024-01-01",
           unloadingBonus: { amount: 30 },
           attendanceBonus: { amount: 25 },
           earlyBonus: { amount: 50 },
         },
         {
-          date: '2024-01-02',
+          date: "2024-01-02",
           unloadingBonus: { amount: 30 },
           attendanceBonus: { amount: 25 },
           earlyBonus: { amount: 50 },
@@ -91,11 +88,11 @@ describe('Bonus Breakdown Storage', () => {
     });
   });
 
-  describe('AnalysisTotalRecord Interface', () => {
-    it('should include all bonus breakdown fields', () => {
+  describe("AnalysisTotalRecord Interface", () => {
+    it("should include all bonus breakdown fields", () => {
       const analysisTotals = {
-        id: 'analysis-123',
-        analysis_id: 'analysis-456',
+        id: "analysis-123",
+        analysis_id: "analysis-456",
         base_total: 500,
         pickup_total: 50,
         bonus_total: 210,
@@ -105,7 +102,7 @@ describe('Bonus Breakdown Storage', () => {
         expected_total: 760,
         paid_total: 760,
         difference_total: 0,
-        created_at: '2024-01-01T00:00:00Z',
+        created_at: "2024-01-01T00:00:00Z",
       };
 
       expect(analysisTotals.bonus_total).toBe(210);
@@ -122,11 +119,11 @@ describe('Bonus Breakdown Storage', () => {
       expect(breakdownSum).toBe(analysisTotals.bonus_total);
     });
 
-    it('should handle optional bonus breakdown fields', () => {
+    it("should handle optional bonus breakdown fields", () => {
       // For analyses created before this enhancement
       const legacyAnalysisTotals: Record<string, unknown> = {
-        id: 'analysis-123',
-        analysis_id: 'analysis-456',
+        id: "analysis-123",
+        analysis_id: "analysis-456",
         base_total: 500,
         pickup_total: 50,
         bonus_total: 210,
@@ -134,7 +131,7 @@ describe('Bonus Breakdown Storage', () => {
         expected_total: 760,
         paid_total: 760,
         difference_total: 0,
-        created_at: '2024-01-01T00:00:00Z',
+        created_at: "2024-01-01T00:00:00Z",
       };
 
       expect(legacyAnalysisTotals.bonus_total).toBe(210);
@@ -144,8 +141,8 @@ describe('Bonus Breakdown Storage', () => {
     });
   });
 
-  describe('Bonus Trend Analysis Use Cases', () => {
-    it('should enable tracking unloading bonus trends over time', () => {
+  describe("Bonus Trend Analysis Use Cases", () => {
+    it("should enable tracking unloading bonus trends over time", () => {
       const weeklyAnalyses = [
         {
           week: 1,
@@ -165,13 +162,12 @@ describe('Bonus Breakdown Storage', () => {
       ];
 
       const avgUnloadingPerWeek =
-        weeklyAnalyses.reduce((sum, w) => sum + w.unloading_bonus_total, 0) /
-        weeklyAnalyses.length;
+        weeklyAnalyses.reduce((sum, w) => sum + w.unloading_bonus_total, 0) / weeklyAnalyses.length;
 
       expect(avgUnloadingPerWeek).toBe(180); // Average across 3 weeks
     });
 
-    it('should enable calculating early arrival rate', () => {
+    it("should enable calculating early arrival rate", () => {
       const analysis = {
         working_days: 5,
         early_bonus_total: 200, // 4 days × £50
@@ -184,7 +180,7 @@ describe('Bonus Breakdown Storage', () => {
       expect(earlyRate).toBe(80); // 80% early arrival rate
     });
 
-    it('should enable comparing bonus types', () => {
+    it("should enable comparing bonus types", () => {
       const analysis = {
         unloading_bonus_total: 180,
         attendance_bonus_total: 125,
@@ -202,8 +198,8 @@ describe('Bonus Breakdown Storage', () => {
     });
   });
 
-  describe('Legacy System Parity', () => {
-    it('should match legacy system bonus storage', () => {
+  describe("Legacy System Parity", () => {
+    it("should match legacy system bonus storage", () => {
       // Legacy system stores:
       // totals.unloadingTotal
       // totals.attendanceTotal
@@ -229,8 +225,8 @@ describe('Bonus Breakdown Storage', () => {
     });
   });
 
-  describe('Database Schema', () => {
-    it('should support nullable bonus breakdown columns', () => {
+  describe("Database Schema", () => {
+    it("should support nullable bonus breakdown columns", () => {
       // Columns should be optional to support:
       // 1. Existing analyses created before this enhancement
       // 2. Manual entries that don't specify bonus breakdown

@@ -1,8 +1,7 @@
 // Value Objects
-export * from './value-objects';
 
-// Entities  
-export * from './entities';
-
+// Entities
+export * from "./entities";
 // Services
-export * from './services';
+export * from "./services";
+export * from "./value-objects";

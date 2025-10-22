@@ -8,7 +8,7 @@ export class ConsignmentCount {
 
   constructor(count: number) {
     if (!this.isValidCount(count)) {
-      throw new Error('Invalid consignment count: must be a non-negative integer');
+      throw new Error("Invalid consignment count: must be a non-negative integer");
     }
     this._count = count;
   }
@@ -46,10 +46,12 @@ export class ConsignmentCount {
   }
 
   private isValidCount(count: number): boolean {
-    return typeof count === 'number' && 
-           !isNaN(count) && 
-           isFinite(count) && 
-           count >= 0 && 
-           Number.isInteger(count);
+    return (
+      typeof count === "number" &&
+      !Number.isNaN(count) &&
+      Number.isFinite(count) &&
+      count >= 0 &&
+      Number.isInteger(count)
+    );
   }
 }

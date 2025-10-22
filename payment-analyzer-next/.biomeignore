@@ -1,0 +1,16 @@
+# Ignore third-party outputs and non-source assets
+node_modules/
+.next/
+coverage/
+dist/
+
+# Ignore public assets and runtime scripts
+public/
+
+# Ignore project scripts and docs from lint scope
+scripts/
+docs/
+
+# Ignore plain CSS styles for now
+src/styles/
+

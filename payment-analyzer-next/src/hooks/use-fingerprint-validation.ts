@@ -9,8 +9,12 @@
  * - File comparison state and management
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { FileFingerprintService, FileComparison, FingerprintValidation } from '@/lib/services/file-fingerprint-service';
+import { useCallback, useEffect, useState } from "react";
+import {
+  type FileComparison,
+  FileFingerprintService,
+  type FingerprintValidation,
+} from "@/lib/services/file-fingerprint-service";
 
 export interface UseFingerprintValidationConfig {
   /** Files to validate for fingerprints */
@@ -27,7 +31,7 @@ export interface UseFingerprintValidationConfig {
 
 export interface FileIndicator {
   /** Badge variant for UI styling */
-  variant: 'secondary' | 'error' | 'warning' | 'success' | 'default';
+  variant: "secondary" | "error" | "warning" | "success" | "default";
   /** Icon character to display */
   icon: string;
   /** Short status text */
@@ -52,7 +56,7 @@ export interface UseFingerprintValidationReturn {
   /** Whether there are any fingerprint issues */
   hasFingerprintIssues: boolean;
   /** Get duplicates from fingerprint validation */
-  duplicates: FingerprintValidation['duplicates'];
+  duplicates: FingerprintValidation["duplicates"];
   /** Get warnings from fingerprint validation */
   warnings: string[];
 }
@@ -79,17 +83,21 @@ export interface UseFingerprintValidationReturn {
  * });
  * ```
  */
-export function useFingerprintValidation(config: UseFingerprintValidationConfig): UseFingerprintValidationReturn {
+export function useFingerprintValidation(
+  config: UseFingerprintValidationConfig
+): UseFingerprintValidationReturn {
   const {
     files,
     autoValidate = true,
     onValidationComplete,
     onValidationError,
-    showDetails = false
+    showDetails = false,
   } = config;
 
   // State for fingerprint validation (extracted from lines 48-50)
-  const [fingerprintValidation, setFingerprintValidation] = useState<FingerprintValidation | null>(null);
+  const [fingerprintValidation, setFingerprintValidation] = useState<FingerprintValidation | null>(
+    null
+  );
   const [fingerprintLoading, setFingerprintLoading] = useState(false);
   const [fileComparisons, setFileComparisons] = useState<Record<string, FileComparison>>({});
 
@@ -107,8 +115,8 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
     try {
       setFingerprintLoading(true);
 
-      console.log('🔍 Starting fingerprint validation...', {
-        fileCount: files.length
+      console.log("🔍 Starting fingerprint validation...", {
+        fileCount: files.length,
       });
 
       // Validate the entire file set for duplicates and issues
@@ -116,11 +124,11 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
       setFingerprintValidation(validation);
       onValidationComplete?.(validation);
 
-      console.log('✅ Fingerprint validation completed:', {
+      console.log("✅ Fingerprint validation completed:", {
         isValid: validation.isValid,
         errors: validation.errors.length,
         warnings: validation.warnings.length,
-        duplicates: validation.duplicates.length
+        duplicates: validation.duplicates.length,
       });
 
       // Generate individual file comparisons for detailed display
@@ -136,7 +144,7 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
               isDuplicate: comparison.isDuplicate,
               hasChanged: comparison.hasChanged,
               changeType: comparison.changeType,
-              hasPrevious: !!comparison.previousFingerprint
+              hasPrevious: !!comparison.previousFingerprint,
             });
           }
         } catch (error) {
@@ -144,11 +152,12 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
         }
       }
       setFileComparisons(comparisons);
-
     } catch (error) {
-      console.error('❌ Fingerprint validation failed:', error);
+      console.error("❌ Fingerprint validation failed:", error);
       setFingerprintValidation(null);
-      onValidationError?.(error instanceof Error ? error : new Error('Unknown fingerprint validation error'));
+      onValidationError?.(
+        error instanceof Error ? error : new Error("Unknown fingerprint validation error")
+      );
     } finally {
       setFingerprintLoading(false);
     }
@@ -158,64 +167,67 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
    * Get individual file fingerprint indicator
    * Extracted from getFileIndicator callback (lines 86-132)
    */
-  const getFileIndicator = useCallback((file: File): FileIndicator => {
-    const key = `${file.name}-${file.size}-${file.lastModified}`;
-    const comparison = fileComparisons[key];
+  const getFileIndicator = useCallback(
+    (file: File): FileIndicator => {
+      const key = `${file.name}-${file.size}-${file.lastModified}`;
+      const comparison = fileComparisons[key];
 
-    // Still checking (no comparison data available)
-    if (!comparison) {
+      // Still checking (no comparison data available)
+      if (!comparison) {
+        return {
+          variant: "secondary" as const,
+          icon: "⏳",
+          text: "Checking...",
+          description: "Analyzing file fingerprint",
+        };
+      }
+
+      // File is a duplicate (identical content, not changed)
+      if (comparison.isDuplicate) {
+        return {
+          variant: "error" as const,
+          icon: "🔄",
+          text: "Duplicate",
+          description: "This file was already processed",
+        };
+      }
+
+      // File has been modified since last processing
+      if (comparison.hasChanged) {
+        return {
+          variant: "warning" as const,
+          icon: "📝",
+          text: "Modified",
+          description: `File has been ${comparison.changeType || "changed"} since last analysis`,
+        };
+      }
+
+      // File exists and hasn't changed
+      if (comparison.previousFingerprint) {
+        return {
+          variant: "success" as const,
+          icon: "✅",
+          text: "Unchanged",
+          description: "File matches previous analysis",
+        };
+      }
+
+      // New file (first time processing)
       return {
-        variant: 'secondary' as const,
-        icon: '⏳',
-        text: 'Checking...',
-        description: 'Analyzing file fingerprint'
+        variant: "default" as const,
+        icon: "🆕",
+        text: "New",
+        description: "First time processing this file",
       };
-    }
-
-    // File is a duplicate (identical content, not changed)
-    if (comparison.isDuplicate) {
-      return {
-        variant: 'error' as const,
-        icon: '🔄',
-        text: 'Duplicate',
-        description: 'This file was already processed'
-      };
-    }
-
-    // File has been modified since last processing
-    if (comparison.hasChanged) {
-      return {
-        variant: 'warning' as const,
-        icon: '📝',
-        text: 'Modified',
-        description: `File has been ${comparison.changeType || 'changed'} since last analysis`
-      };
-    }
-
-    // File exists and hasn't changed
-    if (comparison.previousFingerprint) {
-      return {
-        variant: 'success' as const,
-        icon: '✅',
-        text: 'Unchanged',
-        description: 'File matches previous analysis'
-      };
-    }
-
-    // New file (first time processing)
-    return {
-      variant: 'default' as const,
-      icon: '🆕',
-      text: 'New',
-      description: 'First time processing this file'
-    };
-  }, [fileComparisons]);
+    },
+    [fileComparisons]
+  );
 
   /**
    * Reset fingerprint validation state
    */
   const resetFingerprintValidation = useCallback((): void => {
-    console.log('🧹 Resetting fingerprint validation state...');
+    console.log("🧹 Resetting fingerprint validation state...");
     setFingerprintValidation(null);
     setFingerprintLoading(false);
     setFileComparisons({});
@@ -224,7 +236,7 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
   // Auto-validate when files change (extracted from useEffect lines 53-83)
   useEffect(() => {
     if (autoValidate && files.length > 0) {
-      console.log('🔄 Auto-validating fingerprints due to file changes...');
+      console.log("🔄 Auto-validating fingerprints due to file changes...");
       validateFingerprints();
     } else if (files.length === 0) {
       resetFingerprintValidation();
@@ -232,8 +244,9 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
   }, [files, autoValidate, validateFingerprints, resetFingerprintValidation]);
 
   // Derived state for convenience
-  const hasFingerprintIssues = (fingerprintValidation?.duplicates?.length || 0) > 0 ||
-                              (fingerprintValidation?.warnings?.length || 0) > 0;
+  const hasFingerprintIssues =
+    (fingerprintValidation?.duplicates?.length || 0) > 0 ||
+    (fingerprintValidation?.warnings?.length || 0) > 0;
   const duplicates = fingerprintValidation?.duplicates ?? [];
   const warnings = fingerprintValidation?.warnings ?? [];
 
@@ -246,7 +259,7 @@ export function useFingerprintValidation(config: UseFingerprintValidationConfig)
     resetFingerprintValidation,
     hasFingerprintIssues,
     duplicates,
-    warnings
+    warnings,
   };
 }
 
@@ -275,12 +288,12 @@ export function hasFingerprintWarnings(validation: FingerprintValidation | null)
  * Get fingerprint validation status text for display
  */
 export function getFingerprintStatusText(validation: FingerprintValidation | null): string {
-  if (!validation) return 'No fingerprint analysis performed';
-  if (!validation.isValid) return 'Fingerprint validation failed';
+  if (!validation) return "No fingerprint analysis performed";
+  if (!validation.isValid) return "Fingerprint validation failed";
   if (hasFingerprintWarnings(validation) || hasFingerprintDuplicates(validation)) {
-    return 'Fingerprint analysis completed with issues';
+    return "Fingerprint analysis completed with issues";
   }
-  return 'Fingerprint analysis passed';
+  return "Fingerprint analysis passed";
 }
 
 /**
@@ -297,7 +310,7 @@ export function getFingerprintIssueSummary(validation: FingerprintValidation | n
       duplicateCount: 0,
       warningCount: 0,
       errorCount: 0,
-      hasIssues: false
+      hasIssues: false,
     };
   }
 
@@ -309,6 +322,6 @@ export function getFingerprintIssueSummary(validation: FingerprintValidation | n
     duplicateCount,
     warningCount,
     errorCount,
-    hasIssues: duplicateCount > 0 || warningCount > 0 || errorCount > 0
+    hasIssues: duplicateCount > 0 || warningCount > 0 || errorCount > 0,
   };
 }

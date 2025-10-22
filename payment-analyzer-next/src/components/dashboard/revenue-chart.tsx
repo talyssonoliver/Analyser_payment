@@ -3,8 +3,7 @@
  * Legacy-style bar chart for weekly revenue data
  */
 
-import React from 'react';
-import type { AnalysisWithDetails } from '@/lib/repositories/analysis-repository';
+import type { AnalysisWithDetails } from "@/lib/repositories/analysis-repository";
 
 interface WeekData {
   label: string;
@@ -29,19 +28,22 @@ function generateWeeklyChartData(analyses: AnalysisWithDetails[], currentMonth: 
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
 
-    const weekAnalyses = analyses.filter(analysis => {
+    const weekAnalyses = analyses.filter((analysis) => {
       if (!analysis.created_at) return false;
       const analysisDate = new Date(analysis.created_at);
       return analysisDate >= weekStart && analysisDate <= weekEnd;
     });
 
-    const expected = weekAnalyses.reduce((sum, analysis) => sum + (analysis.analysis_totals?.expected_total || 0), 0);
+    const expected = weekAnalyses.reduce(
+      (sum, analysis) => sum + (analysis.analysis_totals?.expected_total || 0),
+      0
+    );
     const actual = expected;
 
     weeks.push({
       label: `W${weekNum}`,
       expected,
-      actual
+      actual,
     });
 
     weekStart.setDate(weekStart.getDate() + 7);
@@ -52,7 +54,7 @@ function generateWeeklyChartData(analyses: AnalysisWithDetails[], currentMonth: 
 
 export function RevenueChart({ analyses, currentMonth }: RevenueChartProps) {
   const weeklyData = generateWeeklyChartData(analyses, currentMonth);
-  const maxValue = Math.max(...weeklyData.flatMap(w => [w.expected, w.actual]));
+  const maxValue = Math.max(...weeklyData.flatMap((w) => [w.expected, w.actual]));
 
   return (
     <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mb-2">

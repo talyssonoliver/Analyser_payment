@@ -3,25 +3,25 @@
  * Matches original Payment Analyzer card styles exactly
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { useOriginalColors } from '@/lib/contexts/theme-context';
-import { cn } from '@/lib/utils';
+import type React from "react";
+import { useOriginalColors } from "@/lib/contexts/theme-context";
+import { cn } from "@/lib/utils";
 
 export interface ThemedCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'kpi' | 'summary' | 'analysis';
-  accentColor?: 'primary' | 'accent' | 'success' | 'warning' | 'danger';
+  variant?: "default" | "kpi" | "summary" | "analysis";
+  accentColor?: "primary" | "accent" | "success" | "warning" | "danger";
   children: React.ReactNode;
 }
 
-export function ThemedCard({ 
-  variant = 'default', 
-  accentColor = 'accent',
-  className, 
-  children, 
-  ...props 
-}: ThemedCardProps) {
+export function ThemedCard({
+  variant = "default",
+  accentColor = "accent",
+  className,
+  children,
+  ...props
+}: Readonly<ThemedCardProps>) {
   const colors = useOriginalColors();
 
   const baseStyles = "bg-white border border-slate-200 rounded-xl transition-all duration-200";
@@ -36,27 +36,26 @@ export function ThemedCard({
   // Get accent color value
   const getAccentColor = (color: string): string => {
     switch (color) {
-      case 'primary': return colors.primary;
-      case 'accent': return colors.accent;
-      case 'success': return colors.success;
-      case 'warning': return colors.warning;
-      case 'danger': return colors.danger;
-      default: return colors.accent;
+      case "primary":
+        return colors.primary;
+      case "accent":
+        return colors.accent;
+      case "success":
+        return colors.success;
+      case "warning":
+        return colors.warning;
+      case "danger":
+        return colors.danger;
+      default:
+        return colors.accent;
     }
   };
 
   return (
-    <div
-      className={cn(
-        baseStyles,
-        variants[variant],
-        className
-      )}
-      {...props}
-    >
+    <div className={cn(baseStyles, variants[variant], className)} {...props}>
       {/* Accent line for KPI and summary cards */}
-      {(variant === 'kpi' || variant === 'summary') && (
-        <div 
+      {(variant === "kpi" || variant === "summary") && (
+        <div
           className="absolute left-0 top-0 bottom-0 w-1"
           style={{ backgroundColor: getAccentColor(accentColor) }}
         />
@@ -70,7 +69,11 @@ export interface ThemedCardHeaderProps extends React.HTMLAttributes<HTMLDivEleme
   children: React.ReactNode;
 }
 
-export function ThemedCardHeader({ className, children, ...props }: ThemedCardHeaderProps) {
+export function ThemedCardHeader({
+  className,
+  children,
+  ...props
+}: Readonly<ThemedCardHeaderProps>) {
   return (
     <div className={cn("mb-4", className)} {...props}>
       {children}
@@ -82,10 +85,10 @@ export interface ThemedCardTitleProps extends React.HTMLAttributes<HTMLHeadingEl
   children: React.ReactNode;
 }
 
-export function ThemedCardTitle({ className, children, ...props }: ThemedCardTitleProps) {
+export function ThemedCardTitle({ className, children, ...props }: Readonly<ThemedCardTitleProps>) {
   return (
-    <h3 
-      className={cn("text-lg font-bold text-slate-900 flex items-center gap-2", className)} 
+    <h3
+      className={cn("text-lg font-bold text-slate-900 flex items-center gap-2", className)}
       {...props}
     >
       {children}
@@ -97,7 +100,11 @@ export interface ThemedCardContentProps extends React.HTMLAttributes<HTMLDivElem
   children: React.ReactNode;
 }
 
-export function ThemedCardContent({ className, children, ...props }: ThemedCardContentProps) {
+export function ThemedCardContent({
+  className,
+  children,
+  ...props
+}: Readonly<ThemedCardContentProps>) {
   return (
     <div className={cn("", className)} {...props}>
       {children}

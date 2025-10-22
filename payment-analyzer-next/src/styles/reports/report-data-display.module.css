@@ -1,0 +1,273 @@
+/**
+ * Report Data Display Styles
+ * Unified table/cards hybrid for all daily entry displays
+ */
+
+.dataDisplayContainer {
+  background: white;
+  border: 1px solid var(--color-slate-200);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.dataDisplayHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-slate-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dataDisplayTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+}
+
+.viewToggleButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-slate-600);
+  border: 1px solid var(--color-slate-300);
+  border-radius: 0.5rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewToggleButton:hover {
+  background: var(--color-slate-50);
+}
+
+/* Table View */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dataTable thead {
+  background: var(--color-slate-50);
+}
+
+.dataTable th {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-slate-700);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dataTable tbody tr {
+  border-bottom: 1px solid var(--color-slate-200);
+  transition: background-color 0.2s ease;
+}
+
+.dataTable tbody tr:hover {
+  background: var(--color-slate-50);
+}
+
+.dataTable td {
+  padding: 1rem 1.5rem;
+  font-size: 0.875rem;
+  color: var(--color-slate-900);
+}
+
+.dataTable tfoot {
+  background: var(--color-slate-50);
+  font-weight: 700;
+}
+
+.dataTable tfoot td {
+  padding: 1rem 1.5rem;
+}
+
+.cellDate {
+  font-family: var(--font-mono, "SF Mono", "Monaco", monospace);
+  font-weight: 500;
+}
+
+.cellDay {
+  color: var(--color-slate-600);
+}
+
+.cellConsignments {
+  font-weight: 600;
+}
+
+.cellCurrency {
+  font-family: var(--font-mono, "SF Mono", "Monaco", monospace);
+}
+
+.cellPositive {
+  color: var(--color-green-600);
+  font-weight: 600;
+}
+
+.cellNegative {
+  color: var(--color-red-600);
+  font-weight: 600;
+}
+
+.editButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-blue-600);
+  background: var(--color-blue-50);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editButton:hover {
+  background: var(--color-blue-100);
+}
+
+/* Status Badges */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusBalanced,
+.statusComplete {
+  background: var(--color-green-100);
+  color: var(--color-green-800);
+  border: 1px solid var(--color-green-500);
+}
+
+.statusOverpaid {
+  background: var(--color-blue-100);
+  color: var(--color-blue-800);
+  border: 1px solid var(--color-blue-500);
+}
+
+.statusUnderpaid {
+  background: var(--color-red-100);
+  color: var(--color-red-800);
+  border: 1px solid var(--color-red-500);
+}
+
+.statusPending {
+  background: var(--color-amber-100);
+  color: var(--color-amber-800);
+  border: 1px solid var(--color-amber-500);
+}
+
+/* Cards View (Mobile) */
+.cardsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.dayCard {
+  background: linear-gradient(135deg, white 0%, var(--color-slate-50) 100%);
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.dayCard:hover {
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  transform: translateY(-1px);
+}
+
+.dayCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-slate-100);
+}
+
+.dayCardDateInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.dayCardDayName {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+}
+
+.dayCardDate {
+  font-size: 0.875rem;
+  color: var(--color-slate-600);
+  font-weight: 500;
+}
+
+.dayCardBody {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.dayCardRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dayCardLabel {
+  color: var(--color-slate-500);
+  font-size: 0.75rem;
+}
+
+.dayCardValue {
+  font-weight: 600;
+  color: var(--color-slate-900);
+  font-family: var(--font-mono, "SF Mono", "Monaco", monospace);
+}
+
+.dayCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-slate-100);
+}
+
+/* Compact view modifications */
+.dataTable.compact th,
+.dataTable.compact td {
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+}
+
+/* Responsive */
+@media (width <= 768px) {
+  .dataDisplayHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .viewToggleButton {
+    width: 100%;
+  }
+}

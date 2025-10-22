@@ -1,0 +1,47 @@
+FROM node:20-alpine
+
+# Install necessary build tools, Python for native dependencies, and setup pnpm
+RUN apk add --no-cache \
+    bash \
+    curl \
+    g++ \
+    git \
+    make \
+    python3 \
+    && corepack enable \
+    && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy package files first (better layer caching)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
+
+# Install dependencies
+# Using --frozen-lockfile for reproducibility
+RUN pnpm install --frozen-lockfile
+
+# Copy TypeScript config (needed for type checking)
+COPY tsconfig.json ./
+COPY next.config.ts ./
+COPY next-env.d.ts* ./
+COPY tailwind.config.ts* ./
+COPY postcss.config.mjs* ./
+COPY vitest.config.ts* ./
+COPY eslint.config.mjs* ./
+
+# Copy resto do código (será sobrescrito pelo volume em dev)
+COPY . .
+
+# Create cache directories with proper permissions
+RUN mkdir -p .next node_modules/.cache node_modules/.vitest coverage && \
+    chmod -R 777 .next node_modules/.cache node_modules/.vitest coverage
+
+# Expose ports
+EXPOSE 3000 9229 51204
+
+# Health check para garantir que o servidor está respondendo
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Default command (pode ser sobrescrito no docker-compose)
+CMD ["pnpm", "dev"]

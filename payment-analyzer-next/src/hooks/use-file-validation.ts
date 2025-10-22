@@ -9,8 +9,12 @@
  * - Retry functionality
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { ValidationResult, fileValidationService, FileValidationOptions } from '@/lib/domain/services/file-validation-service';
+import { useCallback, useEffect, useState } from "react";
+import {
+  type FileValidationOptions,
+  fileValidationService,
+  type ValidationResult,
+} from "@/lib/domain/services/file-validation-service";
 
 export interface UseFileValidationConfig {
   /** Files to validate */
@@ -84,12 +88,12 @@ export function useFileValidation(config: UseFileValidationConfig): UseFileValid
   const {
     files,
     maxFileSize = 50 * 1024 * 1024, // 50MB default
-    allowedTypes = ['application/pdf'],
+    allowedTypes = ["application/pdf"],
     checkForUpdates = true,
     checkForDuplicates = true,
     autoValidate = true,
     onValidationComplete,
-    onValidationError
+    onValidationError,
   } = config;
 
   // Validation state
@@ -113,40 +117,38 @@ export function useFileValidation(config: UseFileValidationConfig): UseFileValid
         maxFileSize,
         allowedTypes,
         checkForUpdates,
-        checkForDuplicates
+        checkForDuplicates,
       };
 
-      console.log('🔍 Starting file validation...', {
+      console.log("🔍 Starting file validation...", {
         fileCount: files.length,
-        options: validationOptions
+        options: validationOptions,
       });
 
       // Perform validation using the service
       const result = await fileValidationService.validateFiles(files, validationOptions);
 
-      console.log('✅ File validation completed:', {
+      console.log("✅ File validation completed:", {
         isValid: result.isValid,
         errors: result.errors.length,
         warnings: result.warnings.length,
         isUpdated: result.isUpdated,
-        duplicates: result.duplicateFiles?.length || 0
+        duplicates: result.duplicateFiles?.length || 0,
       });
 
       setValidationResult(result);
       onValidationComplete?.(result);
-
     } catch (error) {
-      console.error('❌ File validation failed:', error);
+      console.error("❌ File validation failed:", error);
 
       const errorResult: ValidationResult = {
         isValid: false,
-        errors: [`Validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`],
-        warnings: []
+        errors: [`Validation failed: ${error instanceof Error ? error.message : "Unknown error"}`],
+        warnings: [],
       };
 
       setValidationResult(errorResult);
-      onValidationError?.(error instanceof Error ? error : new Error('Unknown validation error'));
-
+      onValidationError?.(error instanceof Error ? error : new Error("Unknown validation error"));
     } finally {
       setIsValidating(false);
     }
@@ -157,14 +159,14 @@ export function useFileValidation(config: UseFileValidationConfig): UseFileValid
     checkForUpdates,
     checkForDuplicates,
     onValidationComplete,
-    onValidationError
+    onValidationError,
   ]);
 
   /**
    * Retry validation (alias for validateFiles)
    */
   const retryValidation = useCallback((): Promise<void> => {
-    console.log('🔄 Retrying file validation...');
+    console.log("🔄 Retrying file validation...");
     return validateFiles();
   }, [validateFiles]);
 
@@ -172,7 +174,7 @@ export function useFileValidation(config: UseFileValidationConfig): UseFileValid
    * Reset validation state
    */
   const resetValidation = useCallback((): void => {
-    console.log('🧹 Resetting validation state...');
+    console.log("🧹 Resetting validation state...");
     setValidationResult(null);
     setIsValidating(false);
   }, []);
@@ -180,7 +182,7 @@ export function useFileValidation(config: UseFileValidationConfig): UseFileValid
   // Auto-validate when files change
   useEffect(() => {
     if (autoValidate && files.length > 0) {
-      console.log('🔄 Auto-validating files due to changes...');
+      console.log("🔄 Auto-validating files due to changes...");
       validateFiles();
     } else if (files.length === 0) {
       resetValidation();
@@ -204,7 +206,7 @@ export function useFileValidation(config: UseFileValidationConfig): UseFileValid
     hasErrors,
     hasWarnings,
     errorCount,
-    warningCount
+    warningCount,
   };
 }
 
@@ -226,18 +228,20 @@ export function hasValidationWarnings(result: ValidationResult | null): boolean 
  * Get validation status text for display
  */
 export function getValidationStatusText(result: ValidationResult | null): string {
-  if (!result) return 'No validation performed';
-  if (!result.isValid) return 'Validation Failed';
-  if (hasValidationWarnings(result) || result.isUpdated) return 'Validation Passed with Warnings';
-  return 'Validation Passed';
+  if (!result) return "No validation performed";
+  if (!result.isValid) return "Validation Failed";
+  if (hasValidationWarnings(result) || result.isUpdated) return "Validation Passed with Warnings";
+  return "Validation Passed";
 }
 
 /**
  * Get validation status color for UI theming
  */
-export function getValidationStatusColor(result: ValidationResult | null): 'red' | 'amber' | 'green' | 'gray' {
-  if (!result) return 'gray';
-  if (!result.isValid) return 'red';
-  if (hasValidationWarnings(result) || result.isUpdated) return 'amber';
-  return 'green';
+export function getValidationStatusColor(
+  result: ValidationResult | null
+): "red" | "amber" | "green" | "gray" {
+  if (!result) return "gray";
+  if (!result.isValid) return "red";
+  if (hasValidationWarnings(result) || result.isUpdated) return "amber";
+  return "green";
 }

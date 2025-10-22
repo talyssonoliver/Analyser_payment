@@ -3,8 +3,14 @@
  * Handles API communication for user preferences management
  */
 
-import type { UserPreferences, DisplayPreferences, NotificationPreferences, AnalysisPreferences, PrivacyPreferences } from '@/lib/stores/preferences-store';
-import { StringKeyObject } from '@/types/core';
+import type {
+  AnalysisPreferences,
+  DisplayPreferences,
+  NotificationPreferences,
+  PrivacyPreferences,
+  UserPreferences,
+} from "@/lib/stores/preferences-store";
+import type { StringKeyObject } from "@/types/core";
 
 export interface PreferencesApiResponse {
   success: boolean;
@@ -25,7 +31,7 @@ export interface PartialPreferencesUpdate {
 }
 
 export class PreferencesService {
-  private readonly baseUrl = '/api/preferences';
+  private readonly baseUrl = "/api/preferences";
 
   /**
    * Fetch user preferences from the database
@@ -33,14 +39,14 @@ export class PreferencesService {
   async getPreferences(): Promise<PreferencesApiResponse> {
     try {
       const response = await fetch(this.baseUrl, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'same-origin',
+        credentials: "same-origin",
       }).catch((fetchError) => {
-        console.error('Fetch error:', fetchError);
-        throw new Error(`Network error: ${fetchError.message || 'Failed to connect'}`);
+        console.error("Fetch error:", fetchError);
+        throw new Error(`Network error: ${fetchError.message || "Failed to connect"}`);
       });
 
       const data = await response.json().catch(() => null);
@@ -48,7 +54,7 @@ export class PreferencesService {
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || 'Failed to fetch preferences',
+          error: data.error || "Failed to fetch preferences",
           details: data.details,
         };
       }
@@ -58,10 +64,10 @@ export class PreferencesService {
         data: data.data,
       };
     } catch (error) {
-      console.error('PreferencesService.getPreferences error:', error);
+      console.error("PreferencesService.getPreferences error:", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Network error occurred',
+        error: error instanceof Error ? error.message : "Network error occurred",
       };
     }
   }
@@ -72,11 +78,11 @@ export class PreferencesService {
   async updatePreferences(updates: PartialPreferencesUpdate): Promise<PreferencesApiResponse> {
     try {
       const response = await fetch(this.baseUrl, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'same-origin',
+        credentials: "same-origin",
         body: JSON.stringify(updates),
       });
 
@@ -85,7 +91,7 @@ export class PreferencesService {
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || 'Failed to update preferences',
+          error: data.error || "Failed to update preferences",
           details: data.details,
         };
       }
@@ -95,10 +101,10 @@ export class PreferencesService {
         data: data.data,
       };
     } catch (error) {
-      console.error('PreferencesService.updatePreferences error:', error);
+      console.error("PreferencesService.updatePreferences error:", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Network error occurred',
+        error: error instanceof Error ? error.message : "Network error occurred",
       };
     }
   }
@@ -106,28 +112,36 @@ export class PreferencesService {
   /**
    * Update display preferences specifically
    */
-  async updateDisplayPreferences(preferences: Partial<DisplayPreferences>): Promise<PreferencesApiResponse> {
+  async updateDisplayPreferences(
+    preferences: Partial<DisplayPreferences>
+  ): Promise<PreferencesApiResponse> {
     return this.updatePreferences({ display: preferences });
   }
 
   /**
    * Update notification preferences specifically
    */
-  async updateNotificationPreferences(preferences: Partial<NotificationPreferences>): Promise<PreferencesApiResponse> {
+  async updateNotificationPreferences(
+    preferences: Partial<NotificationPreferences>
+  ): Promise<PreferencesApiResponse> {
     return this.updatePreferences({ notifications: preferences });
   }
 
   /**
    * Update analysis preferences specifically
    */
-  async updateAnalysisPreferences(preferences: Partial<AnalysisPreferences>): Promise<PreferencesApiResponse> {
+  async updateAnalysisPreferences(
+    preferences: Partial<AnalysisPreferences>
+  ): Promise<PreferencesApiResponse> {
     return this.updatePreferences({ analysis: preferences });
   }
 
   /**
    * Update privacy preferences specifically
    */
-  async updatePrivacyPreferences(preferences: Partial<PrivacyPreferences>): Promise<PreferencesApiResponse> {
+  async updatePrivacyPreferences(
+    preferences: Partial<PrivacyPreferences>
+  ): Promise<PreferencesApiResponse> {
     return this.updatePreferences({ privacy: preferences });
   }
 
@@ -150,8 +164,8 @@ export class PreferencesService {
   async checkConnectivity(): Promise<boolean> {
     try {
       const response = await fetch(this.baseUrl, {
-        method: 'HEAD',
-        credentials: 'same-origin',
+        method: "HEAD",
+        credentials: "same-origin",
       });
       return response.ok;
     } catch {

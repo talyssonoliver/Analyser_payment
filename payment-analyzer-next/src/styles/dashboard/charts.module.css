@@ -1,0 +1,125 @@
+/* Chart Styles */
+
+.container {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Legacy Bar Chart */
+.legacyBarChart {
+  min-height: 150px;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+}
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  height: 120px;
+  padding: 0 4px;
+}
+
+.chartWeek {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.barsWrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100px;
+  width: 100%;
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+
+.bar {
+  border-radius: 6px 6px 0 0;
+  min-height: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
+  position: relative;
+}
+
+.barExpected {
+  width: 45%;
+  margin-right: 4px;
+}
+
+.barActual {
+  width: 45%;
+}
+
+.barValue {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  background: rgb(255 255 255 / 90%);
+  padding: 1px 4px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
+}
+
+.barExpected .barValue {
+  color: var(--color-blue-500);
+}
+
+.barActual .barValue {
+  color: var(--color-green-500);
+}
+
+.bar:hover {
+  opacity: 0.8;
+}
+
+.weekLabel {
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  font-weight: 500;
+}

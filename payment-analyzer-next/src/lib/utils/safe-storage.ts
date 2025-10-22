@@ -2,23 +2,23 @@
  * Safe storage utilities to prevent JSON parsing errors
  */
 
-export class SafeStorage {
-  private static isStorageAvailable(type: 'localStorage' | 'sessionStorage'): boolean {
-    try {
-      const storage = window[type];
-      const x = '__storage_test__';
-      storage.setItem(x, x);
-      storage.removeItem(x);
-      return true;
-    } catch {
-      return false;
-    }
+function isStorageAvailable(type: "localStorage" | "sessionStorage"): boolean {
+  try {
+    const storage = window[type];
+    const x = "__storage_test__";
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  } catch {
+    return false;
   }
+}
 
-  static setItem(key: string, value: unknown, useSession = false): boolean {
-    const storageType = useSession ? 'sessionStorage' : 'localStorage';
-    
-    if (!this.isStorageAvailable(storageType)) {
+export const SafeStorage = {
+  setItem(key: string, value: unknown, useSession = false): boolean {
+    const storageType = useSession ? "sessionStorage" : "localStorage";
+
+    if (!isStorageAvailable(storageType)) {
       console.warn(`${storageType} is not available`);
       return false;
     }
@@ -31,12 +31,12 @@ export class SafeStorage {
       console.warn(`Failed to set ${storageType} item "${key}":`, error);
       return false;
     }
-  }
+  },
 
-  static getItem<T = unknown>(key: string, defaultValue: T | null = null, useSession = false): T | null {
-    const storageType = useSession ? 'sessionStorage' : 'localStorage';
-    
-    if (!this.isStorageAvailable(storageType)) {
+  getItem<T = unknown>(key: string, defaultValue: T | null = null, useSession = false): T | null {
+    const storageType = useSession ? "sessionStorage" : "localStorage";
+
+    if (!isStorageAvailable(storageType)) {
       return defaultValue;
     }
 
@@ -45,7 +45,7 @@ export class SafeStorage {
       if (item === null) {
         return defaultValue;
       }
-      
+
       return JSON.parse(item);
     } catch (error) {
       console.warn(`Failed to get ${storageType} item "${key}":`, error);
@@ -57,12 +57,12 @@ export class SafeStorage {
       }
       return defaultValue;
     }
-  }
+  },
 
-  static removeItem(key: string, useSession = false): boolean {
-    const storageType = useSession ? 'sessionStorage' : 'localStorage';
-    
-    if (!this.isStorageAvailable(storageType)) {
+  removeItem(key: string, useSession = false): boolean {
+    const storageType = useSession ? "sessionStorage" : "localStorage";
+
+    if (!isStorageAvailable(storageType)) {
       return false;
     }
 
@@ -73,12 +73,12 @@ export class SafeStorage {
       console.warn(`Failed to remove ${storageType} item "${key}":`, error);
       return false;
     }
-  }
+  },
 
-  static clear(useSession = false): boolean {
-    const storageType = useSession ? 'sessionStorage' : 'localStorage';
-    
-    if (!this.isStorageAvailable(storageType)) {
+  clear(useSession = false): boolean {
+    const storageType = useSession ? "sessionStorage" : "localStorage";
+
+    if (!isStorageAvailable(storageType)) {
       return false;
     }
 
@@ -89,5 +89,5 @@ export class SafeStorage {
       console.warn(`Failed to clear ${storageType}:`, error);
       return false;
     }
-  }
-}
+  },
+};

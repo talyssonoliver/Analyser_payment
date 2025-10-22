@@ -1,0 +1,162 @@
+/* Analysis Page Styles - Centralized Style System */
+
+.analysisContainer {
+  min-height: 100vh;
+  background: var(--color-slate-50);
+}
+
+.analysisWrapper {
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+/* Step 1 Container */
+.step1Container {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.step1Header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.step1Title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin-bottom: 0.5rem;
+}
+
+.step1Subtitle {
+  color: var(--color-slate-500);
+}
+
+/* Data Input Method Selector */
+.dataInputSelector {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 0.25rem;
+  display: flex;
+  gap: 0.25rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+  max-width: 20rem;
+  width: 100%;
+}
+
+.dataInputBtn {
+  flex: 1;
+  padding: 0.625rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.dataInputBtn--active {
+  background: linear-gradient(135deg, var(--color-blue-600), var(--color-blue-700));
+  color: white;
+  box-shadow: 0 2px 8px rgb(59 130 246 / 30%);
+}
+
+.dataInputBtn--inactive {
+  color: var(--color-slate-500);
+  background: transparent;
+}
+
+.dataInputBtn--inactive:hover {
+  background: var(--color-slate-100);
+}
+
+.dataInputBtn__icon {
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dataInputBtn__label {
+  line-height: 1;
+}
+
+/* File Upload Wrapper */
+.fileUploadWrapper {
+  margin-bottom: 2rem;
+}
+
+/* Action Buttons */
+.step1Actions {
+  margin-top: 0;
+}
+
+.proceedBtn {
+  background: var(--color-blue-600);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 1.125rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 10%);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  cursor: pointer;
+}
+
+.proceedBtn:hover:not(:disabled) {
+  background: var(--color-blue-700);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 10%);
+}
+
+.proceedBtn:disabled {
+  background: var(--color-slate-300);
+  cursor: not-allowed;
+}
+
+.proceedBtn__content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.proceedBtn__loader {
+  display: none;
+}
+
+.step1HelpText {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-slate-500);
+  margin-top: 0.75rem;
+}
+
+/* Step 2 Container */
+.step2Container {
+  margin-top: 2rem;
+}
+
+.step2Header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.step2Title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin-bottom: 0.5rem;
+}
+
+.step2Subtitle {
+  color: var(--color-slate-500);
+}

@@ -1,0 +1,289 @@
+/* Calendar Tooltip Styles */
+
+.trigger {
+  display: contents;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: fixed;
+  background: white;
+  border-radius: 8px;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -1px rgb(0 0 0 / 6%),
+    0 0 0 1px rgb(0 0 0 / 5%);
+  pointer-events: auto;
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+  will-change: transform, opacity;
+  contain: layout style;
+  min-width: 240px;
+  max-width: 320px;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.content {
+  padding: 12px;
+}
+
+.header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-slate-200);
+}
+
+.dateLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.summaryRow .label {
+  color: var(--color-gray-600);
+  font-weight: 500;
+}
+
+.summaryRow .value {
+  color: var(--color-gray-900);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryRow.difference {
+  padding-top: 8px;
+  border-top: 1px solid var(--color-slate-200);
+  margin-top: 4px;
+}
+
+.summaryRow.difference.positive .label,
+.summaryRow.difference.positive .value {
+  color: var(--color-green-600);
+}
+
+.summaryRow.difference.negative .label,
+.summaryRow.difference.negative .value {
+  color: var(--color-red-600);
+}
+
+.statuses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-slate-200);
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--color-slate-50);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusLabel {
+  color: var(--color-gray-700);
+}
+
+.statusBadge.statusPending {
+  background: rgb(59 130 246 / 10%);
+}
+
+.statusBadge.statusPending .statusDot {
+  background: var(--color-blue-500);
+}
+
+.statusBadge.statusReceived {
+  background: rgb(34 197 94 / 10%);
+}
+
+.statusBadge.statusReceived .statusDot {
+  background: var(--color-green-500);
+}
+
+.statusBadge.statusShortfall {
+  background: rgb(220 38 38 / 10%);
+}
+
+.statusBadge.statusShortfall .statusDot {
+  background: var(--color-red-600);
+}
+
+.arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border: inherit;
+  transform: rotate(45deg);
+  top: -5px;
+  left: 50%;
+  margin-left: -5px;
+  box-shadow: -1px -1px 1px rgb(0 0 0 / 5%);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .tooltip {
+    background: var(--color-gray-800);
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 30%),
+      0 2px 4px -1px rgb(0 0 0 / 20%),
+      0 0 0 1px rgb(255 255 255 / 10%);
+  }
+
+  .header {
+    border-bottom-color: var(--color-gray-700);
+  }
+
+  .dateLabel {
+    color: var(--color-gray-100);
+  }
+
+  .summaryRow .label {
+    color: var(--color-gray-400);
+  }
+
+  .summaryRow .value {
+    color: var(--color-gray-100);
+  }
+
+  .summaryRow.difference {
+    border-top-color: var(--color-gray-700);
+  }
+
+  .summaryRow.difference.positive .label,
+  .summaryRow.difference.positive .value {
+    color: var(--color-green-400);
+  }
+
+  .summaryRow.difference.negative .label,
+  .summaryRow.difference.negative .value {
+    color: var(--color-red-400);
+  }
+
+  .statuses {
+    border-top-color: var(--color-gray-700);
+  }
+
+  .statusBadge {
+    background: var(--color-gray-700);
+  }
+
+  .statusLabel {
+    color: var(--color-gray-300);
+  }
+
+  .statusBadge.statusPending {
+    background: rgb(59 130 246 / 20%);
+  }
+
+  .statusBadge.statusReceived {
+    background: rgb(34 197 94 / 20%);
+  }
+
+  .statusBadge.statusShortfall {
+    background: rgb(220 38 38 / 20%);
+  }
+
+  .arrow {
+    background: var(--color-gray-800);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    transition: none;
+  }
+}
+
+/* Mobile optimizations */
+@media (width <= 640px) {
+  .tooltip {
+    min-width: 200px;
+    max-width: 280px;
+  }
+
+  .content {
+    padding: 10px;
+  }
+
+  .dateLabel {
+    font-size: 13px;
+  }
+
+  .summaryRow {
+    font-size: 12px;
+  }
+
+  .statusBadge {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .statusDot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .tooltip {
+    border: 2px solid var(--color-gray-900);
+  }
+
+  .statusBadge {
+    border: 1px solid currentcolor;
+  }
+
+  .arrow {
+    border: 2px solid var(--color-gray-900);
+  }
+}
+
+/* Focus visible */
+.trigger:focus-visible {
+  outline: 2px solid var(--color-blue-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

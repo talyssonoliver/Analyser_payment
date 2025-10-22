@@ -219,7 +219,10 @@ export interface SupabaseQueryBuilder {
   single(): SupabaseQueryBuilder;
   maybeSingle(): SupabaseQueryBuilder;
   then<TResult1 = SupabaseResponse, TResult2 = never>(
-    onfulfilled?: ((value: SupabaseResponse) => TResult1 | PromiseLike<TResult1>) | undefined | null,
+    onfulfilled?:
+      | ((value: SupabaseResponse) => TResult1 | PromiseLike<TResult1>)
+      | undefined
+      | null,
     onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | undefined | null
   ): Promise<TResult1 | TResult2>;
 }
@@ -255,18 +258,19 @@ export interface SupabaseAuth {
     };
   }): Promise<SupabaseAuthResponse<SupabaseSession>>;
   signOut(): Promise<SupabaseAuthResponse<never>>;
-  resetPasswordForEmail(email: string, options?: {
-    redirectTo?: string;
-    captchaToken?: string;
-  }): Promise<SupabaseAuthResponse<never>>;
+  resetPasswordForEmail(
+    email: string,
+    options?: {
+      redirectTo?: string;
+      captchaToken?: string;
+    }
+  ): Promise<SupabaseAuthResponse<never>>;
   updateUser(attributes: {
     email?: string;
     password?: string;
     data?: Record<string, unknown>;
   }): Promise<SupabaseAuthResponse<SupabaseUser>>;
-  onAuthStateChange(
-    callback: (event: string, session: SupabaseSession | null) => void
-  ): {
+  onAuthStateChange(callback: (event: string, session: SupabaseSession | null) => void): {
     data: { subscription: { unsubscribe: () => void } };
   };
 }
@@ -287,20 +291,33 @@ export interface SupabaseStorage {
  * Supabase Storage Bucket Interface
  */
 export interface SupabaseStorageBucket {
-  upload(path: string, fileBody: File | Blob | ArrayBuffer, options?: {
-    cacheControl?: string;
-    contentType?: string;
-    upsert?: boolean;
-  }): Promise<SupabaseResponse<{ path: string }>>;
+  upload(
+    path: string,
+    fileBody: File | Blob | ArrayBuffer,
+    options?: {
+      cacheControl?: string;
+      contentType?: string;
+      upsert?: boolean;
+    }
+  ): Promise<SupabaseResponse<{ path: string }>>;
   download(path: string): Promise<SupabaseResponse<Blob>>;
-  list(path?: string, options?: {
-    limit?: number;
-    offset?: number;
-    sortBy?: { column: string; order: string };
-  }): Promise<SupabaseResponse<unknown[]>>;
+  list(
+    path?: string,
+    options?: {
+      limit?: number;
+      offset?: number;
+      sortBy?: { column: string; order: string };
+    }
+  ): Promise<SupabaseResponse<unknown[]>>;
   remove(paths: string[]): Promise<SupabaseResponse<unknown[]>>;
-  createSignedUrl(path: string, expiresIn: number): Promise<SupabaseResponse<{ signedUrl: string }>>;
-  createSignedUrls(paths: string[], expiresIn: number): Promise<SupabaseResponse<{ signedUrl: string; path: string }[]>>;
+  createSignedUrl(
+    path: string,
+    expiresIn: number
+  ): Promise<SupabaseResponse<{ signedUrl: string }>>;
+  createSignedUrls(
+    paths: string[],
+    expiresIn: number
+  ): Promise<SupabaseResponse<{ signedUrl: string; path: string }[]>>;
   getPublicUrl(path: string): { data: { publicUrl: string } };
 }
 
@@ -324,17 +341,17 @@ export interface SupabaseClient {
 /**
  * Analysis Status Union Type
  */
-export type AnalysisStatus = 'pending' | 'processing' | 'completed' | 'error';
+export type AnalysisStatus = "pending" | "processing" | "completed" | "error";
 
 /**
  * Payment Status Union Type
  */
-export type PaymentStatus = 'balanced' | 'overpaid' | 'underpaid';
+export type PaymentStatus = "balanced" | "overpaid" | "underpaid";
 
 /**
  * Analysis Source Union Type
  */
-export type AnalysisSource = 'upload' | 'manual' | 'import';
+export type AnalysisSource = "upload" | "manual" | "import";
 
 /**
  * Date-like values that can be converted to Date
@@ -351,9 +368,9 @@ export interface AnalysisMetadata {
   totalPagesProcessed?: number;
   consignmentPatterns?: string[];
   invoicePatterns?: string[];
-  legacyFingerprint?: string;      // Base64 + 32-bit hash fingerprint (for backward compatibility)
-  modernFingerprint?: string;      // SHA-256 fingerprint (current system)
-  fingerprintVersion?: number;     // Version: 1 = legacy, 2 = modern, 3 = dual
+  legacyFingerprint?: string; // Base64 + 32-bit hash fingerprint (for backward compatibility)
+  modernFingerprint?: string; // SHA-256 fingerprint (current system)
+  fingerprintVersion?: number; // Version: 1 = legacy, 2 = modern, 3 = dual
   processingErrors?: string[];
   settings?: {
     autoCalculate?: boolean;

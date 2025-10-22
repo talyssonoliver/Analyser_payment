@@ -3,7 +3,7 @@
  * Represents a period between two dates with validation
  */
 
-import { format } from 'date-fns';
+import { format } from "date-fns";
 
 export class DateRange {
   private readonly _start: Date;
@@ -11,7 +11,7 @@ export class DateRange {
 
   constructor(start: Date, end: Date) {
     if (start > end) {
-      throw new Error('Start date must be before or equal to end date');
+      throw new Error("Start date must be before or equal to end date");
     }
     this._start = new Date(start);
     this._end = new Date(end);
@@ -51,14 +51,16 @@ export class DateRange {
   }
 
   formatRange(): string {
-    const startStr = format(this._start, 'dd/MM/yyyy');
-    const endStr = format(this._end, 'dd/MM/yyyy');
+    const startStr = format(this._start, "dd/MM/yyyy");
+    const endStr = format(this._end, "dd/MM/yyyy");
     return `${startStr} - ${endStr}`;
   }
 
   equals(other: DateRange): boolean {
-    return this._start.getTime() === other._start.getTime() &&
-           this._end.getTime() === other._end.getTime();
+    return (
+      this._start.getTime() === other._start.getTime() &&
+      this._end.getTime() === other._end.getTime()
+    );
   }
 
   toJSON() {

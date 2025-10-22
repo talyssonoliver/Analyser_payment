@@ -3,32 +3,59 @@
  * Central export file for all validation hooks
  */
 
-// File validation hook and utilities
-export {
-  useFileValidation,
-  hasValidationErrors,
-  hasValidationWarnings,
-  getValidationStatusText,
-  getValidationStatusColor
-} from './use-file-validation';
-
 export type {
   UseFileValidationConfig,
-  UseFileValidationReturn
-} from './use-file-validation';
-
+  UseFileValidationReturn,
+} from "./use-file-validation";
+// File validation hook and utilities
+export {
+  getValidationStatusColor,
+  getValidationStatusText,
+  hasValidationErrors,
+  hasValidationWarnings,
+  useFileValidation,
+} from "./use-file-validation";
+export type {
+  FileIndicator,
+  UseFingerprintValidationConfig,
+  UseFingerprintValidationReturn,
+} from "./use-fingerprint-validation";
 // Fingerprint validation hook and utilities
 export {
-  useFingerprintValidation,
   getFileKey,
+  getFingerprintIssueSummary,
+  getFingerprintStatusText,
   hasFingerprintDuplicates,
   hasFingerprintWarnings,
-  getFingerprintStatusText,
-  getFingerprintIssueSummary
-} from './use-fingerprint-validation';
-
+  useFingerprintValidation,
+} from "./use-fingerprint-validation";
 export type {
-  UseFingerprintValidationConfig,
-  FileIndicator,
-  UseFingerprintValidationReturn
-} from './use-fingerprint-validation';
+  FileValidationResult,
+  UseFileValidationAndHashingConfig,
+  UseFileValidationAndHashingReturn,
+} from "./useFileValidationAndHashing";
+// File validation and hashing hook and utilities
+export {
+  generateFileKey,
+  getValidationSummary,
+  hasValidationErrors as hasFileHashingErrors,
+  hasValidationWarnings as hasFileHashingWarnings,
+  useFileValidationAndHashing,
+} from "./useFileValidationAndHashing";
+export type {
+  NavigationBadges,
+  UseNavigationBadgesOptions,
+} from "./useNavigationBadges";
+// Navigation badges hook
+export { useNavigationBadges } from "./useNavigationBadges";
+export type {
+  UseSessionRecoveryConfig,
+  UseSessionRecoveryReturn,
+} from "./useSessionRecovery";
+// Session recovery hook and utilities
+export {
+  checkForSessionRecovery,
+  clearSessionData,
+  saveSessionData,
+  useSessionRecovery,
+} from "./useSessionRecovery";

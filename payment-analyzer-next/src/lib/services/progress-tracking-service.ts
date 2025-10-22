@@ -36,70 +36,73 @@ export class ProgressTrackingService {
   private readonly stageTimeouts: Map<number, NodeJS.Timeout> = new Map();
 
   // Define the 8 stages matching original HTML
-  private static readonly STAGES: Omit<ProgressStage, 'isActive' | 'isComplete' | 'startTime' | 'endTime'>[] = [
+  private static readonly STAGES: Omit<
+    ProgressStage,
+    "isActive" | "isComplete" | "startTime" | "endTime"
+  >[] = [
     {
       id: 0,
-      name: 'Initializing',
-      description: 'Setting up analysis environment and validating input',
-      icon: '⚙️',
-      estimatedDuration: 500
+      name: "Initializing",
+      description: "Setting up analysis environment and validating input",
+      icon: "⚙️",
+      estimatedDuration: 500,
     },
     {
       id: 1,
-      name: 'Loading Rules',
-      description: 'Loading payment calculation rules and business logic',
-      icon: '📋',
-      estimatedDuration: 300
+      name: "Loading Rules",
+      description: "Loading payment calculation rules and business logic",
+      icon: "📋",
+      estimatedDuration: 300,
     },
     {
       id: 2,
-      name: 'Reading PDFs',
-      description: 'Opening and parsing PDF documents for processing',
-      icon: '📄',
-      estimatedDuration: 2000
+      name: "Reading PDFs",
+      description: "Opening and parsing PDF documents for processing",
+      icon: "📄",
+      estimatedDuration: 2000,
     },
     {
       id: 3,
-      name: 'Extracting Data',
-      description: 'Extracting consignment and payment data from documents',
-      icon: '🔍',
-      estimatedDuration: 3000
+      name: "Extracting Data",
+      description: "Extracting consignment and payment data from documents",
+      icon: "🔍",
+      estimatedDuration: 3000,
     },
     {
       id: 4,
-      name: 'Processing',
-      description: 'Processing extracted data and organizing by date',
-      icon: '⚡',
-      estimatedDuration: 1500
+      name: "Processing",
+      description: "Processing extracted data and organizing by date",
+      icon: "⚡",
+      estimatedDuration: 1500,
     },
     {
       id: 5,
-      name: 'Validating',
-      description: 'Validating data integrity and checking business rules',
-      icon: '✅',
-      estimatedDuration: 800
+      name: "Validating",
+      description: "Validating data integrity and checking business rules",
+      icon: "✅",
+      estimatedDuration: 800,
     },
     {
       id: 6,
-      name: 'Calculating',
-      description: 'Performing payment calculations and generating totals',
-      icon: '🧮',
-      estimatedDuration: 1000
+      name: "Calculating",
+      description: "Performing payment calculations and generating totals",
+      icon: "🧮",
+      estimatedDuration: 1000,
     },
     {
       id: 7,
-      name: 'Generating Report',
-      description: 'Creating analysis results and preparing display',
-      icon: '📊',
-      estimatedDuration: 700
+      name: "Generating Report",
+      description: "Creating analysis results and preparing display",
+      icon: "📊",
+      estimatedDuration: 3000, // Increased to accommodate database operations
     },
     {
       id: 8,
-      name: 'Complete',
-      description: 'Analysis completed successfully!',
-      icon: '🎉',
-      estimatedDuration: 200
-    }
+      name: "Complete",
+      description: "Analysis completed successfully!",
+      icon: "🎉",
+      estimatedDuration: 200,
+    },
   ];
 
   private constructor() {
@@ -107,15 +110,15 @@ export class ProgressTrackingService {
   }
 
   static getInstance(): ProgressTrackingService {
-    this.instance ??= new ProgressTrackingService();
-    return this.instance;
+    ProgressTrackingService.instance ??= new ProgressTrackingService();
+    return ProgressTrackingService.instance;
   }
 
   private initializeProgress(): ProgressState {
-    const stages = ProgressTrackingService.STAGES.map(stage => ({
+    const stages = ProgressTrackingService.STAGES.map((stage) => ({
       ...stage,
       isActive: false,
-      isComplete: false
+      isComplete: false,
     }));
 
     return {
@@ -124,7 +127,7 @@ export class ProgressTrackingService {
       stages,
       isActive: false,
       startTime: 0,
-      overallProgress: 0
+      overallProgress: 0,
     };
   }
 
@@ -133,10 +136,10 @@ export class ProgressTrackingService {
    */
   subscribe(callback: ProgressCallback): () => void {
     this.callbacks.add(callback);
-    
+
     // Send current state immediately
     callback(this.progressState);
-    
+
     // Return unsubscribe function
     return () => {
       this.callbacks.delete(callback);
@@ -147,11 +150,11 @@ export class ProgressTrackingService {
    * Notify all subscribers of progress update
    */
   private notify(): void {
-    this.callbacks.forEach(callback => {
+    this.callbacks.forEach((callback) => {
       try {
         callback({ ...this.progressState });
       } catch (error) {
-        console.error('Progress callback error:', error);
+        console.error("Progress callback error:", error);
       }
     });
   }
@@ -160,21 +163,21 @@ export class ProgressTrackingService {
    * Start progress tracking
    */
   start(): void {
-    console.log('🚀 Starting progress tracking');
-    
+    console.log("🚀 Starting progress tracking");
+
     this.progressState = this.initializeProgress();
     this.progressState.isActive = true;
     this.progressState.startTime = Date.now();
-    
+
     // Calculate estimated completion time
     const totalEstimatedTime = this.progressState.stages
       .slice(0, -1) // Exclude "Complete" stage
       .reduce((sum, stage) => sum + stage.estimatedDuration, 0);
-    
+
     this.progressState.estimatedCompletion = this.progressState.startTime + totalEstimatedTime;
-    
+
     this.notify();
-    
+
     // Auto-advance to first stage
     setTimeout(() => this.advanceToStage(0), 100);
   }
@@ -184,12 +187,12 @@ export class ProgressTrackingService {
    */
   advanceToStage(stageId: number, details?: string): void {
     if (stageId < 0 || stageId >= this.progressState.stages.length) {
-      console.error('Invalid stage ID:', stageId);
+      console.error("Invalid stage ID:", stageId);
       return;
     }
 
     const now = Date.now();
-    
+
     // Complete previous stages
     for (let i = 0; i < stageId; i++) {
       const stage = this.progressState.stages[i];
@@ -206,18 +209,18 @@ export class ProgressTrackingService {
     currentStage.isComplete = false;
     currentStage.startTime = now;
     currentStage.details = details;
-    
+
     // Clear any existing error
     currentStage.error = undefined;
 
     this.progressState.currentStage = stageId;
-    
+
     // Calculate overall progress
     this.updateOverallProgress();
-    
-    const detailsText = details ? ` (${details})` : '';
+
+    const detailsText = details ? ` (${details})` : "";
     console.log(`📍 Progress: Stage ${stageId} - ${currentStage.name}${detailsText}`);
-    
+
     this.notify();
 
     // Clear any existing timeout for this stage
@@ -228,13 +231,16 @@ export class ProgressTrackingService {
 
     // Auto-advance to next stage after estimated duration (fallback)
     if (stageId < this.progressState.totalStages) {
+      // Longer buffer for later stages that involve database operations
+      const bufferTime = stageId >= 6 ? 10000 : 5000; // 10s for stages 6-8, 5s for earlier stages
+
       const timeout = setTimeout(() => {
         if (this.progressState.currentStage === stageId && this.progressState.isActive) {
           console.warn(`⏰ Auto-advancing from stage ${stageId} due to timeout`);
           this.advanceToStage(stageId + 1);
         }
-      }, currentStage.estimatedDuration + 5000); // Add 5s buffer
-      
+      }, currentStage.estimatedDuration + bufferTime);
+
       this.stageTimeouts.set(stageId, timeout);
     }
   }
@@ -258,10 +264,10 @@ export class ProgressTrackingService {
       stage.error = error;
       stage.isActive = false;
       stage.endTime = Date.now();
-      
+
       // Stop progress tracking
       this.progressState.isActive = false;
-      
+
       console.error(`❌ Stage ${stageId} failed: ${error}`);
       this.notify();
     }
@@ -272,7 +278,7 @@ export class ProgressTrackingService {
    */
   complete(): void {
     const now = Date.now();
-    
+
     // Complete all stages
     this.progressState.stages.forEach((stage, index) => {
       if (!stage.isComplete && index <= this.progressState.totalStages) {
@@ -286,16 +292,18 @@ export class ProgressTrackingService {
     const completeStage = this.progressState.stages[this.progressState.stages.length - 1];
     completeStage.isActive = true;
     completeStage.startTime = now;
-    
+
     this.progressState.currentStage = this.progressState.stages.length - 1;
     this.progressState.overallProgress = 100;
     this.progressState.isActive = false;
-    
+
     // Clear all timeouts
-    this.stageTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.stageTimeouts.forEach((timeout) => {
+      clearTimeout(timeout);
+    });
     this.stageTimeouts.clear();
-    
-    console.log('✅ Progress tracking completed');
+
+    console.log("✅ Progress tracking completed");
     this.notify();
 
     // Auto-hide after a delay
@@ -309,16 +317,18 @@ export class ProgressTrackingService {
    */
   abort(reason?: string): void {
     this.progressState.isActive = false;
-    
+
     if (this.progressState.currentStage >= 0) {
-      this.failStage(this.progressState.currentStage, reason || 'Analysis aborted');
+      this.failStage(this.progressState.currentStage, reason || "Analysis aborted");
     }
-    
+
     // Clear all timeouts
-    this.stageTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.stageTimeouts.forEach((timeout) => {
+      clearTimeout(timeout);
+    });
     this.stageTimeouts.clear();
-    
-    console.log('🛑 Progress tracking aborted:', reason);
+
+    console.log("🛑 Progress tracking aborted:", reason);
   }
 
   /**
@@ -326,11 +336,13 @@ export class ProgressTrackingService {
    */
   reset(): void {
     this.progressState = this.initializeProgress();
-    
+
     // Clear all timeouts
-    this.stageTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.stageTimeouts.forEach((timeout) => {
+      clearTimeout(timeout);
+    });
     this.stageTimeouts.clear();
-    
+
     this.notify();
   }
 
@@ -346,11 +358,16 @@ export class ProgressTrackingService {
    */
   private updateOverallProgress(): void {
     const activeStages = this.progressState.stages.slice(0, -1); // Exclude "Complete"
-    const completedCount = activeStages.filter(stage => stage.isComplete).length;
-    const currentProgress = this.progressState.currentStage >= 0 ? 0.5 : 0; // Half credit for current stage
-    
-    this.progressState.overallProgress = Math.round(
-      ((completedCount + currentProgress) / activeStages.length) * 100
+    const completedCount = activeStages.filter((stage) => stage.isComplete).length;
+
+    // Only add partial progress for current stage if it's not already counted as complete
+    const currentStage = this.progressState.stages[this.progressState.currentStage];
+    const currentProgress =
+      this.progressState.currentStage >= 0 && currentStage && !currentStage.isComplete ? 0.5 : 0;
+
+    this.progressState.overallProgress = Math.min(
+      100,
+      Math.round(((completedCount + currentProgress) / activeStages.length) * 100)
     );
   }
 
@@ -362,20 +379,23 @@ export class ProgressTrackingService {
       return 0;
     }
 
-    const remainingStages = this.progressState.stages.slice(this.progressState.currentStage + 1, -1);
+    const remainingStages = this.progressState.stages.slice(
+      this.progressState.currentStage + 1,
+      -1
+    );
     const currentStage = this.progressState.stages[this.progressState.currentStage];
-    
+
     let timeRemaining = 0;
-    
+
     // Add remaining time for current stage
     if (currentStage.startTime) {
       const elapsed = Date.now() - currentStage.startTime;
       timeRemaining += Math.max(0, currentStage.estimatedDuration - elapsed);
     }
-    
+
     // Add time for remaining stages
     timeRemaining += remainingStages.reduce((sum, stage) => sum + stage.estimatedDuration, 0);
-    
+
     return timeRemaining;
   }
 
@@ -388,36 +408,40 @@ export class ProgressTrackingService {
     slowestStage?: { id: number; name: string; duration: number };
     fastestStage?: { id: number; name: string; duration: number };
   } {
-    const completedStages = this.progressState.stages.filter(stage => 
-      stage.isComplete && stage.startTime && stage.endTime
+    const completedStages = this.progressState.stages.filter(
+      (stage) => stage.isComplete && stage.startTime && stage.endTime
     );
 
     if (completedStages.length === 0) {
       return { totalTime: 0, averageStageTime: 0 };
     }
 
-    const stageDurations = completedStages.map(stage => ({
+    const stageDurations = completedStages.map((stage) => ({
       id: stage.id,
       name: stage.name,
-      duration: stage.endTime! - stage.startTime!
+      duration: Number(stage.endTime) - Number(stage.startTime),
     }));
 
-    const totalTime = this.progressState.startTime > 0 ? Date.now() - this.progressState.startTime : 0;
-    const averageStageTime = stageDurations.reduce((sum, s) => sum + s.duration, 0) / stageDurations.length;
-    
-    const slowestStage = stageDurations.reduce((max, stage) => 
-      stage.duration > max.duration ? stage : max, stageDurations[0]
+    const totalTime =
+      this.progressState.startTime > 0 ? Date.now() - this.progressState.startTime : 0;
+    const averageStageTime =
+      stageDurations.reduce((sum, s) => sum + s.duration, 0) / stageDurations.length;
+
+    const slowestStage = stageDurations.reduce(
+      (max, stage) => (stage.duration > max.duration ? stage : max),
+      stageDurations[0]
     );
-    
-    const fastestStage = stageDurations.reduce((min, stage) => 
-      stage.duration < min.duration ? stage : min, stageDurations[0]
+
+    const fastestStage = stageDurations.reduce(
+      (min, stage) => (stage.duration < min.duration ? stage : min),
+      stageDurations[0]
     );
 
     return {
       totalTime,
       averageStageTime,
       slowestStage,
-      fastestStage
+      fastestStage,
     };
   }
 }

@@ -3,33 +3,31 @@
  * Individual row for displaying and editing manual entries
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect, ComponentType } from 'react';
-import { 
-  loadFramerMotion, 
+import { format } from "date-fns";
+import { Edit2, Save, Trash2, X } from "lucide-react";
+import { type ComponentType, useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  loadFramerMotion,
+  type MotionDivProps,
   StaticDiv,
-  type MotionDivProps
-} from '@/lib/optimization/dynamic-motion';
-import { format } from 'date-fns';
-import { Edit2, Trash2, Save, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { cn, formatCurrency, getDayName } from '@/lib/utils';
-import { PaymentRules } from '@/lib/domain/entities';
-import type { ManualEntryData } from './manual-entry';
+} from "@/lib/optimization/dynamic-motion";
+import { cn, formatCurrency, getDayName } from "@/lib/utils";
+import type { ManualEntryData } from "./manual-entry";
 
 interface EntryRowProps {
-  entry: ManualEntryData;
-  isEditing: boolean;
-  onUpdate: (updates: Partial<ManualEntryData>) => void;
-  onStartEdit: () => void;
-  onCancelEdit: () => void;
-  onSaveEdit: () => void;
-  onRemove: () => void;
-  disabled: boolean;
-  paymentRules?: PaymentRules;
+  readonly entry: ManualEntryData;
+  readonly isEditing: boolean;
+  readonly onUpdate: (updates: Partial<ManualEntryData>) => void;
+  readonly onStartEdit: () => void;
+  readonly onCancelEdit: () => void;
+  readonly onSaveEdit: () => void;
+  readonly onRemove: () => void;
+  readonly disabled: boolean;
 }
 
 export function EntryRow({
@@ -43,9 +41,15 @@ export function EntryRow({
   disabled,
 }: EntryRowProps) {
   const [editValues, setEditValues] = useState({
-    date: format(entry.date, 'yyyy-MM-dd'),
-    consignments: typeof entry.consignments === 'number' ? entry.consignments.toString() : String(entry.consignments || 0),
-    paidAmount: typeof entry.paidAmount === 'number' ? entry.paidAmount.toString() : String(entry.paidAmount || 0),
+    date: format(entry.date, "yyyy-MM-dd"),
+    consignments:
+      typeof entry.consignments === "number"
+        ? entry.consignments.toString()
+        : String(entry.consignments || 0),
+    paidAmount:
+      typeof entry.paidAmount === "number"
+        ? entry.paidAmount.toString()
+        : String(entry.paidAmount || 0),
   });
 
   // Dynamic motion loading
@@ -71,7 +75,7 @@ export function EntryRow({
 
   const handleSave = () => {
     const newDate = new Date(editValues.date);
-    const newConsignments = parseInt(editValues.consignments) || 0;
+    const newConsignments = parseInt(editValues.consignments, 10) || 0;
     const newPaidAmount = parseFloat(editValues.paidAmount) || 0;
 
     onUpdate({
@@ -79,28 +83,43 @@ export function EntryRow({
       consignments: newConsignments,
       paidAmount: newPaidAmount,
     });
-    
+
     onSaveEdit();
   };
 
   const handleCancel = () => {
     // Reset to original values
     setEditValues({
-      date: format(entry.date, 'yyyy-MM-dd'),
-      consignments: typeof entry.consignments === 'number' ? entry.consignments.toString() : String(entry.consignments || 0),
-      paidAmount: typeof entry.paidAmount === 'number' ? entry.paidAmount.toString() : String(entry.paidAmount || 0),
+      date: format(entry.date, "yyyy-MM-dd"),
+      consignments:
+        typeof entry.consignments === "number"
+          ? entry.consignments.toString()
+          : String(entry.consignments || 0),
+      paidAmount:
+        typeof entry.paidAmount === "number"
+          ? entry.paidAmount.toString()
+          : String(entry.paidAmount || 0),
     });
     onCancelEdit();
   };
 
   const getDifferenceColor = (difference: number) => {
-    if (Math.abs(difference) < 0.01) return 'text-slate-600';
-    return difference >= 0 ? 'text-green-600' : 'text-red-600';
+    if (Math.abs(difference) < 0.01) return "text-slate-600";
+    return difference >= 0 ? "text-green-600" : "text-red-600";
   };
 
   const getDifferenceIcon = (difference: number) => {
-    if (Math.abs(difference) < 0.01) return '';
-    return difference >= 0 ? '+' : '';
+    if (Math.abs(difference) < 0.01) return "";
+    return difference >= 0 ? "+" : "";
+  };
+
+  const getDayBadgeVariant = (
+    isSunday: boolean,
+    isSaturday: boolean
+  ): "warning" | "info" | "secondary" => {
+    if (isSunday) return "warning";
+    if (isSaturday) return "info";
+    return "secondary";
   };
 
   const { MotionDiv } = motionComponents;
@@ -108,58 +127,65 @@ export function EntryRow({
   if (isEditing) {
     return (
       <MotionDiv
-        initial={{ backgroundColor: '#f8fafc' }}
-        animate={{ backgroundColor: '#ffffff' }}
+        initial={{ backgroundColor: "#f8fafc" }}
+        animate={{ backgroundColor: "#ffffff" }}
         className="px-4 py-4 space-y-4"
       >
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
+            <label
+              htmlFor={`entry-date-${entry.id}`}
+              className="block text-xs font-medium text-slate-700 mb-1"
+            >
               Date
             </label>
             <Input
+              id={`entry-date-${entry.id}`}
               type="date"
               value={editValues.date}
-              onChange={(e) => setEditValues(prev => ({ ...prev, date: e.target.value }))}
+              onChange={(e) => setEditValues((prev) => ({ ...prev, date: e.target.value }))}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
+            <label
+              htmlFor={`entry-consignments-${entry.id}`}
+              className="block text-xs font-medium text-slate-700 mb-1"
+            >
               Consignments
             </label>
             <Input
+              id={`entry-consignments-${entry.id}`}
               type="number"
               value={editValues.consignments}
-              onChange={(e) => setEditValues(prev => ({ ...prev, consignments: e.target.value }))}
+              onChange={(e) => setEditValues((prev) => ({ ...prev, consignments: e.target.value }))}
               min="0"
               step="1"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
+            <label
+              htmlFor={`entry-paidAmount-${entry.id}`}
+              className="block text-xs font-medium text-slate-700 mb-1"
+            >
               Paid Amount (£)
             </label>
             <Input
+              id={`entry-paidAmount-${entry.id}`}
               type="number"
               value={editValues.paidAmount}
-              onChange={(e) => setEditValues(prev => ({ ...prev, paidAmount: e.target.value }))}
+              onChange={(e) => setEditValues((prev) => ({ ...prev, paidAmount: e.target.value }))}
               min="0"
               step="0.01"
             />
           </div>
 
           <div className="flex items-end space-x-2">
-            <Button
-              onClick={handleSave}
-            >
+            <Button onClick={handleSave}>
               <Save className="w-4 h-4" />
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-            >
+            <Button variant="outline" onClick={handleCancel}>
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -181,19 +207,13 @@ export function EntryRow({
           <div>
             <div className="flex items-center space-x-2">
               <span className="font-semibold text-slate-900">
-                {format(entry.date, 'dd/MM/yyyy')}
+                {format(entry.date, "dd/MM/yyyy")}
               </span>
-              
-              <Badge 
-                variant={isSunday ? 'warning' : isSaturday ? 'info' : 'secondary'}
-                >
-                {dayName}
-              </Badge>
+
+              <Badge variant={getDayBadgeVariant(isSunday, isSaturday)}>{dayName}</Badge>
             </div>
-            
-            <div className="text-sm text-slate-600 mt-1">
-              {entry.consignments} consignments
-            </div>
+
+            <div className="text-sm text-slate-600 mt-1">{entry.consignments} consignments</div>
           </div>
         </div>
 
@@ -201,24 +221,17 @@ export function EntryRow({
         <div className="flex items-center space-x-6 text-sm">
           <div className="text-right">
             <div className="text-slate-600">Expected</div>
-            <div className="font-semibold">
-              {formatCurrency(entry.expectedAmount || 0)}
-            </div>
+            <div className="font-semibold">{formatCurrency(entry.expectedAmount || 0)}</div>
           </div>
 
           <div className="text-right">
             <div className="text-slate-600">Paid</div>
-            <div className="font-semibold">
-              {formatCurrency(entry.paidAmount)}
-            </div>
+            <div className="font-semibold">{formatCurrency(entry.paidAmount)}</div>
           </div>
 
           <div className="text-right min-w-[80px]">
             <div className="text-slate-600">Difference</div>
-            <div className={cn(
-              'font-semibold',
-              getDifferenceColor(entry.difference || 0)
-            )}>
+            <div className={cn("font-semibold", getDifferenceColor(entry.difference || 0))}>
               {getDifferenceIcon(entry.difference || 0)}
               {formatCurrency(Math.abs(entry.difference || 0))}
             </div>
@@ -226,14 +239,10 @@ export function EntryRow({
 
           {/* Actions */}
           <div className="flex items-center space-x-1">
-            <Button
-              variant="ghost"
-              onClick={onStartEdit}
-              disabled={disabled}
-            >
+            <Button variant="ghost" onClick={onStartEdit} disabled={disabled}>
               <Edit2 className="w-4 h-4" />
             </Button>
-            
+
             <Button
               variant="ghost"
               onClick={onRemove}

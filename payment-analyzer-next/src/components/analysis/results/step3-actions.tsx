@@ -3,28 +3,22 @@
  * Pure React component replacing HTML string generation from step3-content-generator.ts lines 539-581
  */
 
-import React from 'react';
-
 interface Step3ActionsProps {
-  hasMultipleWeeks: boolean;
-  onViewDetailedReport: () => void;
-  onStartNewAnalysis: () => void;
+  readonly hasMultipleWeeks: boolean;
+  readonly onViewDetailedReport: () => void;
+  readonly onStartNewAnalysis: () => void;
 }
 
 export function Step3Actions({
   hasMultipleWeeks,
   onViewDetailedReport,
-  onStartNewAnalysis
+  onStartNewAnalysis,
 }: Step3ActionsProps) {
   if (hasMultipleWeeks) {
     // Multiple weeks - only show "Start New Analysis" button
     // Individual week report buttons will be shown in each week section
     return (
-      <button
-        className="btn btn-secondary"
-        id="startNewAnalysisStep3Btn"
-        onClick={onStartNewAnalysis}
-      >
+      <button type="button" className="btn btn-secondary" onClick={onStartNewAnalysis}>
         <span className="btn-icon">🔄</span>
         <span className="btn-text">Start New Analysis</span>
       </button>
@@ -33,20 +27,12 @@ export function Step3Actions({
     // Single week - show both global report button and start new analysis
     return (
       <>
-        <button
-          className="btn btn-primary"
-          id="viewDetailedReportBtn"
-          onClick={onViewDetailedReport}
-        >
+        <button type="button" className="btn btn-primary" onClick={onViewDetailedReport}>
           <span className="btn-icon">📊</span>
           <span className="btn-text">View Detailed Report</span>
         </button>
         <div className="action-separator"></div>
-        <button
-          className="btn btn-secondary"
-          id="startNewAnalysisStep3Btn"
-          onClick={onStartNewAnalysis}
-        >
+        <button type="button" className="btn btn-secondary" onClick={onStartNewAnalysis}>
           <span className="btn-icon">🔄</span>
           <span className="btn-text">Start New Analysis</span>
         </button>

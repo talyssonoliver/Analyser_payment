@@ -4,12 +4,12 @@
  * Extracted functionality from file-validation-panel.tsx for reusable actions
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { RefreshCw, X, AlertTriangle, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ValidationActionsProps } from './types';
+import { AlertTriangle, CheckCircle, RefreshCw, X } from "lucide-react";
+import type React from "react";
+import { Button } from "@/components/ui/button";
+import type { ValidationActionsProps } from "./types";
 
 /**
  * ValidationActions component for validation panel controls
@@ -22,12 +22,19 @@ export function ValidationActions({
   hasWarnings = false,
   isValidating = false,
   customActions,
-  className = ''
-}: ValidationActionsProps) {
+  className = "",
+}: Readonly<ValidationActionsProps>) {
   // Don't render if no actions are available
   if (!onRetryValidation && !onDismiss && !customActions) {
     return null;
   }
+
+  // Determine button color based on error/warning state
+  const getButtonColorClass = () => {
+    if (hasErrors) return "bg-red-600 hover:bg-red-700 text-white";
+    if (hasWarnings) return "text-amber-600 hover:text-amber-700 hover:bg-amber-100";
+    return "text-green-600 hover:text-green-700 hover:bg-green-100";
+  };
 
   return (
     <div className={`validation-actions ${className}`}>
@@ -36,22 +43,17 @@ export function ValidationActions({
         {/* Retry Validation Button */}
         {onRetryValidation && (
           <Button
-            variant={hasErrors ? "default" : "ghost"}
+            variant={hasErrors ? "primary" : "ghost"}
             size="sm"
             onClick={onRetryValidation}
             disabled={isValidating}
             className={`
-              ${hasErrors
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : hasWarnings
-                  ? 'text-amber-600 hover:text-amber-700 hover:bg-amber-100'
-                  : 'text-green-600 hover:text-green-700 hover:bg-green-100'
-              }
-              ${isValidating ? 'opacity-50 cursor-not-allowed' : ''}
+              ${getButtonColorClass()}
+              ${isValidating ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
-            <RefreshCw className={`w-4 h-4 mr-1 ${isValidating ? 'animate-spin' : ''}`} />
-            {isValidating ? 'Validating...' : 'Retry Validation'}
+            <RefreshCw className={`w-4 h-4 mr-1 ${isValidating ? "animate-spin" : ""}`} />
+            {isValidating ? "Validating..." : "Retry Validation"}
           </Button>
         )}
 
@@ -61,14 +63,15 @@ export function ValidationActions({
             variant="outline"
             size="sm"
             className={`
-              ${hasErrors
-                ? 'border-red-300 text-red-700 hover:bg-red-50'
-                : 'border-amber-300 text-amber-700 hover:bg-amber-50'
+              ${
+                hasErrors
+                  ? "border-red-300 text-red-700 hover:bg-red-50"
+                  : "border-amber-300 text-amber-700 hover:bg-amber-50"
               }
             `}
           >
             <AlertTriangle className="w-4 h-4 mr-1" />
-            {hasErrors ? 'Fix Errors' : 'Review Warnings'}
+            {hasErrors ? "Fix Errors" : "Review Warnings"}
           </Button>
         )}
 
@@ -112,9 +115,9 @@ export interface ActionButtonProps {
   /** Click handler */
   onClick: () => void;
   /** Button variant */
-  variant?: 'default' | 'outline' | 'ghost' | 'destructive';
+  variant?: "primary" | "secondary" | "success" | "warning" | "danger" | "ghost" | "outline";
   /** Button size */
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   /** Icon component */
   icon?: React.ReactNode;
   /** Whether button is disabled */
@@ -129,12 +132,12 @@ export interface ActionButtonProps {
 export function ActionButton({
   label,
   onClick,
-  variant = 'outline',
-  size = 'sm',
+  variant = "outline",
+  size = "sm",
   icon,
   disabled = false,
-  className = ''
-}: ActionButtonProps) {
+  className = "",
+}: Readonly<ActionButtonProps>) {
   return (
     <Button
       variant={variant}
@@ -167,24 +170,20 @@ export function ValidationActionBar({
   primaryActions,
   secondaryActions,
   sticky = false,
-  className = ''
-}: ValidationActionBarProps) {
+  className = "",
+}: Readonly<ValidationActionBarProps>) {
   return (
     <div
       className={`
         validation-actions flex items-center justify-between p-3
         border-t border-slate-200 bg-slate-50
-        ${sticky ? 'sticky bottom-0 z-10' : ''}
+        ${sticky ? "sticky bottom-0 z-10" : ""}
         ${className}
       `}
     >
-      <div className="flex items-center gap-2">
-        {primaryActions}
-      </div>
+      <div className="flex items-center gap-2">{primaryActions}</div>
 
-      <div className="flex items-center gap-2">
-        {secondaryActions}
-      </div>
+      <div className="flex items-center gap-2">{secondaryActions}</div>
     </div>
   );
 }

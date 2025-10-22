@@ -1,26 +1,46 @@
 /**
  * Storage interceptor to prevent JSON parsing errors
+ *
+ * Note: The primary interceptor is initialized in layout.tsx as a beforeInteractive script
+ * This function provides a fallback for environments where that doesn't run
  */
+
+// Check if already initialized by the global script
+declare global {
+  interface Window {
+    __storageInterceptorInitialized?: boolean;
+  }
+}
 
 let isInitialized = false;
 
 export function initializeStorageInterceptor(): void {
-  if (isInitialized || typeof window === 'undefined') {
+  // Check if already initialized by the global script in layout.tsx
+  if (typeof window !== "undefined" && window.__storageInterceptorInitialized) {
+    console.log("[Storage] Interceptor already initialized by global script");
+    isInitialized = true;
+    return;
+  }
+
+  if (isInitialized || typeof window === "undefined") {
     return;
   }
 
   // Override localStorage.setItem to sanitize data
   const originalSetItem = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(key: string, value: string) {
+  localStorage.setItem = (key: string, value: string) => {
     try {
       // Check if the value contains "[object Object]"
-      if (typeof value === 'string' && (value.includes('[object Object]') || value === '[object Object]')) {
+      if (
+        typeof value === "string" &&
+        (value.includes("[object Object]") || value === "[object Object]")
+      ) {
         console.warn(`Prevented storing corrupted data for key: ${key}`);
         return;
       }
 
       // Try to parse and re-stringify to validate JSON
-      if (value.startsWith('{') || value.startsWith('[')) {
+      if (value.startsWith("{") || value.startsWith("[")) {
         try {
           const parsed = JSON.parse(value);
           const cleaned = JSON.stringify(parsed);
@@ -39,16 +59,19 @@ export function initializeStorageInterceptor(): void {
 
   // Override localStorage.getItem to validate data on retrieval
   const originalGetItem = localStorage.getItem.bind(localStorage);
-  localStorage.getItem = function(key: string): string | null {
+  localStorage.getItem = (key: string): string | null => {
     try {
       const value = originalGetItem(key);
-      
+
       if (value === null) {
         return null;
       }
 
       // Check for corrupted data patterns
-      if (typeof value === 'string' && (value.includes('[object Object]') || value === '[object Object]')) {
+      if (
+        typeof value === "string" &&
+        (value.includes("[object Object]") || value === "[object Object]")
+      ) {
         console.warn(`Removing corrupted data for key: ${key}`);
         localStorage.removeItem(key);
         return null;
@@ -63,14 +86,17 @@ export function initializeStorageInterceptor(): void {
 
   // Also handle sessionStorage
   const originalSessionSetItem = sessionStorage.setItem.bind(sessionStorage);
-  sessionStorage.setItem = function(key: string, value: string) {
+  sessionStorage.setItem = (key: string, value: string) => {
     try {
-      if (typeof value === 'string' && (value.includes('[object Object]') || value === '[object Object]')) {
+      if (
+        typeof value === "string" &&
+        (value.includes("[object Object]") || value === "[object Object]")
+      ) {
         console.warn(`Prevented storing corrupted session data for key: ${key}`);
         return;
       }
 
-      if (value.startsWith('{') || value.startsWith('[')) {
+      if (value.startsWith("{") || value.startsWith("[")) {
         try {
           const parsed = JSON.parse(value);
           const cleaned = JSON.stringify(parsed);
@@ -88,15 +114,18 @@ export function initializeStorageInterceptor(): void {
   };
 
   const originalSessionGetItem = sessionStorage.getItem.bind(sessionStorage);
-  sessionStorage.getItem = function(key: string): string | null {
+  sessionStorage.getItem = (key: string): string | null => {
     try {
       const value = originalSessionGetItem(key);
-      
+
       if (value === null) {
         return null;
       }
 
-      if (typeof value === 'string' && (value.includes('[object Object]') || value === '[object Object]')) {
+      if (
+        typeof value === "string" &&
+        (value.includes("[object Object]") || value === "[object Object]")
+      ) {
         console.warn(`Removing corrupted session data for key: ${key}`);
         sessionStorage.removeItem(key);
         return null;
@@ -113,10 +142,12 @@ export function initializeStorageInterceptor(): void {
   cleanupAllCorruptedData();
 
   // Listen for storage events from other tabs/windows and clean them up
-  window.addEventListener('storage', (event) => {
-    if (event.newValue && 
-        typeof event.newValue === 'string' && 
-        (event.newValue.includes('[object Object]') || event.newValue === '[object Object]')) {
+  window.addEventListener("storage", (event) => {
+    if (
+      event.newValue &&
+      typeof event.newValue === "string" &&
+      (event.newValue.includes("[object Object]") || event.newValue === "[object Object]")
+    ) {
       console.warn(`Detected corrupted data in storage event for key: ${event.key}`);
       if (event.key) {
         try {
@@ -139,8 +170,11 @@ function cleanupAllCorruptedData(): void {
       if (key) {
         try {
           const value = localStorage.getItem(key);
-          if (value && typeof value === 'string' && 
-              (value.includes('[object Object]') || value === '[object Object]')) {
+          if (
+            value &&
+            typeof value === "string" &&
+            (value.includes("[object Object]") || value === "[object Object]")
+          ) {
             console.warn(`Cleaning up corrupted localStorage key: ${key}`);
             localStorage.removeItem(key);
           }
@@ -162,8 +196,11 @@ function cleanupAllCorruptedData(): void {
       if (key) {
         try {
           const value = sessionStorage.getItem(key);
-          if (value && typeof value === 'string' && 
-              (value.includes('[object Object]') || value === '[object Object]')) {
+          if (
+            value &&
+            typeof value === "string" &&
+            (value.includes("[object Object]") || value === "[object Object]")
+          ) {
             console.warn(`Cleaning up corrupted sessionStorage key: ${key}`);
             sessionStorage.removeItem(key);
           }
@@ -178,6 +215,6 @@ function cleanupAllCorruptedData(): void {
       }
     }
   } catch (error) {
-    console.warn('Error during storage cleanup:', error);
+    console.warn("Error during storage cleanup:", error);
   }
 }

@@ -1,7 +1,7 @@
-import type { AnalysisWithDetails } from '@/lib/repositories/analysis-repository';
+import type { AnalysisWithDetails } from "@/lib/repositories/analysis-repository";
 
 export interface ExportOptions {
-  format: 'csv' | 'json' | 'pdf' | 'html';
+  format: "csv" | "json" | "pdf" | "html";
   includeCharts?: boolean;
   includeMetadata?: boolean;
   includeSummary?: boolean;
@@ -33,44 +33,49 @@ export interface LocalStorageExportData {
     averageDaily: number;
     difference: number;
   };
-  dailyData: Record<string, {
-    consignments: number;
-    basePayment: number;
-    expectedTotal: number;
-    paidAmount: number;
-    unloadingBonus: number;
-    attendanceBonus: number;
-    earlyBonus: number;
-    pickups: number;
-    pickupTotal: number;
-    rate: number;
-    status: string;
-  }>;
+  dailyData: Record<
+    string,
+    {
+      consignments: number;
+      basePayment: number;
+      expectedTotal: number;
+      paidAmount: number;
+      unloadingBonus: number;
+      attendanceBonus: number;
+      earlyBonus: number;
+      pickups: number;
+      pickupTotal: number;
+      rate: number;
+      status: string;
+    }
+  >;
 }
 
 export class ExportService {
-  
   /**
    * Export analysis data in specified format (for database analyses)
    */
-  async exportAnalyses(analyses: AnalysisWithDetails[], options: ExportOptions): Promise<ExportResult> {
+  async exportAnalyses(
+    analyses: AnalysisWithDetails[],
+    options: ExportOptions
+  ): Promise<ExportResult> {
     try {
       switch (options.format) {
-        case 'csv':
+        case "csv":
           return this.exportToCSV(analyses);
-        case 'json':
+        case "json":
           return this.exportToJSON(analyses);
-        case 'pdf':
+        case "pdf":
           return await this.exportToPDF(analyses);
-        case 'html':
+        case "html":
           return this.exportToHTML(analyses);
         default:
-          return { success: false, error: 'Unsupported export format' };
+          return { success: false, error: "Unsupported export format" };
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Export failed'
+        error: error instanceof Error ? error.message : "Export failed",
       };
     }
   }
@@ -78,36 +83,53 @@ export class ExportService {
   /**
    * Export single analysis from localStorage format
    */
-  async exportLocalStorageAnalysis(data: LocalStorageExportData, options: ExportOptions): Promise<void> {
+  async exportLocalStorageAnalysis(
+    data: LocalStorageExportData,
+    options: ExportOptions
+  ): Promise<void> {
     const {
       format,
       includeMetadata = true,
       includeSummary = true,
       includeDetails = true,
-      filename
+      filename,
     } = options;
 
-    const baseFilename = filename || `payment-analysis-${data.analysisId.slice(0, 8)}-${new Date().toISOString().split('T')[0]}`;
+    const baseFilename =
+      filename ||
+      `payment-analysis-${data.analysisId.slice(0, 8)}-${new Date().toISOString().split("T")[0]}`;
 
     try {
       switch (format) {
-        case 'csv':
-          this.exportLocalStorageToCSV(data, { includeMetadata, includeSummary, includeDetails }, baseFilename);
+        case "csv":
+          this.exportLocalStorageToCSV(
+            data,
+            { includeMetadata, includeSummary, includeDetails },
+            baseFilename
+          );
           break;
-        case 'json':
-          this.exportLocalStorageToJSON(data, { includeMetadata, includeSummary, includeDetails }, baseFilename);
+        case "json":
+          this.exportLocalStorageToJSON(
+            data,
+            { includeMetadata, includeSummary, includeDetails },
+            baseFilename
+          );
           break;
-        case 'pdf':
+        case "pdf":
           this.exportLocalStorageToPDF(data, { includeMetadata, includeSummary, includeDetails });
           break;
-        case 'html':
-          this.exportLocalStorageToHTML(data, { includeMetadata, includeSummary, includeDetails }, baseFilename);
+        case "html":
+          this.exportLocalStorageToHTML(
+            data,
+            { includeMetadata, includeSummary, includeDetails },
+            baseFilename
+          );
           break;
         default:
           throw new Error(`Unsupported export format: ${format}`);
       }
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error("Export failed:", error);
       throw error;
     }
   }
@@ -117,40 +139,40 @@ export class ExportService {
    */
   private exportToCSV(analyses: AnalysisWithDetails[]): ExportResult {
     const headers = [
-      'Analysis ID',
-      'Period Start',
-      'Period End',
-      'Working Days',
-      'Total Consignments',
-      'Expected Total',
-      'Paid Total',
-      'Difference',
-      'Status',
-      'Created At'
+      "Analysis ID",
+      "Period Start",
+      "Period End",
+      "Working Days",
+      "Total Consignments",
+      "Expected Total",
+      "Paid Total",
+      "Difference",
+      "Status",
+      "Created At",
     ];
 
-    const rows = analyses.map(analysis => [
+    const rows = analyses.map((analysis) => [
       analysis.id,
       analysis.period_start,
       analysis.period_end,
       analysis.working_days.toString(),
       analysis.total_consignments.toString(),
-      analysis.analysis_totals?.expected_total?.toString() || '0',
-      analysis.analysis_totals?.paid_total?.toString() || '0',
-      analysis.analysis_totals?.difference_total?.toString() || '0',
+      analysis.analysis_totals?.expected_total?.toString() || "0",
+      analysis.analysis_totals?.paid_total?.toString() || "0",
+      analysis.analysis_totals?.difference_total?.toString() || "0",
       analysis.status,
-      analysis.created_at
+      analysis.created_at,
     ]);
 
     const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(field => `"${field}"`).join(','))
-    ].join('\n');
+      headers.join(","),
+      ...rows.map((row) => row.map((field) => `"${field}"`).join(",")),
+    ].join("\n");
 
     return {
       success: true,
       data: csvContent,
-      filename: `payment-analyses-${new Date().toISOString().split('T')[0]}.csv`
+      filename: `payment-analyses-${new Date().toISOString().split("T")[0]}.csv`,
     };
   }
 
@@ -161,7 +183,7 @@ export class ExportService {
     const exportData = {
       exportDate: new Date().toISOString(),
       totalAnalyses: analyses.length,
-      analyses: analyses.map(analysis => ({
+      analyses: analyses.map((analysis) => ({
         id: analysis.id,
         periodStart: analysis.period_start,
         periodEnd: analysis.period_end,
@@ -174,23 +196,24 @@ export class ExportService {
           paid: analysis.analysis_totals?.paid_total || 0,
           difference: analysis.analysis_totals?.difference_total || 0,
         },
-        dailyEntries: analysis.daily_entries?.map(entry => ({
-          date: entry.date,
-          consignments: entry.consignments,
-          expectedTotal: entry.expected_total,
-          paidAmount: entry.paid_amount,
-          difference: entry.difference,
-          status: entry.status,
-        })) || [],
+        dailyEntries:
+          analysis.daily_entries?.map((entry) => ({
+            date: entry.date,
+            consignments: entry.consignments,
+            expectedTotal: entry.expected_total,
+            paidAmount: entry.paid_amount,
+            difference: entry.difference,
+            status: entry.status,
+          })) || [],
         createdAt: analysis.created_at,
         updatedAt: analysis.updated_at,
-      }))
+      })),
     };
 
     return {
       success: true,
       data: JSON.stringify(exportData, null, 2),
-      filename: `payment-analyses-${new Date().toISOString().split('T')[0]}.json`
+      filename: `payment-analyses-${new Date().toISOString().split("T")[0]}.json`,
     };
   }
 
@@ -199,7 +222,7 @@ export class ExportService {
    */
   private exportToHTML(analyses: AnalysisWithDetails[]): ExportResult {
     let htmlContent = this.generateHTMLTemplate();
-    
+
     htmlContent += `
     <h1>Payment Analyses Report</h1>
     <div class="metadata">
@@ -232,7 +255,7 @@ export class ExportService {
                 </div>
                 <div class="total-item">
                     <span class="label">Difference:</span>
-                    <span class="value ${(analysis.analysis_totals?.difference_total || 0) >= 0 ? 'positive' : 'negative'}">
+                    <span class="value ${(analysis.analysis_totals?.difference_total || 0) >= 0 ? "positive" : "negative"}">
                         £${(analysis.analysis_totals?.difference_total || 0).toFixed(2)}
                     </span>
                 </div>
@@ -244,7 +267,7 @@ export class ExportService {
     htmlContent += `
     </div>
     <div class="footer">
-        <p>Generated by Payment Analyzer • ${new Date().toLocaleDateString('en-GB')}</p>
+        <p>Generated by Payment Analyzer • ${new Date().toLocaleDateString("en-GB")}</p>
     </div>
 </body>
 </html>
@@ -253,7 +276,7 @@ export class ExportService {
     return {
       success: true,
       data: htmlContent,
-      filename: `payment-analyses-${new Date().toISOString().split('T')[0]}.html`
+      filename: `payment-analyses-${new Date().toISOString().split("T")[0]}.html`,
     };
   }
 
@@ -263,24 +286,15 @@ export class ExportService {
   private async exportToPDF(analyses: AnalysisWithDetails[]): Promise<ExportResult> {
     const htmlResult = this.exportToHTML(analyses);
     if (!htmlResult.success || !htmlResult.data) {
-      return { success: false, error: 'Failed to generate HTML for PDF' };
+      return { success: false, error: "Failed to generate HTML for PDF" };
     }
 
-    // Create a new window with the HTML content for printing
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(htmlResult.data as string);
-      printWindow.document.close();
-      
-      printWindow.onload = () => {
-        printWindow.print();
-        setTimeout(() => printWindow.close(), 1000);
-      };
-    }
+    // Use modern Blob URL approach instead of deprecated document.write()
+    this.printHTMLContent(htmlResult.data as string);
 
     return {
       success: true,
-      filename: htmlResult.filename?.replace('.html', '.pdf')
+      filename: htmlResult.filename?.replace(".html", ".pdf"),
     };
   }
 
@@ -295,50 +309,69 @@ export class ExportService {
     const csvRows: string[][] = [];
 
     if (options.includeMetadata) {
-      csvRows.push(['Payment Analysis Report']);
-      csvRows.push(['Analysis ID', data.analysisId]);
-      csvRows.push(['Period', data.period]);
-      csvRows.push(['Created', new Date(data.createdAt).toLocaleString()]);
+      csvRows.push(["Payment Analysis Report"]);
+      csvRows.push(["Analysis ID", data.analysisId]);
+      csvRows.push(["Period", data.period]);
+      csvRows.push(["Created", new Date(data.createdAt).toLocaleString()]);
       csvRows.push([]);
     }
 
     if (options.includeSummary) {
-      csvRows.push(['Summary']);
-      csvRows.push(['Working Days', data.summary.workingDays.toString()]);
-      csvRows.push(['Total Consignments', data.summary.totalConsignments.toString()]);
-      csvRows.push(['Total Expected', `£${data.summary.totalExpected.toFixed(2)}`]);
-      csvRows.push(['Total Paid', `£${data.summary.totalActual.toFixed(2)}`]);
-      csvRows.push(['Difference', `£${data.summary.difference.toFixed(2)}`]);
-      csvRows.push(['Average Daily', `£${data.summary.averageDaily.toFixed(2)}`]);
+      csvRows.push(["Summary"]);
+      csvRows.push(["Working Days", data.summary.workingDays.toString()]);
+      csvRows.push(["Total Consignments", data.summary.totalConsignments.toString()]);
+      csvRows.push(["Total Expected", `£${data.summary.totalExpected.toFixed(2)}`]);
+      csvRows.push(["Total Paid", `£${data.summary.totalActual.toFixed(2)}`]);
+      csvRows.push(["Difference", `£${data.summary.difference.toFixed(2)}`]);
+      csvRows.push(["Average Daily", `£${data.summary.averageDaily.toFixed(2)}`]);
       csvRows.push([]);
     }
 
     if (options.includeDetails) {
       csvRows.push([
-        'Date', 'Day', 'Consignments', 'Rate', 'Base Payment',
-        'Unloading Bonus', 'Attendance Bonus', 'Early Bonus',
-        'Pickups', 'Pickup Total', 'Expected Total', 'Paid Amount', 'Difference', 'Status'
+        "Date",
+        "Day",
+        "Consignments",
+        "Rate",
+        "Base Payment",
+        "Unloading Bonus",
+        "Attendance Bonus",
+        "Early Bonus",
+        "Pickups",
+        "Pickup Total",
+        "Expected Total",
+        "Paid Amount",
+        "Difference",
+        "Status",
       ]);
 
       Object.entries(data.dailyData)
         .sort(([a], [b]) => a.localeCompare(b))
         .forEach(([date, day]) => {
-          const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+          const dayName = new Date(date).toLocaleDateString("en-US", { weekday: "long" });
           const difference = day.paidAmount - day.expectedTotal;
-          
+
           csvRows.push([
-            date, dayName, day.consignments.toString(), `£${day.rate.toFixed(2)}`,
-            `£${day.basePayment.toFixed(2)}`, `£${day.unloadingBonus.toFixed(2)}`,
-            `£${day.attendanceBonus.toFixed(2)}`, `£${day.earlyBonus.toFixed(2)}`,
-            (day.pickups || 0).toString(), `£${(day.pickupTotal || 0).toFixed(2)}`,
-            `£${day.expectedTotal.toFixed(2)}`, `£${day.paidAmount.toFixed(2)}`,
-            `£${difference.toFixed(2)}`, day.status
+            date,
+            dayName,
+            day.consignments.toString(),
+            `£${day.rate.toFixed(2)}`,
+            `£${day.basePayment.toFixed(2)}`,
+            `£${day.unloadingBonus.toFixed(2)}`,
+            `£${day.attendanceBonus.toFixed(2)}`,
+            `£${day.earlyBonus.toFixed(2)}`,
+            (day.pickups || 0).toString(),
+            `£${(day.pickupTotal || 0).toFixed(2)}`,
+            `£${day.expectedTotal.toFixed(2)}`,
+            `£${day.paidAmount.toFixed(2)}`,
+            `£${difference.toFixed(2)}`,
+            day.status,
           ]);
         });
     }
 
-    const csvContent = csvRows.map(row => row.map(field => `"${field}"`).join(',')).join('\n');
-    this.downloadFile(csvContent, `${filename}.csv`, 'text/csv;charset=utf-8;');
+    const csvContent = csvRows.map((row) => row.map((field) => `"${field}"`).join(",")).join("\n");
+    this.downloadFile(csvContent, `${filename}.csv`, "text/csv;charset=utf-8;");
   }
 
   /**
@@ -356,7 +389,7 @@ export class ExportService {
         analysisId: data.analysisId,
         period: data.period,
         createdAt: data.createdAt,
-        exportedAt: new Date().toISOString()
+        exportedAt: new Date().toISOString(),
       };
     }
 
@@ -369,14 +402,14 @@ export class ExportService {
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([date, day]) => ({
           date,
-          dayName: new Date(date).toLocaleDateString('en-US', { weekday: 'long' }),
+          dayName: new Date(date).toLocaleDateString("en-US", { weekday: "long" }),
           ...day,
-          difference: day.paidAmount - day.expectedTotal
+          difference: day.paidAmount - day.expectedTotal,
         }));
     }
 
     const jsonContent = JSON.stringify(exportData, null, 2);
-    this.downloadFile(jsonContent, `${filename}.json`, 'application/json');
+    this.downloadFile(jsonContent, `${filename}.json`, "application/json");
   }
 
   /**
@@ -387,17 +420,9 @@ export class ExportService {
     options: { includeMetadata: boolean; includeSummary: boolean; includeDetails: boolean }
   ): void {
     const htmlContent = this.generateLocalStoragePrintHTML(data, options);
-    
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      
-      printWindow.onload = () => {
-        printWindow.print();
-        setTimeout(() => printWindow.close(), 1000);
-      };
-    }
+
+    // Use modern Blob URL approach instead of deprecated document.write()
+    this.printHTMLContent(htmlContent);
   }
 
   /**
@@ -409,29 +434,39 @@ export class ExportService {
     filename: string
   ): void {
     const htmlContent = this.generateLocalStoragePrintHTML(data, options);
-    this.downloadFile(htmlContent, `${filename}.html`, 'text/html');
+    this.downloadFile(htmlContent, `${filename}.html`, "text/html");
   }
 
   /**
    * Download file in browser
    */
   downloadFile(data: string | Blob, filename: string, mimeType?: string) {
-    const blob = typeof data === 'string' ? new Blob([data], { type: mimeType || 'text/plain' }) : data;
+    const blob =
+      typeof data === "string" ? new Blob([data], { type: mimeType || "text/plain" }) : data;
     const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
-    link.style.display = 'none';
+    link.style.display = "none";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 
   /**
    * Generate HTML template for exports
+   *
+   * NOTE: This method creates standalone HTML files with inline styles for export/print.
+   * For in-app printing, use the centralized print utilities in src/styles/base/print.css
+   * and the print-mode class approach (see layout.tsx handlePrint).
+   *
+   * Inline styles here are acceptable because:
+   * - Generated HTML is standalone (opened in new window/saved as file)
+   * - No access to app's CSS imports or build system
+   * - Must be self-contained for portability
    */
   private generateHTMLTemplate(): string {
     return `
@@ -565,7 +600,7 @@ export class ExportService {
         </div>
         <div class="summary-item">
             <div class="summary-label">Difference</div>
-            <div class="summary-value ${data.summary.difference >= 0 ? 'positive' : 'negative'}">
+            <div class="summary-value ${data.summary.difference >= 0 ? "positive" : "negative"}">
                 £${data.summary.difference.toFixed(2)}
             </div>
         </div>
@@ -599,20 +634,20 @@ export class ExportService {
       Object.entries(data.dailyData)
         .sort(([a], [b]) => a.localeCompare(b))
         .forEach(([date, day]) => {
-          const dayName = new Date(date).toLocaleDateString('en-US', { weekday: 'short' });
+          const dayName = new Date(date).toLocaleDateString("en-US", { weekday: "short" });
           const bonuses = day.unloadingBonus + day.attendanceBonus + day.earlyBonus;
           const difference = day.paidAmount - day.expectedTotal;
-          
+
           htmlContent += `
             <tr>
-                <td>${new Date(date).toLocaleDateString('en-GB')}</td>
+                <td>${new Date(date).toLocaleDateString("en-GB")}</td>
                 <td>${dayName}</td>
                 <td class="text-center">${day.consignments}</td>
                 <td class="text-right">£${day.basePayment.toFixed(2)}</td>
                 <td class="text-right">£${bonuses.toFixed(2)}</td>
                 <td class="text-right">£${day.expectedTotal.toFixed(2)}</td>
                 <td class="text-right">£${day.paidAmount.toFixed(2)}</td>
-                <td class="text-right ${difference >= 0 ? 'positive' : 'negative'}">
+                <td class="text-right ${difference >= 0 ? "positive" : "negative"}">
                     £${difference.toFixed(2)}
                 </td>
             </tr>
@@ -627,7 +662,7 @@ export class ExportService {
 
     htmlContent += `
     <div class="footer">
-        <p>Generated by Payment Analyzer • ${new Date().toLocaleDateString('en-GB')}</p>
+        <p>Generated by Payment Analyzer • ${new Date().toLocaleDateString("en-GB")}</p>
     </div>
 </body>
 </html>
@@ -641,37 +676,37 @@ export class ExportService {
    */
   async exportBatch(
     analyses: LocalStorageExportData[],
-    format: 'csv' | 'json',
+    format: "csv" | "json",
     filename: string
   ): Promise<void> {
-    if (format === 'csv') {
+    if (format === "csv") {
       const csvRows: string[][] = [];
-      
-      csvRows.push(['Batch Export - Payment Analyses']);
-      csvRows.push(['Export Date', new Date().toLocaleString()]);
-      csvRows.push(['Total Analyses', analyses.length.toString()]);
+
+      csvRows.push(["Batch Export - Payment Analyses"]);
+      csvRows.push(["Export Date", new Date().toLocaleString()]);
+      csvRows.push(["Total Analyses", analyses.length.toString()]);
       csvRows.push([]);
-      
+
       analyses.forEach((analysis, index) => {
         if (index > 0) csvRows.push([]);
-        
+
         csvRows.push([`Analysis ${index + 1}`]);
-        csvRows.push(['ID', analysis.analysisId]);
-        csvRows.push(['Period', analysis.period]);
-        csvRows.push(['Working Days', analysis.summary.workingDays.toString()]);
-        csvRows.push(['Total Expected', `£${analysis.summary.totalExpected.toFixed(2)}`]);
-        csvRows.push(['Total Paid', `£${analysis.summary.totalActual.toFixed(2)}`]);
-        csvRows.push(['Difference', `£${analysis.summary.difference.toFixed(2)}`]);
+        csvRows.push(["ID", analysis.analysisId]);
+        csvRows.push(["Period", analysis.period]);
+        csvRows.push(["Working Days", analysis.summary.workingDays.toString()]);
+        csvRows.push(["Total Expected", `£${analysis.summary.totalExpected.toFixed(2)}`]);
+        csvRows.push(["Total Paid", `£${analysis.summary.totalActual.toFixed(2)}`]);
+        csvRows.push(["Difference", `£${analysis.summary.difference.toFixed(2)}`]);
       });
-      
+
       const csvContent = csvRows
-        .map(row => row.map(field => `"${field}"`).join(','))
-        .join('\n');
-      
-      this.downloadFile(csvContent, `${filename}.csv`, 'text/csv;charset=utf-8;');
+        .map((row) => row.map((field) => `"${field}"`).join(","))
+        .join("\n");
+
+      this.downloadFile(csvContent, `${filename}.csv`, "text/csv;charset=utf-8;");
     } else {
       const jsonContent = JSON.stringify(analyses, null, 2);
-      this.downloadFile(jsonContent, `${filename}.json`, 'application/json');
+      this.downloadFile(jsonContent, `${filename}.json`, "application/json");
     }
   }
 
@@ -682,8 +717,57 @@ export class ExportService {
     // Would use html2canvas or similar library
     return {
       success: false,
-      error: 'Chart image export not yet implemented'
+      error: "Chart image export not yet implemented",
     };
+  }
+
+  /**
+   * Modern helper method to print HTML content without using deprecated document.write()
+   *
+   * Uses Blob URL approach for better security and modern browser compatibility.
+   * Properly handles print events and resource cleanup.
+   *
+   * @param htmlContent - Complete HTML document as string
+   * @private
+   */
+  private printHTMLContent(htmlContent: string): void {
+    // Create a Blob from the HTML content
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Open new window with the blob URL
+    const printWindow = window.open(blobUrl, "_blank");
+
+    if (printWindow) {
+      // Wait for content to load before triggering print
+      printWindow.addEventListener("load", () => {
+        printWindow.print();
+
+        // Clean up after print dialog closes
+        printWindow.addEventListener("afterprint", () => {
+          printWindow.close();
+          URL.revokeObjectURL(blobUrl);
+        });
+
+        // Fallback cleanup if user doesn't print (closes window manually)
+        // This prevents memory leaks from unreleased blob URLs
+        setTimeout(() => {
+          if (!printWindow.closed) {
+            printWindow.close();
+          }
+          URL.revokeObjectURL(blobUrl);
+        }, 60000); // 1 minute timeout
+      });
+
+      // Handle case where window fails to load
+      printWindow.addEventListener("error", () => {
+        printWindow.close();
+        URL.revokeObjectURL(blobUrl);
+      });
+    } else {
+      // Clean up if window couldn't be opened (popup blocker)
+      URL.revokeObjectURL(blobUrl);
+    }
   }
 }
 

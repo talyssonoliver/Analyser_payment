@@ -1,86 +1,48 @@
-# GEMINI Project Analysis: payment-analyzer-next
+# ⚠️ DEPRECATED - See payment-analyzer-next/docs/
 
-## Project Overview
+**This file has been superseded by comprehensive documentation.**
 
-This project is a modern, scalable, and production-ready version of the "Payment Analyzer Professional" application. It has been migrated from an original monolithic HTML-based system to a robust Next.js application, preserving 100% of the original business logic while introducing significant architectural and technological enhancements.
+---
 
-The application is designed for analyzing payment documents (such as PDF runsheets and invoices) and generating comprehensive financial reports. It is primarily targeted at courier services, delivery companies, and financial analysis professionals.
+## 📍 New Documentation Location
 
-### Key Technologies
+All project documentation has been unified and moved to:
 
-- **Framework**: Next.js 15 (with App Router)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (with Row Level Security)
-- **State Management**: React Query + Zustand
-- **PDF Processing**: PDF.js (with Web Workers)
-- **Data Visualization**: Recharts
-- **Animations**: Framer Motion
+**→ [`payment-analyzer-next/docs/INDEX.md`](./payment-analyzer-next/docs/INDEX.md)** ← **START HERE**
 
-### Architecture
+---
 
-The project follows a Domain-Driven Design (DDD) approach, with a clear separation of concerns between the domain, infrastructure, and application layers. The architecture is designed to be scalable, maintainable, and testable.
+## Quick Links for Gemini Users
 
-- **`src/lib/domain`**: Contains the core business logic, entities, and services.
-- **`src/lib/infrastructure`**: Manages external concerns like data access, PDF processing, and external service integrations.
-- **`src/components`**: A well-organized library of reusable UI components.
-- **`src/app/api`**: A comprehensive REST API for programmatic access to application features.
+| Topic | New Location |
+|-------|--------------|
+| **Getting Started** | [docs/GETTING_STARTED.md](./payment-analyzer-next/docs/GETTING_STARTED.md) |
+| **Architecture Overview** | [docs/ARCHITECTURE.md](./payment-analyzer-next/docs/ARCHITECTURE.md) |
+| **Development Conventions** | [docs/CONVENTIONS.md](./payment-analyzer-next/docs/CONVENTIONS.md) |
+| **Testing Infrastructure** | [docs/TESTING.md](./payment-analyzer-next/docs/TESTING.md) |
 
-## Building and Running
+---
 
-### Prerequisites
+## Build & Run Commands
 
-- Node.js 20+
-- pnpm 8+
-- A Supabase account
+```bash
+cd payment-analyzer-next
 
-### Setup
+# Development (Docker - Recommended)
+pnpm docker:build        # First-time setup
+pnpm docker:dev          # Start development
+pnpm docker:type-check   # Type checking
 
-1.  **Install dependencies:**
-    ```bash
-    cd payment-analyzer-next
-    pnpm install
-    ```
+# Traditional
+pnpm install             # Install dependencies
+pnpm dev                 # Start development
+pnpm build               # Production build
+```
 
-2.  **Configure environment variables:**
-    - Copy `.env.example` to `.env.local`.
-    - Populate the file with your Supabase URL, keys, and other required credentials.
+**Complete command reference:** [docs/DEV_GUIDE.md](./payment-analyzer-next/docs/DEV_GUIDE.md)
 
-### Development
+---
 
--   **Start the development server:**
-    ```bash
-    pnpm dev
-    ```
-    This command uses Turbopack for an optimized development experience.
-
--   **Run type checking:**
-    ```bash
-    pnpm type-check
-    ```
-
--   **Run linter:**
-    ```bash
-    pnpm lint
-    ```
-
-### Production
-
--   **Build the application:**
-    ```bash
-    pnpm build
-    ```
-    This command uses Turbopack for an optimized production build.
-
--   **Start the production server:**
-    ```bash
-    pnpm start
-    ```
-
-## Development Conventions
-
-- **Domain-Driven Design**: New features should adhere to the established DDD patterns.
-- **TypeScript**: All new code should be written in TypeScript with strict mode enabled.
-- **Testing**: The project is set up for unit, integration, and end-to-end testing. New features should include corresponding tests.
-- **Conventional Commits**: Commit messages should follow the Conventional Commits specification.
-- **API Documentation**: The `API.md` file should be updated to reflect any changes to the REST API.
+**Last Updated**: December 2025
+**Status**: DEPRECATED - Use unified docs
+**Replaced By**: `payment-analyzer-next/docs/*`

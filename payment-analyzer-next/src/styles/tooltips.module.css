@@ -1,0 +1,196 @@
+/* Tooltip Trigger */
+.tooltipTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+}
+
+/* Tooltip Container */
+.tooltip {
+  position: absolute;
+  z-index: 9999;
+  max-width: 300px;
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-gray-800);
+  color: var(--color-white);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -1px rgb(0 0 0 / 6%);
+  pointer-events: none;
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tooltipContent {
+  position: relative;
+  z-index: 1;
+}
+
+/* Arrow */
+.arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-gray-800);
+  transform: rotate(45deg);
+}
+
+/* Arrow Positioning */
+.arrow-top {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+.arrow-bottom {
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+}
+
+.arrow-left {
+  right: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+.arrow-right {
+  left: -4px;
+  top: 50%;
+  margin-top: -4px;
+}
+
+/* Info Icon */
+.infoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gray-500);
+  transition: color 0.2s ease;
+  cursor: help;
+  outline: none;
+}
+
+.infoIcon:hover,
+.infoIcon:focus {
+  color: var(--color-blue-500);
+}
+
+.infoIcon:focus-visible {
+  outline: 2px solid var(--color-blue-500);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.infoIconSvg {
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.infoIcon:hover .infoIconSvg,
+.infoIcon:focus .infoIconSvg {
+  transform: scale(1.1);
+}
+
+/* Info Icon with Label */
+.infoIconWithLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+/* Light Theme Override */
+@media (prefers-color-scheme: light) {
+  .tooltip {
+    background-color: var(--color-gray-800);
+    color: var(--color-white);
+  }
+
+  .arrow {
+    background-color: var(--color-gray-800);
+  }
+}
+
+/* Dark Theme */
+@media (prefers-color-scheme: dark) {
+  .tooltip {
+    background-color: var(--color-gray-700);
+    color: var(--color-gray-50);
+  }
+
+  .arrow {
+    background-color: var(--color-gray-700);
+  }
+
+  .label {
+    color: var(--color-gray-300);
+  }
+
+  .infoIcon {
+    color: var(--color-gray-400);
+  }
+
+  .infoIcon:hover,
+  .infoIcon:focus {
+    color: var(--color-blue-400);
+  }
+}
+
+/* Responsive */
+@media (width <= 640px) {
+  .tooltip {
+    max-width: 250px;
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1\.5) var(--spacing-2\.5);
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+    transition: none;
+  }
+
+  .infoIconSvg {
+    transition: none;
+  }
+
+  .infoIcon {
+    transition: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .tooltip {
+    border: 2px solid var(--color-white);
+  }
+
+  .infoIcon {
+    border: 1px solid currentcolor;
+    border-radius: 50%;
+    padding: 2px;
+  }
+}

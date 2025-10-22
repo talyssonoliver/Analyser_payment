@@ -1,0 +1,144 @@
+/* Welcome Screen Styles */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero {
+  margin-top: 120px;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-slate-900);
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--color-slate-900) 0%, var(--color-blue-500) 100%);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: slideInFromTop 0.8s ease-out;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: var(--color-slate-500);
+  line-height: 1.5;
+}
+
+.ctaSection {
+  margin-bottom: 50px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, var(--color-blue-500) 0%, var(--color-blue-700) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(59 130 246 / 40%);
+}
+
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: white;
+  color: var(--color-blue-500);
+  border: 2px solid var(--color-blue-500);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondaryButton:hover {
+  background: var(--color-blue-500);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.buttonIcon {
+  display: flex;
+  align-items: center;
+}
+
+.ctaSubtitle {
+  font-size: 0.875rem;
+  color: var(--color-slate-500);
+}
+
+@media (width <= 640px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    max-width: 280px;
+  }
+}

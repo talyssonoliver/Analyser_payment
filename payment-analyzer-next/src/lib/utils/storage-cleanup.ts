@@ -3,19 +3,19 @@
  */
 
 export function cleanupCorruptedStorage(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     // List of keys used by the application
     const appKeys = [
-      'payment-analyzer-auth',
-      'payment-analyzer-settings',
-      'supabase.auth.token',
-      '__ZUSTAND__'
+      "payment-analyzer-auth",
+      "payment-analyzer-settings",
+      "supabase.auth.token",
+      "__ZUSTAND__",
     ];
 
     // Check each key for corruption
-    appKeys.forEach(key => {
+    appKeys.forEach((key) => {
       try {
         const value = localStorage.getItem(key);
         if (value !== null) {
@@ -33,15 +33,15 @@ export function cleanupCorruptedStorage(): void {
     });
 
     // Also check for any keys that might contain object references
-    for (let i = 0; i < localStorage.length; i++) {
+    // Iterate backwards to safely remove items without affecting indices
+    for (let i = localStorage.length - 1; i >= 0; i--) {
       const key = localStorage.key(i);
       if (key) {
         try {
           const value = localStorage.getItem(key);
-          if (value && (value.includes('[object Object]') || value === '[object Object]')) {
+          if (value && (value.includes("[object Object]") || value === "[object Object]")) {
             console.warn(`Removing invalid localStorage value for key: ${key}`);
             localStorage.removeItem(key);
-            i--; // Adjust index since we removed an item
           }
         } catch (error) {
           console.warn(`Error checking localStorage key ${key}:`, error);
@@ -49,6 +49,6 @@ export function cleanupCorruptedStorage(): void {
       }
     }
   } catch (error) {
-    console.warn('Storage cleanup failed:', error);
+    console.warn("Storage cleanup failed:", error);
   }
 }

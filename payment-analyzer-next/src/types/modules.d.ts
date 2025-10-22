@@ -7,16 +7,16 @@ import type {
   SupabaseClient as CoreSupabaseClient,
   SupabaseSession,
   SupabaseUser,
-  StringKeyObject
-} from './core';
+  StringKeyObject,
+} from "./core";
 
-declare module 'lucide-react' {
-  import { FC, SVGProps } from 'react';
-  
+declare module "lucide-react" {
+  import { FC, SVGProps } from "react";
+
   export interface IconProps extends SVGProps<SVGSVGElement> {
     size?: string | number;
   }
-  
+
   export const ArrowLeft: FC<IconProps>;
   export const Download: FC<IconProps>;
   export const Share2: FC<IconProps>;
@@ -53,7 +53,7 @@ declare module 'lucide-react' {
   export const Zap: FC<IconProps>;
   export const Search: FC<IconProps>;
   export const BarChart3: FC<IconProps>;
-  
+
   // Missing icons from error messages
   export const XCircle: FC<IconProps>;
   export const LogIn: FC<IconProps>;
@@ -84,33 +84,33 @@ declare module 'lucide-react' {
   export const Circle: FC<IconProps>;
 }
 
-declare module '@supabase/supabase-js' {
+declare module "@supabase/supabase-js" {
   export type Session = SupabaseSession;
-  
+
   export type User = SupabaseUser;
-  
+
   export type SupabaseClient = CoreSupabaseClient;
-  
+
   export function createClient(url: string, key: string, options?: StringKeyObject): SupabaseClient;
 }
 
 // CSS module declarations - supports CSS modules with default export
-declare module '*.module.css' {
+declare module "*.module.css" {
   const content: { [className: string]: string };
   export default content;
 }
 
 // Support for side-effect CSS imports (no export) - specific files
-declare module '@/styles/analysis-enhanced.css';
-declare module '@/styles/step3-enhanced-v2.css';
-declare module '@/styles/legacy-step2.css';
-declare module '@/styles/step-navigation.css';
-declare module '@/styles/step3-enhanced.css';
-declare module '@/styles/summary-cards-fix.css';
-declare module '@/styles/toast-legacy.css';
+declare module "@/styles/step3-enhanced-v2.css";
+declare module "@/styles/step-navigation.css";
+declare module "@/styles/summary-cards-fix.css";
 
 declare global {
   interface Window {
-    pdfjsLib: import('./core').PDFJSLib;
+    pdfjsLib: import("./core").PDFJSLib;
+  }
+
+  interface WorkerGlobalScope {
+    pdfjsLib: import("./core").PDFJSLib;
   }
 }

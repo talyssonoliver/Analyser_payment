@@ -10,15 +10,15 @@
  * - All Step 2 event handlers and validation logic
  */
 
-'use client';
+"use client";
 
-import React from 'react';
-import { BarChart, FileText, File } from 'lucide-react';
-import {
-  ValidationSystem,
-  EntryCards,
-  WorkflowCards
-} from '@/components/analysis';
+import { useEffect, useRef, useState } from "react";
+import { EntryCards, WorkflowCards } from "@/components/analysis";
+import { LegacyStep2Validation } from "@/components/analysis/validation/legacy-step2-validation";
+import { AnalysisRepository } from "@/lib/repositories/analysis-repository";
+import { FileStorageService } from "@/lib/services/file-storage-service";
+import { SessionRecoveryService } from "@/lib/services/session-recovery-service";
+import { toast } from "@/lib/utils/toast";
 
 // Type definitions for the component
 interface DailyEntry {
@@ -37,39 +37,125 @@ interface DailyEntry {
 interface Step2ContainerProps {
   readonly files: File[];
   readonly entries: DailyEntry[];
+  readonly validationResult?: {
+    isValid: boolean;
+    errors: string[];
+    warnings: string[];
+  } | null;
   readonly onStepComplete: () => void;
   readonly onEditEntry?: (entryId: number) => void;
   readonly onAddMoreDays?: () => void;
   readonly onError: (error: string) => void;
+  readonly onFileRemove?: (fileName: string, fileSize: number) => void;
+  readonly onGoToStep1?: () => void;
+  readonly onFilesLoaded?: (files: File[]) => void; // New prop for loading files from DB
+  readonly userId?: string; // User ID for file operations
   readonly className?: string;
 }
 
 export function Step2Container({
   files,
   entries,
+  validationResult,
   onStepComplete,
   onEditEntry,
   onAddMoreDays,
   onError,
-  className = ''
+  onFileRemove,
+  onGoToStep1,
+  onFilesLoaded,
+  userId,
+  className = "",
 }: Step2ContainerProps) {
-  // Helper function to get file type icon based on filename
-  const getFileTypeIcon = (filename: string) => {
-    if (filename.toLowerCase().includes('runsheet')) {
-      return <BarChart className="w-5 h-5 text-blue-600" />;
-    }
-    if (filename.toLowerCase().includes('invoice')) {
-      return <FileText className="w-5 h-5 text-green-600" />;
-    }
-    return <File className="w-5 h-5 text-gray-600" />;
-  };
+  // State for file loading
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+  const hasLoadedFilesRef = useRef(false);
 
-  // Helper function to get file type label based on filename
-  const getFileTypeLabel = (filename: string) => {
-    if (filename.toLowerCase().includes('runsheet')) return 'Runsheet';
-    if (filename.toLowerCase().includes('invoice')) return 'Invoice';
-    return 'Document';
-  };
+  // Load files from database if needed
+  useEffect(() => {
+    const loadFilesFromDatabase = async () => {
+      // Don't load if:
+      // - Already loaded files in this session
+      // - Files already exist in memory
+      // - No user ID
+      // - Manual entry mode (has entries)
+      if (hasLoadedFilesRef.current || files.length > 0 || !userId || entries.length > 0) {
+        return;
+      }
+
+      const session = SessionRecoveryService.loadSession();
+      const dbAnalysisId = session?.dbAnalysisId;
+
+      // No dbAnalysisId means no files to load
+      if (!dbAnalysisId) {
+        console.log("📂 No dbAnalysisId in session - skipping file load");
+        return;
+      }
+
+      console.log("📂 Step 2: Checking for files to load from database...");
+      console.log("   - dbAnalysisId:", dbAnalysisId);
+      console.log("   - files in memory:", files.length);
+      console.log("   - userId:", userId);
+
+      try {
+        setIsLoadingFiles(true);
+
+        // Get file metadata from database
+        const analysisRepo = new AnalysisRepository();
+        const analysisResult = await analysisRepo.getAnalysisById(dbAnalysisId);
+
+        if (analysisResult.isFailure || !analysisResult.data) {
+          console.log("📂 No analysis found for ID:", dbAnalysisId);
+          return;
+        }
+
+        const analysis = analysisResult.data;
+        const fileRecords = analysis.analysis_files || [];
+
+        if (fileRecords.length === 0) {
+          console.log("📂 No files associated with this analysis");
+          return;
+        }
+
+        console.log(
+          `📂 Found ${fileRecords.length} file(s) in database:`,
+          fileRecords.map((f) => f.original_name)
+        );
+
+        // Download files from Storage
+        const fileNames = fileRecords.map((f) => f.original_name);
+        const fileStorage = new FileStorageService();
+        const downloadResult = await fileStorage.downloadAnalysisFiles(
+          userId,
+          dbAnalysisId,
+          fileNames
+        );
+
+        if (downloadResult.isFailure) {
+          console.error("📂 Failed to download files:", downloadResult.error);
+          toast.error("Failed to load files from storage");
+          return;
+        }
+
+        const downloadedFiles = downloadResult.data;
+        console.log(`✅ Successfully loaded ${downloadedFiles.length} file(s) from storage`);
+
+        // Update parent component with loaded files
+        if (onFilesLoaded) {
+          onFilesLoaded(downloadedFiles);
+          hasLoadedFilesRef.current = true;
+          toast.success(`Loaded ${downloadedFiles.length} file(s) from database`);
+        }
+      } catch (error) {
+        console.error("📂 Error loading files from database:", error);
+        toast.error("Failed to load files from database");
+      } finally {
+        setIsLoadingFiles(false);
+      }
+    };
+
+    loadFilesFromDatabase();
+  }, [files.length, entries.length, userId, onFilesLoaded]);
 
   // Handle edit entry with error handling
   const handleEditEntry = (entryId: number) => {
@@ -78,8 +164,8 @@ export function Step2Container({
         onEditEntry(entryId);
       }
     } catch (error) {
-      console.error('Error editing entry:', error);
-      onError('Failed to edit entry');
+      console.error("Error editing entry:", error);
+      onError("Failed to edit entry");
     }
   };
 
@@ -90,8 +176,8 @@ export function Step2Container({
         onAddMoreDays();
       }
     } catch (error) {
-      console.error('Error adding more days:', error);
-      onError('Failed to open add more days dialog');
+      console.error("Error adding more days:", error);
+      onError("Failed to open add more days dialog");
     }
   };
 
@@ -100,105 +186,62 @@ export function Step2Container({
     try {
       onStepComplete();
     } catch (error) {
-      console.error('Error starting analysis:', error);
-      onError('Failed to start analysis');
+      console.error("Error starting analysis:", error);
+      onError("Failed to start analysis");
     }
   };
 
   // Render Step 2 content based on workflow type
   const renderStep2Content = () => {
+    // Show loading state while files are being loaded from database
+    if (isLoadingFiles) {
+      return (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-blue-600 animate-spin"
+            >
+              <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Loading Files...</h3>
+          <p className="text-slate-600">Retrieving your uploaded files from storage</p>
+        </div>
+      );
+    }
+
     // Show rich entry cards if we have manual entries
     if (entries.length > 0) {
       return (
-        // Manual Entry Workflow - Rich Cards
         <div className="validate-content">
-          {/* Validation System */}
-          <div className="validation-section mb-6">
-            <ValidationSystem
-              files={files}
-              manualEntries={entries}
-              showDetails={true}
-            />
-          </div>
-
           {/* Rich Entry Display */}
-          <EntryCards
-            entries={entries}
-            onEditEntry={handleEditEntry}
-          />
+          <EntryCards entries={entries} onEditEntry={handleEditEntry} />
 
           {/* Workflow Cards */}
           <div className="mt-8">
-            <WorkflowCards
-              onAddMoreDays={handleAddMoreDays}
-              onAnalyzeWeek={handleAnalyzeWeek}
-            />
+            <WorkflowCards onAddMoreDays={handleAddMoreDays} onAnalyzeWeek={handleAnalyzeWeek} />
           </div>
         </div>
       );
     }
 
-    // Show file validation if we have uploaded files - Match original HTML structure
+    // Show file validation if we have uploaded files - Use LegacyStep2Validation component
     if (files.length > 0) {
       return (
-        <div className="validate-content">
-          <div className="validate-header text-center mb-6">
-            <h2 className="validate-title text-xl sm:text-2xl font-bold text-slate-900 mb-2">File Upload Validation</h2>
-            <p className="validate-subtitle text-sm sm:text-base text-slate-600">Review your uploaded documents and proceed to analysis</p>
-          </div>
-
-          {/* Validation System */}
-          <div className="validation-section mb-6">
-            <ValidationSystem
-              files={files}
-              manualEntries={entries}
-              showDetails={true}
-            />
-          </div>
-
-          {/* File List Section - Mobile responsive structure */}
-          <div className="files-section mt-4 sm:mt-6">
-            <div className="files-header flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="files-title text-base sm:text-lg font-semibold text-slate-900">Uploaded Files</h3>
-              <div className="files-count text-xs sm:text-sm text-slate-500">{files.length} files</div>
-            </div>
-            <div className="file-list enhanced-file-list space-y-3">
-              {files.map((file) => {
-                const fileSize = (file.size / 1024).toFixed(1);
-                const fileTypeIcon = getFileTypeIcon(file.name);
-                const fileTypeLabel = getFileTypeLabel(file.name);
-
-                return (
-                  <div key={`${file.name}-${file.size}-${file.lastModified}`} className="validation-file-item flex items-center gap-3 p-3 sm:gap-4 sm:p-4 bg-white border border-slate-200 rounded-lg">
-                    <div className="file-icon-wrapper flex-shrink-0 w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center">
-                      {fileTypeIcon}
-                    </div>
-                    <div className="file-details flex-1 min-w-0">
-                      <div className="file-name font-medium text-slate-900 truncate text-sm sm:text-base">{file.name}</div>
-                      <div className="file-meta flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-slate-500">
-                        <span className="file-type">{fileTypeLabel}</span>
-                        <span>•</span>
-                        <span className="file-size">{fileSize} KB</span>
-                      </div>
-                    </div>
-                    <div className="file-status flex-shrink-0">
-                      <span className="status-badge status-ready text-green-600 font-medium text-xs sm:text-sm">✓ Ready</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Workflow Actions - Mobile responsive */}
-          <div className="validation-actions mt-6 sm:mt-8">
-            <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-3 sm:mb-4 text-center">Choose Your Next Step</h3>
-            <WorkflowCards
-              onAddMoreDays={handleAddMoreDays}
-              onAnalyzeWeek={handleAnalyzeWeek}
-            />
-          </div>
-        </div>
+        <LegacyStep2Validation
+          uploadedFiles={files}
+          validationResult={validationResult}
+          onAnalyzeWeek={handleAnalyzeWeek}
+          onFileRemove={onFileRemove}
+        />
       );
     }
 
@@ -206,16 +249,28 @@ export function Step2Container({
     return (
       <div className="text-center py-8">
         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-slate-400"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </div>
         <h3 className="text-lg font-semibold text-slate-900 mb-2">No Data to Validate</h3>
-        <p className="text-slate-600">Upload PDF files or add manual entries to proceed with validation</p>
+        <p className="text-slate-600">
+          Upload PDF files or add manual entries to proceed with validation
+        </p>
         <button
-          onClick={() => onError('Please go back to upload section to add data')}
+          type="button"
+          onClick={() => onGoToStep1?.()}
           className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
         >
           Go Back to Upload
@@ -225,17 +280,8 @@ export function Step2Container({
   };
 
   return (
-    <div className={`step2-container ${className}`}>
-      <div className="validate-section">
-        <div className="validate-header text-center mb-8">
-          <h2 className="validate-title text-2xl font-bold text-slate-900 mb-2">Review Daily Data</h2>
-          <p className="validate-subtitle text-slate-600">Choose to add more days or analyze your current week</p>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 border border-slate-200">
-          {renderStep2Content()}
-        </div>
-      </div>
+    <div className={`step2-container w-full max-w-4xl mx-auto ${className || ""}`}>
+      {renderStep2Content()}
     </div>
   );
 }

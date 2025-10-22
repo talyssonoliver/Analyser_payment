@@ -36,7 +36,7 @@ export interface StoredAnalysisData {
 export class FileValidationService {
   private static readonly DEFAULT_OPTIONS: FileValidationOptions = {
     maxFileSize: 50 * 1024 * 1024, // 50MB
-    allowedTypes: ['application/pdf'],
+    allowedTypes: ["application/pdf"],
     checkForUpdates: true,
     checkForDuplicates: true,
   };
@@ -45,7 +45,7 @@ export class FileValidationService {
    * Validate uploaded files with comprehensive checks
    */
   async validateFiles(
-    files: File[], 
+    files: File[],
     options: Partial<FileValidationOptions> = {}
   ): Promise<ValidationResult> {
     const config = { ...FileValidationService.DEFAULT_OPTIONS, ...options };
@@ -57,7 +57,7 @@ export class FileValidationService {
 
     // Basic validation
     this.validateBasicRequirements(files, config, result);
-    
+
     if (config.checkForDuplicates) {
       this.checkForDuplicateFiles(files, result);
     }
@@ -78,19 +78,19 @@ export class FileValidationService {
    */
   async checkForFileUpdates(files: File[], result: ValidationResult): Promise<void> {
     try {
-      const savedAnalyses = localStorage.getItem('pa:analyses:v9');
+      const savedAnalyses = localStorage.getItem("pa:analyses:v9");
       if (!savedAnalyses) return;
 
       const analyses = JSON.parse(savedAnalyses);
       const fileMetadata = await this.extractFileMetadata(files);
-      
+
       let hasUpdates = false;
       const updatedFiles: string[] = [];
 
       // Check each file against existing analyses
       for (const file of fileMetadata) {
         const existingAnalysis = this.findAnalysisWithFile(analyses, file);
-        
+
         if (existingAnalysis) {
           const existingFile = existingAnalysis.files?.find(
             (f: FileMetadata) => f.name === file.name && f.size === file.size
@@ -99,7 +99,7 @@ export class FileValidationService {
           if (existingFile && file.lastModified > existingFile.lastModified) {
             hasUpdates = true;
             updatedFiles.push(file.name);
-            
+
             console.log(`📄 File ${file.name} updated:`, {
               previous: new Date(existingFile.lastModified).toLocaleString(),
               current: new Date(file.lastModified).toLocaleString(),
@@ -111,12 +111,12 @@ export class FileValidationService {
       if (hasUpdates) {
         result.isUpdated = true;
         result.warnings.push(
-          `File updates detected: ${updatedFiles.join(', ')}. Consider re-processing to get latest data.`
+          `File updates detected: ${updatedFiles.join(", ")}. Consider re-processing to get latest data.`
         );
       }
     } catch (error) {
-      console.error('Error checking file updates:', error);
-      result.warnings.push('Unable to check for file updates');
+      console.error("Error checking file updates:", error);
+      result.warnings.push("Unable to check for file updates");
     }
   }
 
@@ -125,11 +125,11 @@ export class FileValidationService {
    */
   findExistingAnalysis(files: File[]): string | null {
     try {
-      const savedAnalyses = localStorage.getItem('pa:analyses:v9');
+      const savedAnalyses = localStorage.getItem("pa:analyses:v9");
       if (!savedAnalyses) return null;
 
       const analyses = JSON.parse(savedAnalyses);
-      const currentFileSignatures = files.map(f => ({
+      const currentFileSignatures = files.map((f) => ({
         name: f.name,
         size: f.size,
       }));
@@ -151,7 +151,7 @@ export class FileValidationService {
 
       return null;
     } catch (error) {
-      console.error('Error finding existing analysis:', error);
+      console.error("Error finding existing analysis:", error);
       return null;
     }
   }
@@ -162,11 +162,11 @@ export class FileValidationService {
   async generateFileFingerprint(file: File): Promise<string> {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
     } catch (error) {
-      console.error('Error generating file fingerprint:', error);
+      console.error("Error generating file fingerprint:", error);
       // Fallback to simple hash
       return `${file.name}_${file.size}_${file.lastModified}`;
     }
@@ -176,12 +176,12 @@ export class FileValidationService {
    * Validate basic file requirements
    */
   private validateBasicRequirements(
-    files: File[], 
-    config: FileValidationOptions, 
+    files: File[],
+    config: FileValidationOptions,
     result: ValidationResult
   ): void {
     if (files.length === 0) {
-      result.errors.push('No files selected');
+      result.errors.push("No files selected");
       return;
     }
 
@@ -200,13 +200,13 @@ export class FileValidationService {
       // Type validation
       if (!config.allowedTypes.includes(file.type)) {
         result.errors.push(
-          `File "${file.name}" has invalid type (${file.type || 'unknown'}). Allowed types: ${config.allowedTypes.join(', ')}`
+          `File "${file.name}" has invalid type (${file.type || "unknown"}). Allowed types: ${config.allowedTypes.join(", ")}`
         );
       }
 
       // Name validation
-      if (!file.name || file.name.trim() === '') {
-        result.errors.push('File has no name');
+      if (!file.name || file.name.trim() === "") {
+        result.errors.push("File has no name");
       }
     }
   }
@@ -220,7 +220,7 @@ export class FileValidationService {
 
     for (const file of files) {
       const signature = `${file.name}_${file.size}`;
-      
+
       if (seen.has(signature)) {
         duplicates.push({
           name: file.name,
@@ -235,9 +235,7 @@ export class FileValidationService {
 
     if (duplicates.length > 0) {
       result.duplicateFiles = duplicates;
-      result.warnings.push(
-        `Duplicate files detected: ${duplicates.map(f => f.name).join(', ')}`
-      );
+      result.warnings.push(`Duplicate files detected: ${duplicates.map((f) => f.name).join(", ")}`);
     }
   }
 
@@ -245,14 +243,23 @@ export class FileValidationService {
    * Validate PDF files specifically
    */
   private async validatePDFFiles(files: File[], result: ValidationResult): Promise<void> {
-    const pdfFiles = files.filter(f => f.type === 'application/pdf');
-    
+    const pdfFiles = files.filter((f) => f.type === "application/pdf");
+
     for (const file of pdfFiles) {
+      // Skip validation if file is empty (restored from session)
+      if (file.size === 0) {
+        result.warnings.push(
+          `File "${file.name}" restored from session - skipping validation. ` +
+            "Re-upload files for fresh analysis if needed."
+        );
+        continue;
+      }
+
       try {
         // Check if file is a valid PDF by reading header
         const header = await this.readFileHeader(file, 8);
         const pdfMagic = new Uint8Array([0x25, 0x50, 0x44, 0x46]); // %PDF
-        
+
         if (!this.arrayStartsWith(header, pdfMagic)) {
           result.errors.push(`File "${file.name}" is not a valid PDF file`);
         }
@@ -280,7 +287,10 @@ export class FileValidationService {
   /**
    * Find analysis that contains a specific file
    */
-  private findAnalysisWithFile(analyses: Record<string, StoredAnalysisData>, fileMetadata: FileMetadata): StoredAnalysisData | null {
+  private findAnalysisWithFile(
+    analyses: Record<string, StoredAnalysisData>,
+    fileMetadata: FileMetadata
+  ): StoredAnalysisData | null {
     for (const analysis of Object.values(analyses)) {
       const analysisData = analysis;
       if (analysisData.files) {
@@ -318,10 +328,8 @@ export class FileValidationService {
    */
   private arraysEqual(a: unknown[], b: unknown[]): boolean {
     if (a.length !== b.length) return false;
-    return a.every((val, index) => 
-      typeof val === 'object' ? 
-        JSON.stringify(val) === JSON.stringify(b[index]) : 
-        val === b[index]
+    return a.every((val, index) =>
+      typeof val === "object" ? JSON.stringify(val) === JSON.stringify(b[index]) : val === b[index]
     );
   }
 
@@ -329,11 +337,11 @@ export class FileValidationService {
    * Format file size for display
    */
   private formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   }
 }
 

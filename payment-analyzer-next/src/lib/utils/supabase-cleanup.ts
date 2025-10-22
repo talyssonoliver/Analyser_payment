@@ -4,50 +4,52 @@
  */
 
 export function clearSupabaseStorage() {
-  if (typeof window === 'undefined') return;
-  
+  if (typeof window === "undefined") return;
+
   try {
     // Clear Supabase auth tokens and session data
     const keysToRemove: string[] = [];
-    
+
     // Find all Supabase-related keys
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && (
-        key.startsWith('supabase.auth.token') ||
-        key.startsWith('sb-') ||
-        key.includes('supabase') ||
-        key.includes('auth-token') ||
-        key.includes('access-token') ||
-        key.includes('refresh-token')
-      )) {
+      if (
+        key &&
+        (key.startsWith("supabase.auth.token") ||
+          key.startsWith("sb-") ||
+          key.includes("supabase") ||
+          key.includes("auth-token") ||
+          key.includes("access-token") ||
+          key.includes("refresh-token"))
+      ) {
         keysToRemove.push(key);
       }
     }
-    
+
     // Remove the keys
-    keysToRemove.forEach(key => {
+    keysToRemove.forEach((key) => {
       localStorage.removeItem(key);
       console.log(`Cleared invalid Supabase key: ${key}`);
     });
-    
+
     // Also clear sessionStorage
     for (let i = 0; i < sessionStorage.length; i++) {
       const key = sessionStorage.key(i);
-      if (key && (
-        key.startsWith('supabase.auth.token') ||
-        key.startsWith('sb-') ||
-        key.includes('supabase') ||
-        key.includes('auth-token')
-      )) {
+      if (
+        key &&
+        (key.startsWith("supabase.auth.token") ||
+          key.startsWith("sb-") ||
+          key.includes("supabase") ||
+          key.includes("auth-token"))
+      ) {
         sessionStorage.removeItem(key);
         console.log(`Cleared invalid Supabase session key: ${key}`);
       }
     }
-    
-    console.log('Supabase cleanup completed');
+
+    console.log("Supabase cleanup completed");
   } catch (error) {
-    console.error('Error during Supabase cleanup:', error);
+    console.error("Error during Supabase cleanup:", error);
   }
 }
 
@@ -57,13 +59,19 @@ export function clearSupabaseStorage() {
 export function hasValidSupabaseConfig(): boolean {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  
+
   if (!url || !anonKey) return false;
-  
+
   try {
     // Basic URL validation
     new URL(url);
-    return url.includes('.supabase.co') && anonKey.length > 50;
+
+    // Allow test/development environments with localhost
+    const isTestEnv = process.env.NODE_ENV === "test" || url.includes("localhost");
+    const isValidSupabaseUrl = url.includes(".supabase.co") || isTestEnv;
+    const isValidKey = anonKey.length > 20; // Less strict for test keys
+
+    return isValidSupabaseUrl && isValidKey;
   } catch {
     return false;
   }
@@ -73,11 +81,11 @@ export function hasValidSupabaseConfig(): boolean {
  * Initialize cleanup on app start
  */
 export function initSupabaseCleanup() {
-  if (typeof window === 'undefined') return;
-  
+  if (typeof window === "undefined") return;
+
   // Only run cleanup if we don't have valid config
   if (!hasValidSupabaseConfig()) {
-    console.warn('Invalid Supabase configuration detected, cleaning up old tokens...');
+    console.warn("Invalid Supabase configuration detected, cleaning up old tokens...");
     clearSupabaseStorage();
   }
 }

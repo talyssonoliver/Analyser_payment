@@ -1,0 +1,482 @@
+{
+  "audit_metadata": {
+    "audit_date": "2025-10-22",
+    "auditor": "Claude Code Security Scanner",
+    "application": "payment-analyzer-next",
+    "version": "15.5.0",
+    "total_files_scanned": 608,
+    "total_lines_of_code": 57507,
+    "audit_scope": [
+      "Security secrets and credentials",
+      "Dependency vulnerabilities",
+      "Code quality and complexity",
+      "Repository integrity",
+      "Authentication and authorization",
+      "Security anti-patterns",
+      "Compliance with security standards"
+    ]
+  },
+  "executive_summary": {
+    "overall_security_grade": "B",
+    "overall_quality_grade": "B+",
+    "total_critical_issues": 4,
+    "total_high_issues": 7,
+    "total_medium_issues": 13,
+    "total_low_issues": 8,
+    "estimated_remediation_time": "7-9 days",
+    "deployment_recommendation": "Do not deploy to production until critical and high severity issues are resolved",
+    "key_strengths": [
+      "Strong TypeScript usage with 837 type definitions",
+      "Comprehensive RLS policies on all user tables",
+      "Supabase Auth with JWT and email verification",
+      "No hardcoded secrets in source code",
+      "Clean git history with no committed secrets",
+      "Good architectural separation (services, repositories, domain)",
+      "Proper test infrastructure with 396 test files",
+      "No SQL injection vulnerabilities detected"
+    ],
+    "critical_areas_requiring_attention": [
+      "4 production credentials exposed in .env.local file",
+      "CORS configured to allow wildcard origins",
+      "Missing Content-Security-Policy and HSTS headers",
+      "1 XSS vulnerability in export utility",
+      "Rate limiting middleware not applied to any routes",
+      "Open redirect vulnerability in auth callback"
+    ]
+  },
+  "findings_by_category": {
+    "secrets_and_credentials": {
+      "severity": "CRITICAL",
+      "grade": "D",
+      "total_issues": 4,
+      "critical": 4,
+      "high": 1,
+      "medium": 1,
+      "low": 2,
+      "summary": "4 production credentials exposed in .env.local file including service_role key, NextAuth secret, and Supabase access token",
+      "issues": [
+        {
+          "id": "SEC-001",
+          "severity": "CRITICAL",
+          "title": "Supabase Service Role Key Exposed",
+          "description": "Service role key bypasses all Row Level Security policies",
+          "file": ".env.local",
+          "line": 4,
+          "cvss_score": 9.8,
+          "cwe": "CWE-798: Use of Hard-coded Credentials",
+          "recommendation": "Rotate key immediately in Supabase dashboard, audit database logs, never commit this key",
+          "estimated_fix_time": "30 minutes"
+        },
+        {
+          "id": "SEC-002",
+          "severity": "CRITICAL",
+          "title": "NextAuth Secret Exposed",
+          "description": "Exposed secret allows session hijacking and token forgery",
+          "file": ".env.local",
+          "line": 12,
+          "cvss_score": 8.5,
+          "cwe": "CWE-798: Use of Hard-coded Credentials",
+          "recommendation": "Generate new secret (openssl rand -base64 32), update production, invalidate sessions",
+          "estimated_fix_time": "30 minutes"
+        },
+        {
+          "id": "SEC-003",
+          "severity": "CRITICAL",
+          "title": "Supabase Access Token Exposed",
+          "description": "Personal access token grants management API access",
+          "file": ".env.local",
+          "line": 34,
+          "cvss_score": 8.0,
+          "cwe": "CWE-798: Use of Hard-coded Credentials",
+          "recommendation": "Revoke token in Supabase dashboard, generate new token, review access logs",
+          "estimated_fix_time": "20 minutes"
+        },
+        {
+          "id": "SEC-004",
+          "severity": "HIGH",
+          "title": "Supabase Anon Key Exposed",
+          "description": "Production anon key committed to filesystem",
+          "file": ".env.local",
+          "line": 3,
+          "cvss_score": 6.5,
+          "cwe": "CWE-522: Insufficiently Protected Credentials",
+          "recommendation": "Rotate key, ensure .env.local never committed",
+          "estimated_fix_time": "15 minutes"
+        }
+      ],
+      "remediation_priority": 1,
+      "compliance_impact": "SOC 2 CC6.1, CC6.6 - FAIL"
+    },
+    "dependency_vulnerabilities": {
+      "severity": "MODERATE",
+      "grade": "B-",
+      "total_dependencies": 849,
+      "total_vulnerabilities": 1,
+      "moderate": 1,
+      "outdated_packages": 31,
+      "deprecated_packages": 1,
+      "summary": "1 moderate CVE in Vite, 31 outdated packages, 1 deprecated package",
+      "issues": [
+        {
+          "id": "DEP-001",
+          "severity": "MEDIUM",
+          "title": "CVE-2025-62522: Vite Server.fs.deny Bypass on Windows",
+          "description": "Files denied by server.fs.deny sent if URL ends with backslash on Windows",
+          "package": "vite",
+          "current_version": "7.1.7",
+          "fixed_version": "7.1.11",
+          "cvss_score": 5.3,
+          "cwe": "CWE-22: Path Traversal",
+          "recommendation": "Update vite to 7.1.11",
+          "estimated_fix_time": "10 minutes"
+        },
+        {
+          "id": "DEP-002",
+          "severity": "MEDIUM",
+          "title": "pdfjs-dist 147 versions behind",
+          "description": "PDF parsing library significantly outdated (5.4.149 → 5.4.296)",
+          "package": "pdfjs-dist",
+          "current_version": "5.4.149",
+          "latest_version": "5.4.296",
+          "recommendation": "Update to 5.4.296, test PDF parsing thoroughly",
+          "estimated_fix_time": "2 hours"
+        }
+      ],
+      "remediation_priority": 2,
+      "compliance_impact": "SOC 2 CC7.1 - PARTIAL"
+    },
+    "code_quality": {
+      "severity": "MEDIUM",
+      "grade": "B+",
+      "total_files_analyzed": 261,
+      "total_issues": 28,
+      "high_complexity_functions": 9,
+      "large_files": 15,
+      "any_type_usages": 11,
+      "console_statements": 673,
+      "summary": "Good architecture with some large files, excessive console logging, and type safety gaps",
+      "issues": [
+        {
+          "id": "QUAL-001",
+          "severity": "HIGH",
+          "title": "XSS Vulnerability in Export Utility",
+          "description": "innerHTML used without sanitization in print functionality",
+          "file": "src/lib/utils/export-utils.ts",
+          "line": 294,
+          "cvss_score": 5.4,
+          "cwe": "CWE-79: Cross-site Scripting",
+          "recommendation": "Sanitize HTML with DOMPurify or use DOM manipulation",
+          "estimated_fix_time": "1 hour"
+        },
+        {
+          "id": "QUAL-002",
+          "severity": "MEDIUM",
+          "title": "673 Console Statements in Production Code",
+          "description": "Excessive console logging causes performance degradation and potential data leakage",
+          "recommendation": "Replace with structured logger from lib/utils/logger.ts",
+          "estimated_fix_time": "4-6 hours"
+        },
+        {
+          "id": "QUAL-003",
+          "severity": "MEDIUM",
+          "title": "analysis-repository.ts Too Large (1389 lines)",
+          "description": "File is 2.7x recommended maximum size",
+          "file": "src/lib/repositories/analysis-repository.ts",
+          "recommendation": "Split into 4 repositories by entity",
+          "estimated_fix_time": "1 day"
+        }
+      ],
+      "remediation_priority": 3,
+      "compliance_impact": "SOC 2 CC8.1 - PARTIAL"
+    },
+    "security_patterns": {
+      "severity": "HIGH",
+      "grade": "B",
+      "authentication_score": "B+",
+      "authorization_score": "B-",
+      "total_issues": 6,
+      "critical": 0,
+      "high": 2,
+      "medium": 2,
+      "low": 2,
+      "summary": "Good authentication foundation but missing critical security headers and rate limiting",
+      "issues": [
+        {
+          "id": "SEC-005",
+          "severity": "HIGH",
+          "title": "CORS Wildcard Origin Allowed",
+          "description": "CORS allows all origins (*) if ALLOWED_ORIGINS not set",
+          "file": "src/lib/middleware/auth.ts",
+          "line": 255,
+          "cvss_score": 7.0,
+          "cwe": "CWE-942: Overly Permissive Cross-domain Whitelist",
+          "recommendation": "Set explicit ALLOWED_ORIGINS, never use wildcard in production",
+          "estimated_fix_time": "30 minutes"
+        },
+        {
+          "id": "SEC-006",
+          "severity": "HIGH",
+          "title": "Rate Limiting Not Applied",
+          "description": "Middleware exists but not used on any API routes",
+          "file": "src/lib/middleware/auth.ts",
+          "line": 86,
+          "cvss_score": 7.5,
+          "cwe": "CWE-307: Improper Restriction of Excessive Authentication Attempts",
+          "recommendation": "Apply withAuth to all routes, use Redis for production",
+          "estimated_fix_time": "4 hours"
+        },
+        {
+          "id": "SEC-007",
+          "severity": "MEDIUM",
+          "title": "Open Redirect Vulnerability",
+          "description": "Unvalidated redirect_to parameter in auth callback",
+          "file": "src/app/(auth)/callback/page.tsx",
+          "line": 113,
+          "cvss_score": 4.3,
+          "cwe": "CWE-601: Open Redirect",
+          "recommendation": "Validate redirect_to against allowlist",
+          "estimated_fix_time": "1 hour"
+        },
+        {
+          "id": "SEC-008",
+          "severity": "HIGH",
+          "title": "Missing Content-Security-Policy Header",
+          "description": "No CSP header configured to prevent XSS attacks",
+          "cvss_score": 6.5,
+          "cwe": "CWE-693: Protection Mechanism Failure",
+          "recommendation": "Add CSP header to middleware",
+          "estimated_fix_time": "2 hours"
+        },
+        {
+          "id": "SEC-009",
+          "severity": "HIGH",
+          "title": "Missing HSTS Header",
+          "description": "No Strict-Transport-Security header to enforce HTTPS",
+          "cvss_score": 5.0,
+          "cwe": "CWE-319: Cleartext Transmission of Sensitive Information",
+          "recommendation": "Add HSTS header with max-age=31536000",
+          "estimated_fix_time": "30 minutes"
+        }
+      ],
+      "remediation_priority": 1,
+      "compliance_impact": "SOC 2 CC6.1, CC6.6, CC6.7 - FAIL"
+    },
+    "repository_integrity": {
+      "severity": "MEDIUM",
+      "grade": "B-",
+      "repo_size_mb": 10.4,
+      "uncommitted_changes": 417,
+      "total_issues": 5,
+      "summary": "Well-maintained repository with documentation sprawl and uncommitted changes",
+      "issues": [
+        {
+          "id": "REPO-001",
+          "severity": "HIGH",
+          "title": "417 Uncommitted Changes",
+          "description": "Large uncommitted changeset suggests incomplete work",
+          "recommendation": "Create atomic commits for logical groups",
+          "estimated_fix_time": "2-3 hours"
+        },
+        {
+          "id": "REPO-002",
+          "severity": "MEDIUM",
+          "title": "Documentation Sprawl (22 root MD files)",
+          "description": "Fix documentation scattered at repository root",
+          "recommendation": "Move to docs/archive/fixes/",
+          "estimated_fix_time": "30 minutes"
+        }
+      ],
+      "remediation_priority": 4,
+      "compliance_impact": "SOC 2 CC8.1 - PARTIAL"
+    }
+  },
+  "prioritized_remediation_plan": {
+    "phase_1_critical": {
+      "timeline": "Complete within 24 hours",
+      "estimated_effort": "3-4 hours",
+      "issues": [
+        "SEC-001: Rotate Supabase Service Role Key",
+        "SEC-002: Rotate NextAuth Secret",
+        "SEC-003: Revoke Supabase Access Token",
+        "SEC-004: Rotate Supabase Anon Key"
+      ],
+      "success_criteria": "All production credentials rotated, old keys revoked, access logs audited"
+    },
+    "phase_2_security_headers": {
+      "timeline": "Complete within 48 hours",
+      "estimated_effort": "3-4 hours",
+      "issues": [
+        "SEC-005: Fix CORS Configuration",
+        "SEC-008: Add Content-Security-Policy",
+        "SEC-009: Add HSTS Header",
+        "SEC-007: Fix Open Redirect"
+      ],
+      "success_criteria": "All security headers present, CORS properly configured, redirect validated"
+    },
+    "phase_3_rate_limiting": {
+      "timeline": "Complete within 1 week",
+      "estimated_effort": "4-6 hours",
+      "issues": [
+        "SEC-006: Apply Rate Limiting to All Routes",
+        "Implement Redis-based rate limiting"
+      ],
+      "success_criteria": "Rate limiting active on all protected routes, tested under load"
+    },
+    "phase_4_dependencies": {
+      "timeline": "Complete within 1 week",
+      "estimated_effort": "2-3 hours",
+      "issues": [
+        "DEP-001: Update Vite to 7.1.11",
+        "DEP-002: Update pdfjs-dist",
+        "Update 31 outdated packages"
+      ],
+      "success_criteria": "No vulnerabilities in pnpm audit, all critical packages updated"
+    },
+    "phase_5_code_quality": {
+      "timeline": "Complete within 2 weeks",
+      "estimated_effort": "5-7 days",
+      "issues": [
+        "QUAL-001: Fix XSS in export-utils.ts",
+        "QUAL-002: Replace console statements with logger",
+        "QUAL-003: Split large files"
+      ],
+      "success_criteria": "XSS fixed, console statements <50, largest file <700 lines"
+    },
+    "phase_6_repository": {
+      "timeline": "Complete within 1 week",
+      "estimated_effort": "3-4 hours",
+      "issues": [
+        "REPO-001: Commit uncommitted changes",
+        "REPO-002: Organize documentation"
+      ],
+      "success_criteria": "Clean git status, documentation organized in docs/"
+    }
+  },
+  "compliance_assessment": {
+    "soc2_trust_services_criteria": {
+      "cc6_1_logical_and_physical_access": {
+        "status": "FAIL",
+        "grade": "D",
+        "issues": [
+          "Production credentials exposed in .env.local",
+          "Service role key bypasses all RLS policies",
+          "No MFA implementation"
+        ],
+        "requirements_met": 2,
+        "requirements_total": 5,
+        "recommendation": "Rotate all credentials, implement secret management solution, add MFA"
+      },
+      "cc6_6_logical_access_security_measures": {
+        "status": "PARTIAL",
+        "grade": "C+",
+        "issues": [
+          "CORS allows wildcard origins",
+          "Rate limiting not applied",
+          "Open redirect vulnerability"
+        ],
+        "requirements_met": 4,
+        "requirements_total": 7,
+        "recommendation": "Fix CORS, apply rate limiting, validate redirects, add account lockout"
+      },
+      "cc6_7_infrastructure_and_software": {
+        "status": "PARTIAL",
+        "grade": "B-",
+        "issues": [
+          "Missing CSP and HSTS headers",
+          "1 CVE in dependencies"
+        ],
+        "requirements_met": 5,
+        "requirements_total": 6,
+        "recommendation": "Add security headers, update vulnerable dependencies"
+      },
+      "cc7_1_system_operations": {
+        "status": "PARTIAL",
+        "grade": "B",
+        "issues": [
+          "31 outdated packages",
+          "No documented patch management process"
+        ],
+        "requirements_met": 4,
+        "requirements_total": 5,
+        "recommendation": "Update dependencies, document update process"
+      },
+      "cc8_1_change_management": {
+        "status": "PARTIAL",
+        "grade": "B-",
+        "issues": [
+          "417 uncommitted changes",
+          "Large files (>1000 lines) difficult to review"
+        ],
+        "requirements_met": 3,
+        "requirements_total": 5,
+        "recommendation": "Create atomic commits, split large files"
+      }
+    },
+    "iso_27001_controls": {
+      "a_9_2_user_access_management": {
+        "status": "PARTIAL",
+        "grade": "B",
+        "compliant": true,
+        "notes": "Good RLS policies and authentication, but missing MFA and account lockout"
+      },
+      "a_12_6_technical_vulnerability_management": {
+        "status": "PARTIAL",
+        "grade": "B-",
+        "compliant": false,
+        "notes": "1 CVE present, 31 outdated packages need updating"
+      },
+      "a_14_2_security_in_development": {
+        "status": "GOOD",
+        "grade": "B+",
+        "compliant": true,
+        "notes": "Good test coverage, proper code review process implied by git history"
+      },
+      "a_18_1_compliance": {
+        "status": "PARTIAL",
+        "grade": "C+",
+        "compliant": false,
+        "notes": "No documented security policies, no audit logging"
+      }
+    },
+    "overall_compliance_score": "C+ (Needs Improvement)",
+    "certification_readiness": "Not Ready - 4 critical issues must be resolved before SOC 2 Type I audit"
+  },
+  "automated_remediation": {
+    "available": true,
+    "script_path": "docs/AUTOMATED_REMEDIATION.sh",
+    "remediable_issues": 18,
+    "manual_issues": 14,
+    "estimated_automation_time": "30 minutes",
+    "manual_effort_time": "4-5 days"
+  },
+  "recommendations": {
+    "immediate_actions": [
+      "Rotate all 4 exposed production credentials within 24 hours",
+      "Add CSP and HSTS security headers",
+      "Fix CORS configuration to use explicit origins",
+      "Apply rate limiting to all API routes",
+      "Fix open redirect vulnerability in auth callback"
+    ],
+    "short_term": [
+      "Update Vite to fix CVE-2025-62522",
+      "Sanitize HTML in export utility to fix XSS",
+      "Replace console statements with structured logging",
+      "Commit uncommitted changes in logical groups",
+      "Organize documentation into proper structure"
+    ],
+    "medium_term": [
+      "Split large files (analysis-repository.ts, history/page.tsx)",
+      "Update 31 outdated packages",
+      "Implement MFA support",
+      "Add virus scanning for file uploads",
+      "Implement audit logging for security events"
+    ],
+    "long_term": [
+      "Implement automated secret rotation",
+      "Add security monitoring and alerting",
+      "Conduct quarterly security audits",
+      "Implement RBAC if multiple user roles needed",
+      "Add security testing to CI/CD pipeline"
+    ]
+  }
+}

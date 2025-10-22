@@ -3,14 +3,13 @@
  * Pure React component replacing HTML string generation from step3-content-generator.ts lines 252-325 and 422-500
  */
 
-import React from 'react';
-import { AnalysisResult } from './types';
-import { ManualEntry } from '@/types/core';
+import type { ManualEntry } from "@/types/core";
+import type { AnalysisResult } from "./types";
 
 interface Step3DailyCardProps {
-  result?: AnalysisResult;
-  manualEntry?: ManualEntry;
-  isManualEntry: boolean;
+  readonly result?: AnalysisResult;
+  readonly manualEntry?: ManualEntry;
+  readonly isManualEntry: boolean;
 }
 
 export function Step3DailyCard({ result, manualEntry, isManualEntry }: Step3DailyCardProps) {
@@ -21,13 +20,13 @@ export function Step3DailyCard({ result, manualEntry, isManualEntry }: Step3Dail
     const bonuses = (manualEntry.earlyArrive || 0) + (manualEntry.loadingBonus || 0);
 
     const date = new Date(manualEntry.date);
-    const formattedDate = date.toLocaleDateString('en-GB', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short'
+    const formattedDate = date.toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
     });
 
-    const dayName = date.toLocaleDateString('en-GB', { weekday: 'short' });
+    const dayName = date.toLocaleDateString("en-GB", { weekday: "short" });
 
     return (
       <div className="step2-entry-card enhanced-daily-card">
@@ -76,13 +75,17 @@ export function Step3DailyCard({ result, manualEntry, isManualEntry }: Step3Dail
                 {(manualEntry.loadingBonus || 0) > 0 && (
                   <div className="breakdown-item">
                     <span className="item-label">Loading</span>
-                    <span className="item-value">£{(manualEntry.loadingBonus || 0).toFixed(2)}</span>
+                    <span className="item-value">
+                      £{(manualEntry.loadingBonus || 0).toFixed(2)}
+                    </span>
                   </div>
                 )}
                 {(manualEntry.attendanceBonus || 0) > 0 && (
                   <div className="breakdown-item">
                     <span className="item-label">Attend</span>
-                    <span className="item-value">£{(manualEntry.attendanceBonus || 0).toFixed(2)}</span>
+                    <span className="item-value">
+                      £{(manualEntry.attendanceBonus || 0).toFixed(2)}
+                    </span>
                   </div>
                 )}
                 {(manualEntry.earlyArrive || 0) > 0 && (
@@ -102,9 +105,9 @@ export function Step3DailyCard({ result, manualEntry, isManualEntry }: Step3Dail
   if (result) {
     // Analysis result card rendering (lines 252-325)
     const difference = (result.paidAmount || 0) - (result.expectedTotal || 0);
-    const differenceClass = difference >= 0 ? 'positive' : 'negative';
-    const differenceIcon = difference >= 0 ? '↗️' : '↘️';
-    const dayName = new Date(result.date).toLocaleDateString('en-GB', { weekday: 'short' });
+    const differenceClass = difference >= 0 ? "positive" : "negative";
+    const differenceIcon = difference >= 0 ? "↗️" : "↘️";
+    const dayName = new Date(result.date).toLocaleDateString("en-GB", { weekday: "short" });
 
     return (
       <div className="step2-entry-card enhanced-daily-card">

@@ -1,20 +1,29 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type * as React from "react";
+import { DayPicker } from "react-day-picker";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+// Extracted Chevron component to prevent recreation on every render
+function ChevronComponent({
+  orientation,
+}: Readonly<{
+  className?: string;
+  size?: number;
+  disabled?: boolean;
+  orientation?: "left" | "right" | "up" | "down";
+}>) {
+  if (orientation === "left") {
+    return <ChevronLeft className="h-4 w-4" />;
+  }
+  return <ChevronRight className="h-4 w-4" />;
+}
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}: CalendarProps) {
+function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -33,8 +42,7 @@ function Calendar({
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
-        head_cell:
-          "text-slate-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-slate-400",
+        head_cell: "text-slate-500 rounded-md w-9 font-normal text-[0.8rem] dark:text-slate-400",
         row: "flex w-full mt-2",
         cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-slate-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 dark:[&:has([aria-selected])]:bg-slate-800",
         day: cn(
@@ -52,17 +60,12 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: (props) => {
-          if (props.orientation === "left") {
-            return <ChevronLeft className="h-4 w-4" />;
-          }
-          return <ChevronRight className="h-4 w-4" />;
-        },
+        Chevron: ChevronComponent,
       }}
       {...props}
     />
-  )
+  );
 }
-Calendar.displayName = "Calendar"
+Calendar.displayName = "Calendar";
 
-export { Calendar }
+export { Calendar };

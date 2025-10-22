@@ -9,7 +9,7 @@ export enum LogLevel {
   INFO = 1,
   WARN = 2,
   ERROR = 3,
-  NONE = 4
+  NONE = 4,
 }
 
 export interface LoggerConfig {
@@ -21,16 +21,16 @@ export interface LoggerConfig {
 
 class Logger {
   private config: LoggerConfig;
-  private isDevelopment: boolean;
+  private readonly isDevelopment: boolean;
 
   constructor(config?: Partial<LoggerConfig>) {
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    this.isDevelopment = process.env.NODE_ENV === "development";
 
     this.config = {
       level: this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN,
       enableTimestamps: true,
       enableColors: true,
-      ...config
+      ...config,
     };
   }
 
@@ -46,7 +46,7 @@ class Logger {
    */
   debug(message: string, ...args: unknown[]): void {
     if (this.config.level <= LogLevel.DEBUG) {
-      this.log('DEBUG', message, args, console.debug);
+      this.log("DEBUG", message, args, console.debug);
     }
   }
 
@@ -55,7 +55,7 @@ class Logger {
    */
   info(message: string, ...args: unknown[]): void {
     if (this.config.level <= LogLevel.INFO) {
-      this.log('INFO', message, args, console.info);
+      this.log("INFO", message, args, console.info);
     }
   }
 
@@ -64,20 +64,19 @@ class Logger {
    */
   warn(message: string, ...args: unknown[]): void {
     if (this.config.level <= LogLevel.WARN) {
-      this.log('WARN', message, args, console.warn);
+      this.log("WARN", message, args, console.warn);
     }
   }
 
   /**
    * Error level logging - always shown unless NONE
    */
-  error(message: string, error?: Error | unknown, ...args: unknown[]): void {
+  error(message: string, error?: unknown, ...args: unknown[]): void {
     if (this.config.level <= LogLevel.ERROR) {
-      const errorInfo = error instanceof Error
-        ? { message: error.message, stack: error.stack }
-        : error;
+      const errorInfo =
+        error instanceof Error ? { message: error.message, stack: error.stack } : error;
 
-      this.log('ERROR', message, [errorInfo, ...args], console.error);
+      this.log("ERROR", message, [errorInfo, ...args], console.error);
     }
   }
 
@@ -126,16 +125,12 @@ class Logger {
     args: unknown[],
     logFn: (...args: unknown[]) => void
   ): void {
-    const timestamp = this.config.enableTimestamps
-      ? `[${new Date().toISOString()}]`
-      : '';
+    const timestamp = this.config.enableTimestamps ? `[${new Date().toISOString()}]` : "";
 
-    const prefix = this.config.prefix ? `[${this.config.prefix}]` : '';
+    const prefix = this.config.prefix ? `[${this.config.prefix}]` : "";
     const levelTag = `[${level}]`;
 
-    const fullMessage = [timestamp, prefix, levelTag, message]
-      .filter(Boolean)
-      .join(' ');
+    const fullMessage = [timestamp, prefix, levelTag, message].filter(Boolean).join(" ");
 
     if (args.length > 0) {
       logFn(fullMessage, ...args);
@@ -150,9 +145,7 @@ class Logger {
   child(prefix: string): Logger {
     return new Logger({
       ...this.config,
-      prefix: this.config.prefix
-        ? `${this.config.prefix}:${prefix}`
-        : prefix
+      prefix: this.config.prefix ? `${this.config.prefix}:${prefix}` : prefix,
     });
   }
 
@@ -182,7 +175,7 @@ export { Logger };
 export const logDebug = (message: string, ...args: unknown[]) => logger.debug(message, ...args);
 export const logInfo = (message: string, ...args: unknown[]) => logger.info(message, ...args);
 export const logWarn = (message: string, ...args: unknown[]) => logger.warn(message, ...args);
-export const logError = (message: string, error?: Error | unknown, ...args: unknown[]) =>
+export const logError = (message: string, error?: unknown, ...args: unknown[]) =>
   logger.error(message, error, ...args);
 export const logPerf = (operation: string, duration: number, metadata?: Record<string, unknown>) =>
   logger.perf(operation, duration, metadata);

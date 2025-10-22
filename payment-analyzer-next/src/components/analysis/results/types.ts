@@ -3,7 +3,7 @@
  * These match the interfaces from legacy step3-content-generator.ts
  */
 
-import { ManualEntry } from '@/types/core';
+import type { ManualEntry } from "@/types/core";
 
 export interface AnalysisResult {
   date: string;
@@ -23,6 +23,14 @@ export interface AnalysisTotals {
   workingDays: number;
   totalConsignments: number;
   differenceTotal: number;
+  pickupTotal?: number;
+  bonusTotal?: number;
+  unloadingTotal?: number;
+  attendanceTotal?: number;
+  earlyTotal?: number;
+  pickupCount?: number;
+  baseTotal?: number;
+  averageDaily?: number;
 }
 
 export interface AnalysisMetadata {
@@ -49,7 +57,7 @@ export interface WeekGroup {
 export interface GlobalState {
   lastAnalysisData: AnalysisData | null;
   manualEntries: ManualEntry[];
-  currentInputMethod: 'upload' | 'manual';
+  currentInputMethod: "upload" | "manual";
   hasBeenAnalyzed: boolean;
   uploadedFiles: File[];
 }

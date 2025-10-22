@@ -1,0 +1,136 @@
+/**
+ * Report KPI Grid Styles
+ * Unified styling for all KPI card displays across report views
+ */
+
+.kpiGrid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.kpiGrid.cols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.kpiGrid.cols4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (width >= 640px) {
+  .kpiGrid.cols4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width >= 1024px) {
+  .kpiGrid.cols4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.kpiCard {
+  background: linear-gradient(135deg, white 0%, var(--color-slate-50) 100%);
+  border: 1px solid var(--color-slate-200);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: default;
+  position: relative;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgb(0 0 0 / 15%);
+  border-color: var(--color-blue-500);
+}
+
+.kpiCard.compact {
+  padding: 1rem;
+  min-width: 140px;
+}
+
+.kpiCardIcon {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.kpiCardContent {
+  text-align: center;
+}
+
+.kpiCardLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-slate-700);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.kpiCardValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-slate-900);
+  margin-bottom: 0.25rem;
+  font-family: var(--font-mono, "SF Mono", "Monaco", "Cascadia Code", monospace);
+}
+
+.kpiCardDescription {
+  font-size: 0.75rem;
+  color: var(--color-slate-500);
+  font-weight: 500;
+}
+
+/* Tone-specific styles */
+.kpiCard.toneSuccess {
+  background: linear-gradient(135deg, var(--color-green-50) 0%, var(--color-green-100) 100%);
+  border-color: var(--color-green-500);
+}
+
+.kpiCard.toneSuccess .kpiCardValue {
+  color: var(--color-green-600);
+}
+
+.kpiCard.toneDanger {
+  background: linear-gradient(135deg, var(--color-red-50) 0%, var(--color-red-100) 100%);
+  border-color: var(--color-red-500);
+}
+
+.kpiCard.toneDanger .kpiCardValue {
+  color: var(--color-red-600);
+}
+
+.kpiCard.toneInfo {
+  background: linear-gradient(135deg, var(--color-sky-50) 0%, var(--color-sky-100) 100%);
+  border-color: var(--color-sky-600);
+}
+
+.kpiCard.toneInfo .kpiCardValue {
+  color: var(--color-sky-900);
+}
+
+.kpiCard.tonePrimary {
+  background: linear-gradient(135deg, var(--color-slate-50) 0%, var(--color-slate-200) 100%);
+  border-color: var(--color-blue-500);
+}
+
+.kpiCard.tonePrimary .kpiCardValue {
+  color: var(--color-blue-800);
+}
+
+/* Mobile responsive */
+@media (width <= 640px) {
+  .kpiGrid {
+    gap: 0.75rem;
+  }
+
+  .kpiCard {
+    padding: 1rem;
+  }
+
+  .kpiCardValue {
+    font-size: 1.25rem;
+  }
+}
