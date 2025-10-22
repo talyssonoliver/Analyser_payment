@@ -5,7 +5,6 @@
 
 import { AnalysisStorageService } from "./analysis-storage-service";
 import { CompressedStorageService } from "./compressed-storage-service";
-import type { Step3AnalysisData } from "./step3-analysis-service";
 
 interface SaveProgress {
   attempt: number;

@@ -190,7 +190,7 @@ export function useDashboardData() {
         }
 
         // Calculate executive summary data
-        const localAnalyses = AnalysisStorageService.loadAnalyses();
+        const _localAnalyses = AnalysisStorageService.loadAnalyses();
 
         // Use currentWeek for weekly mode, currentMonth for monthly mode
         const referenceDate = viewMode === "weekly" ? currentWeek : currentMonth;

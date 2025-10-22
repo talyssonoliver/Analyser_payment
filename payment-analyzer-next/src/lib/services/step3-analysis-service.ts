@@ -32,6 +32,24 @@ interface DailyDataEntry {
   status: string;
 }
 
+interface HistoricalDailyEntry {
+  date: string;
+  consignments: number;
+  expected_total: number;
+  base_payment: number;
+  unloading_bonus: number;
+  attendance_bonus: number;
+  early_bonus: number;
+  rate: number;
+  paid_amount: number;
+  pickup_total?: number;
+  pickups?: number;
+}
+
+interface HistoricalAnalysis {
+  daily_entries?: HistoricalDailyEntry[];
+}
+
 export interface Step3AnalysisData {
   id: string;
   totals: PaymentTotals;
@@ -177,7 +195,7 @@ export class Step3AnalysisService {
    */
   private static mergeRunsheetData(
     current: DailyDataEntry,
-    historicalEntry: any,
+    historicalEntry: HistoricalDailyEntry,
     date: string
   ): DailyDataEntry {
     console.log(`  📊 [HISTORICAL MERGE] Merging runsheet data for ${date}:`, {
@@ -202,7 +220,7 @@ export class Step3AnalysisService {
    */
   private static mergeInvoiceData(
     current: DailyDataEntry,
-    historicalEntry: any,
+    historicalEntry: HistoricalDailyEntry,
     date: string
   ): DailyDataEntry {
     console.log(`  💰 [HISTORICAL MERGE] Merging invoice data for ${date}:`, {
@@ -224,7 +242,7 @@ export class Step3AnalysisService {
    */
   private static processSingleHistoricalEntry(
     mergedData: Record<string, DailyDataEntry>,
-    historicalEntry: any,
+    historicalEntry: HistoricalDailyEntry,
     hasRunsheet: boolean,
     hasInvoice: boolean
   ): number {
@@ -256,7 +274,7 @@ export class Step3AnalysisService {
    */
   private static processHistoricalEntries(
     mergedData: Record<string, DailyDataEntry>,
-    historicalAnalyses: any[],
+    historicalAnalyses: HistoricalAnalysis[],
     hasRunsheet: boolean,
     hasInvoice: boolean
   ): number {

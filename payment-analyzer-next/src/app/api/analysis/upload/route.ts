@@ -116,7 +116,21 @@ function parseFormDataParams(
 /**
  * Maps analysis data to conflict format for overlap response
  */
-function mapAnalysisToConflict(analysis: any) {
+function mapAnalysisToConflict(analysis: {
+  id: string;
+  period_start: string;
+  period_end: string;
+  status: string;
+  created_at: string;
+  working_days: number;
+  total_consignments: number;
+  analysis_files?: Array<{ original_name: string }>;
+  analysis_totals?: {
+    expected_total: number;
+    paid_total: number;
+    difference_total: number;
+  };
+}) {
   return {
     analysisId: analysis.id,
     dateRange: {
@@ -125,7 +139,7 @@ function mapAnalysisToConflict(analysis: any) {
     },
     status: analysis.status,
     createdAt: analysis.created_at,
-    files: analysis.analysis_files?.map((f: any) => f.original_name) || [],
+    files: analysis.analysis_files?.map((f) => f.original_name) || [],
     totals: analysis.analysis_totals
       ? {
           expectedTotal: analysis.analysis_totals.expected_total,
@@ -141,7 +155,10 @@ function mapAnalysisToConflict(analysis: any) {
 /**
  * Creates overlap error response
  */
-function createOverlapResponse(overlappingData: any[], dateRange: any): NextResponse {
+function createOverlapResponse(
+  overlappingData: Parameters<typeof mapAnalysisToConflict>[0][],
+  dateRange: { start: string; end: string }
+): NextResponse {
   return NextResponse.json(
     {
       error: "DATE_RANGE_OVERLAP",
@@ -160,7 +177,7 @@ function createOverlapResponse(overlappingData: any[], dateRange: any): NextResp
 /**
  * Checks if overlap result has conflicts
  */
-function hasOverlapConflicts(result: any): boolean {
+function hasOverlapConflicts(result: { isSuccess: boolean; data?: unknown[] }): boolean {
   return result.isSuccess && result.data && result.data.length > 0;
 }
 
@@ -196,7 +213,10 @@ async function checkDateRangeOverlap(files: File[], userId: string): Promise<Nex
 /**
  * Creates success progress data
  */
-function createSuccessProgress(uploadId: string, result: any): ProgressData {
+function createSuccessProgress(
+  uploadId: string,
+  result: { analysisId: string; analysis: unknown }
+): ProgressData {
   return {
     stage: "completed",
     progress: 100,

@@ -143,7 +143,6 @@ export default function AnalysisPage() {
         }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, hasBeenAnalyzed, hookUploadedFiles.length]); // Run once on mount to show restoration feedback
 
   // ✨ NEW: Restore files from database when navigating to Step 2 OR Step 3 with empty files
@@ -200,8 +199,8 @@ export default function AnalysisPage() {
      * Download files from storage
      */
     const downloadFilesFromStorage = async (
-      analysisFiles: any[],
-      fileStorage: any
+      analysisFiles: Array<{ storage_path: string; original_name: string; mime_type: string }>,
+      fileStorage: { downloadFile: (path: string) => Promise<{ isSuccess: boolean; data: File | null }> }
     ): Promise<File[]> => {
       console.log(`📥 Downloading ${analysisFiles.length} file(s) from storage...`);
 

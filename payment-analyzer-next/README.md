@@ -15,17 +15,35 @@ Modern payment analysis application built with Next.js 15, React, TypeScript, an
 
 ## 🔧 Quick Start
 
+### Docker Development (REQUIRED for Windows)
+
+```powershell
+# First-time setup
+pnpm docker:build   # Build Docker image (2-5 min)
+
+# Start development
+pnpm docker:dev     # Starts at http://localhost:3000
+
+# In NEW terminal - Run tasks:
+docker-compose -f docker-compose.dev.yml exec app pnpm lint
+docker-compose -f docker-compose.dev.yml exec app pnpm type-check
+docker-compose -f docker-compose.dev.yml exec app pnpm test
+docker-compose -f docker-compose.dev.yml exec app pnpm biom
+```
+
+**Why Docker?** Windows `pnpm install` has permission errors. Docker eliminates:
+- ❌ Permission errors (EACCES)
+- ❌ Binary conflicts
+- ❌ File locking issues
+- ❌ WSL2 performance problems
+
+📖 **Full Guide:** [docs/DOCKER_DEVELOPMENT_WORKFLOW.md](./docs/DOCKER_DEVELOPMENT_WORKFLOW.md)
+
+### Traditional (Not Recommended for Windows)
+
 ```bash
-# Install dependencies
-pnpm install
-
-# Start development server
+pnpm install  # May fail on Windows
 pnpm dev
-
-# Run tests (Docker recommended)
-pnpm docker:test
-
-# Type check
 pnpm type-check
 ```
 
@@ -38,11 +56,10 @@ pnpm type-check
 
 ## 🔒 Security
 
-Recent security audit completed with 5 vulnerabilities fixed:
-- CORS protection implemented
-- XSS vulnerabilities patched
+- CORS protection 
+- XSS vulnerabilities
 - Security headers configured
-- Open redirect fixed
+- Open redirect
 
 See [`docs/QUICK_REFERENCE.md`](./docs/QUICK_REFERENCE.md) for details.
 

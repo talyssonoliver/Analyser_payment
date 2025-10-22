@@ -563,7 +563,7 @@ export function Step3Container({
   };
 
   // Helper: Transform days to dailyData format
-  const transformDaysToDailyData = (days: Step3AnalysisData["days"]) => {
+  const transformDaysToDailyData = useCallback((days: Step3AnalysisData["days"]) => {
     const dailyData: Record<string, unknown> = {};
     days.forEach((day) => {
       dailyData[day.date] = {
@@ -582,10 +582,10 @@ export function Step3Container({
       };
     });
     return dailyData;
-  };
+  }, []);
 
   // Helper: Create storage data object
-  const createStorageData = (
+  const createStorageData = useCallback((
     analysisData: Step3AnalysisData,
     dailyData: Record<string, unknown>
   ) => {
@@ -605,7 +605,7 @@ export function Step3Container({
       },
       createdAt: new Date().toISOString(),
     };
-  };
+  }, []);
 
   /**
    * Clean up old localStorage entry after successful DB save
@@ -880,7 +880,6 @@ export function Step3Container({
         pdfWorkerClient.terminate();
       } catch {}
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showAnalyzeSection,
     entries.length,

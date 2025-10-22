@@ -116,7 +116,7 @@ export function SyncStatusBanner({ onSyncComplete }: Readonly<SyncStatusBannerPr
                 {pendingCount} {pendingCount === 1 ? "analysis" : "analyses"} not synced to database
               </h3>
               <p className="text-sm text-yellow-700 mt-1">
-                Your data is saved locally but won't be available on other devices. Data may be lost
+                Your data is saved locally but won&apos;t be available on other devices. Data may be lost
                 if browser cache is cleared.
               </p>
               {syncProgress && (
